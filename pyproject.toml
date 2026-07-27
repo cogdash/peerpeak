@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peerpeak"
+version = "0.1.0"
+description = "Achievement sharing app used as a DevOps playground."
+readme = "README.md"
+requires-python = ">=3.13"
+venvPath = "."
+venv = "venv"
+authors = [
+  { name = "Maksim Panov", email = "mxm@pnv.life" }
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License"
+]
+dependencies = [
+    "fastapi[standard]>=0.140.0",
+    "uvicorn>=0.51.0"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

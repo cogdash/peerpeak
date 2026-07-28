@@ -21,6 +21,12 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
 
+      - name: Create virtual environment
+        run: uv venv
+
+      - name: Activate virtual environment  
+        run: source .venv/bin/activate
+
       - name: Install dependencies
         run: uv pip install -r pyproject.toml
 

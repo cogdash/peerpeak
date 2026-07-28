@@ -1,0 +1,22 @@
+name: Lint Code Base
+on:
+  pull_request:
+    branches: [ "main" ]
+  
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Super-Linter
+        uses: super-linter/super-linter@v7
+        env:
+          VALIDATE_ALL_CODEBASE: yes
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+  

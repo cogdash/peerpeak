@@ -9,7 +9,7 @@ jobs:
   linting:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       statuses: write
 
     steps:
@@ -22,4 +22,11 @@ jobs:
         uses: super-linter/super-linter@v7
         env:
           VALIDATE_ALL_CODEBASE: true
+          FIX_PYTHON_BLACK: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and Push changes 
+        if: always()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Black: autoformatting Python code"

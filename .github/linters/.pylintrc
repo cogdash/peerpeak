@@ -1,6 +1,5 @@
 [MESSAGES CONTROL]
 disable =
-  C0114,CO115,
   invalid-name,
   missing-module-docstring,
   missing-class-docstring,

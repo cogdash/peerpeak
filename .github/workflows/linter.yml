@@ -18,6 +18,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv pip install -r pyproject.toml
+
       - name: Run Super-Linter
         uses: super-linter/super-linter@v7
         env:

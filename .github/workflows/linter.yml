@@ -22,11 +22,12 @@ jobs:
         uses: super-linter/super-linter@v7
         env:
           VALIDATE_ALL_CODEBASE: true
+          VALIDATE_GITHUB_ADMIN_CUSTOM_LEVEL: true
           FIX_PYTHON_BLACK: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and Push changes 
-        if: always()
+        if: ${{ success() }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Black: autoformatting Python code"

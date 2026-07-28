@@ -18,24 +18,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Super-Linter
-        uses: super-linter/super-linter@v7
-        env:
-          VALIDATE_ALL_CODEBASE: true
-          VALIDATE_PYTHON_PYLINT: false
-          FIX_AUTOFIX: true
-          PYTHON_PYLINT_CONFIG_FILE: .pylintrc 
-          JSCPD_CONFIG_FILE: .jscpd.json
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Setup uv
         uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies
         run: uv sync
 
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+
       - name: Run pylint
         run: uv run pylint src
+
+      - name: Run Super-Linter
+        uses: super-linter/super-linter@v7
+        env:
+          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_PYTHON_PYLINT: false
+          PYTHON_PYLINT_CONFIG_FILE: .pylintrc 
+          JSCPD_CONFIG_FILE: .jscpd.json
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Commit and Push changes 
         if: ${{ success() }}

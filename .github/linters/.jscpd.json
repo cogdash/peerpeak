@@ -1,5 +1,5 @@
 {
-  "path": ["src"],
+  "ignore": ["**/venv/**", "**/.venv/**", "**/tests/**"],
   ".gitignore": true,
   "threshold": 0
 }

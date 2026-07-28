@@ -38,6 +38,7 @@ jobs:
           PYTHON_PYLINT_CONFIG_FILE: .pylintrc 
           JSCPD_CONFIG_FILE: .jscpd.json
           PYTHONPATH: /github/workspace/src
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and Push changes 
         if: ${{ success() }}

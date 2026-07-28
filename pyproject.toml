@@ -8,8 +8,6 @@ version = "0.1.0"
 description = "Achievement sharing app used as a DevOps playground."
 readme = "README.md"
 requires-python = ">=3.13"
-venvPath = "."
-venv = "venv"
 authors = [
   { name = "Maksim Panov", email = "mxm@pnv.life" }
 ]
@@ -19,7 +17,13 @@ classifiers = [
 ]
 dependencies = [
     "fastapi[standard]>=0.140.0",
-    "uvicorn>=0.51.0"
+    "uvicorn>=0.51.0",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.1",
+    "pylint>=4.0.6",
 ]
 
 [tool.pytest.ini_options]

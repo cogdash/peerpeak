@@ -1,9 +1,9 @@
-# <img src="./assets/peerpeak-logo.png" width=35> PeerPeak
+### <img src="./assets/peerpeak-logo.png" width=35 alt="Logo"> PeerPeak
 Achievement sharing webapp used as a DevOps practice ground.
 Blazingly fast!!
 
 ---
-### Running the app
+## Running the app
 Install prerequisites:
 ```shell
 python3 -m venv .venv

@@ -18,30 +18,28 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Create and export virtual environment
-        run: |
-          uv venv
-          uv pip install -r pyproject.toml
-
-      - name: Install dependencies
-        run: uv pip install -r pyproject.toml
-
       - name: Run Super-Linter
         uses: super-linter/super-linter/slim@v7
         env:
           VALIDATE_ALL_CODEBASE: true
-          VALIDATE_GITHUB_ADMIN_CUSTOM_LEVEL: true
+          VALIDATE_PYTHON_PYLINT: false
           FIX_AUTOFIX: true
           PYTHON_PYLINT_CONFIG_FILE: .pylintrc 
           JSCPD_CONFIG_FILE: .jscpd.json
-          PYTHONPATH: /github/workspace/src
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run pylint
+        run: uv run pylint src
 
       - name: Commit and Push changes 
         if: ${{ success() }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Super-Linter: autoformatting"
+

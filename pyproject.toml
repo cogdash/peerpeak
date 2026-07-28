@@ -20,7 +20,7 @@ dependencies = [
     "uvicorn>=0.51.0",
 ]
 
-[dependency-group]
+[dependency-groups]
 dev = [
     "pre-commit>=4.6.1"
 ]

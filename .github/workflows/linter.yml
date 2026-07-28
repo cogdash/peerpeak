@@ -21,10 +21,10 @@ jobs:
       - name: Run Super-Linter
         uses: super-linter/super-linter@v7
         env:
-          PYTHON_PYLINT_ARG_ARGUMENTS: "--disable=C0114,C0116"
           VALIDATE_ALL_CODEBASE: true
           VALIDATE_GITHUB_ADMIN_CUSTOM_LEVEL: true
           FIX_AUTOFIX: true
+          PYTHON_PYLINT_CONFIG_FILE: .pylintrc 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and Push changes 

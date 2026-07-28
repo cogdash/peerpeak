@@ -24,8 +24,15 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run pre-commit
+      - name: Run pre-commit formatting
+        continue-on-error: true
         run: uv run pre-commit run --all-files
+
+      - name: Commit and Push changes
+        if: ${{ success() }}
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Autoformatting:"
 
       - name: Run pylint
         run: uv run pylint src
@@ -35,14 +42,6 @@ jobs:
         env:
           VALIDATE_ALL_CODEBASE: true
           VALIDATE_PYTHON_PYLINT: false
-          PYTHON_PYLINT_CONFIG_FILE: .pylintrc 
+          PYTHON_PYLINT_CONFIG_FILE: .pylintrc
           JSCPD_CONFIG_FILE: .jscpd.json
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-      - name: Commit and Push changes 
-        if: ${{ success() }}
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Super-Linter: autoformatting"
-

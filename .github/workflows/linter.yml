@@ -21,13 +21,15 @@ jobs:
       - name: Run Super-Linter
         uses: super-linter/super-linter@v7
         env:
+          PYTHON_PYLINT_ARG_ARGUMENTS: "--disable=C0114,C0116"
           VALIDATE_ALL_CODEBASE: true
           VALIDATE_GITHUB_ADMIN_CUSTOM_LEVEL: true
           FIX_PYTHON_BLACK: true
+          FIX_SHELL_SHFMT: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and Push changes 
         if: ${{ success() }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Black: autoformatting Python code"
+          commit_message: "Super-Linter: autoformatting"

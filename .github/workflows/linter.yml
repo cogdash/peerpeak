@@ -36,6 +36,8 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
           VALIDATE_GITHUB_ADMIN_CUSTOM_LEVEL: true
           FIX_AUTOFIX: true
+          PYTHON_PYLINT_CONFIG_FILE: .pylintrc 
+          JSCPD_CONFIG_FILE: .jscpd
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and Push changes 

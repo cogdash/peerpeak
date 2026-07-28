@@ -42,6 +42,5 @@ jobs:
         env:
           VALIDATE_ALL_CODEBASE: true
           VALIDATE_PYTHON_PYLINT: false
-          PYTHON_PYLINT_CONFIG_FILE: .pylintrc
           JSCPD_CONFIG_FILE: .jscpd.json
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -24,23 +24,11 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run pre-commit formatting
-        continue-on-error: true
-        run: uv run pre-commit run --all-files
-
-      - name: Commit and Push changes
-        if: ${{ success() }}
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Set up pre-commit cache
+        uses: actions/cache@v4
         with:
-          commit_message: "Autoformatting:"
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - name: Run pylint
-        run: uv run pylint src
-
-      - name: Run Super-Linter
-        uses: super-linter/super-linter@v7
-        env:
-          VALIDATE_ALL_CODEBASE: true
-          VALIDATE_PYTHON_PYLINT: false
-          JSCPD_CONFIG_FILE: .jscpd.json
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run pre-commit hooks
+        run: uv run pre-commit run --all-files

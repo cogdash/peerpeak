@@ -31,5 +31,4 @@ jobs:
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run pre-commit hooks
-        continue-on-error: true
         run: uv run pre-commit run --all-files

@@ -7,6 +7,7 @@ app = FastAPI()
 def read_root():
     return "PeerPeak is ready!"
 
+
 @app.get("/")
 def get_achievements():
     return "Bikepacking"

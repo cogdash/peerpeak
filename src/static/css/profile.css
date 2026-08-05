@@ -1,0 +1,340 @@
+/* Profile page specific styles */
+.section {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+}
+
+.view-btn {
+    background: none;
+    border: none;
+    color: #1a1a1a;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.view-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.view-btn.active {
+    background-color: #e0e0e0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-header h4 {
+    margin: 0;
+}
+
+.profile-header {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    margin-bottom: 1.5rem;
+}
+
+.profile-header-content {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #666;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-username {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.profile-bio {
+    color: #666;
+    line-height: 1.6;
+}
+
+.profile-bio.empty {
+    color: #aaa;
+    font-style: italic;
+}
+
+.profile-handle {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #888;
+    margin-top: 0.5rem;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-shrink: 0;
+}
+
+.btn-settings {
+    padding: 0.5rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.btn-settings:hover {
+    background-color: #e0e0e0;
+    color: #1a1a1a;
+}
+
+/* Badges */
+.badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.badge-card {
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.badge-card:hover {
+    border-color: #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.badge-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 0.75rem;
+}
+
+.badge-name {
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+}
+
+.badge-description {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+/* Stories */
+.story-card {
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.story-title {
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.story-content {
+    color: #666;
+    line-height: 1.6;
+}
+
+.story-meta {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 0.75rem;
+}
+
+/* Sessions */
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.session-item:last-child {
+    border-bottom: none;
+}
+
+.session-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.session-device {
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.session-meta {
+    font-size: 0.875rem;
+    color: #888;
+}
+
+.session-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.terminated {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.btn-terminate {
+    padding: 0.5rem 1rem;
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-terminate:hover {
+    background-color: #fecaca;
+}
+
+.btn-terminate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.empty-sessions {
+    text-align: center;
+    padding: 2rem;
+    color: #888;
+}
+
+/* Danger zone */
+.danger-zone {
+    border: 1px solid #fecaca;
+    background-color: #fef2f2;
+}
+
+.danger-zone .section-title {
+    color: #dc2626;
+}
+
+.delete-account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.delete-account-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.delete-account-form label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.delete-account-form input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.delete-account-form input:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Settings section layout */
+.settings-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-section-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.settings-section-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+}
+
+.settings-section-footer .modal-actions {
+    justify-content: flex-end;
+}
+

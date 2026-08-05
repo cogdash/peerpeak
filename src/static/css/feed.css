@@ -1,0 +1,98 @@
+/* Feed page specific styles */
+.feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.feed-item {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+}
+
+.feed-item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #666;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.feed-content {
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.feed-stats {
+    display: flex;
+    gap: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.stat-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.stat-btn:hover {
+    color: #1a1a1a;
+}
+
+.welcome-banner {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-banner h2 {
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-banner p {
+    color: #666;
+}
+

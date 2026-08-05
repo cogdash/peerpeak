@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - PeerPeak</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/profile.css">
+</head>
+<body x-data="app()" @keydown.window="handleKeydown($event)">
+    <header>
+        <a href="/feed" class="logo">PeerPeak</a>
+        <nav class="nav-buttons">
+            <a href="/feed" class="nav-btn" :class="{ active: activeTab === 'feed' }">Feed</a>
+            <a href="/profile" class="nav-btn" :class="{ active: activeTab === 'profile' }">Profile</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar">
+                    <span x-text="getInitial(user.name)"></span>
+                </div>
+                <div class="profile-info">
+                    <h1 class="profile-username" x-text="user.display_name || user.name"></h1>
+                    <p class="profile-bio" :class="{ empty: !user.bio }" x-text="user.bio || 'No bio yet. Open settings to add one!'"></p>
+                    <p class="profile-handle" x-text="'@' + user.name"></p>
+                </div>
+                <div class="profile-actions">
+                    <button class="btn-settings" @click="openSettingsModal()" aria-label="Settings">⚙️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile View: Badges & Achievements -->
+        <div class="section">
+            <h2 class="section-title">Badges & Achievements</h2>
+            <template x-if="badges.length === 0">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🏅</div>
+                    <p>No badges yet. Earn badges by completing achievements!</p>
+                </div>
+            </template>
+            <template x-if="badges.length > 0">
+                <div class="badge-grid">
+                    <template x-for="badge in badges" :key="badge.id">
+                        <div class="badge-card">
+                            <div class="badge-icon" x-text="getBadgeIcon(badge.type)"></div>
+                            <div class="badge-name" x-text="badge.name"></div>
+                            <div class="badge-description" x-text="badge.description"></div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- Stories -->
+        <div class="section">
+            <h2 class="section-title">Your Stories</h2>
+            <template x-if="stories.length === 0">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📖</div>
+                    <p>No stories yet. Start sharing your adventures!</p>
+                </div>
+            </template>
+            <template x-if="stories.length > 0">
+                <template x-for="story in stories" :key="story.id">
+                    <div class="story-card">
+                        <div class="story-title" x-text="story.title"></div>
+                        <div class="story-content" x-text="story.content"></div>
+                        <div class="story-meta" x-text="formatDate(story.created_at)"></div>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div x-show="showSettingsModal" x-transition.opacity class="settings-modal-overlay" @click.self="closeSettingsModal()">
+        <div class="settings-modal" @click.outside="closeSettingsModal()">
+            <div class="settings-modal-header">
+                <h2>Settings</h2>
+                <button class="settings-modal-close" @click="closeSettingsModal()">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <!-- Sidebar Navigation -->
+                <div class="settings-sidebar">
+                    <a href="#" class="settings-nav-item" :class="{ active: settingsTab === 'profile' }" @click.prevent="switchSettingsTab('profile')">
+                        <span class="settings-nav-icon">👤</span>
+                        <span>Profile</span>
+                    </a>
+                    <a href="#" class="settings-nav-item" :class="{ active: settingsTab === 'sessions' }" @click.prevent="switchSettingsTab('sessions')">
+                        <span class="settings-nav-icon">🔐</span>
+                        <span>Sessions</span>
+                    </a>
+                    <div class="settings-divider"></div>
+                    <a href="#" class="settings-nav-item danger" :class="{ active: settingsTab === 'danger' }" @click.prevent="switchSettingsTab('danger')">
+                        <span class="settings-nav-icon">⚠️</span>
+                        <span>Delete account</span>
+                    </a>
+                    <div class="settings-divider"></div>
+                    <button class="settings-logout-btn" @click="showLogoutConfirm = true; closeSettingsModal()">
+                        <span class="settings-nav-icon">🚪</span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+
+                <!-- Content Area -->
+                <div class="settings-content" style="position: relative;">
+                    <!-- Profile Section -->
+                    <div class="settings-section" x-show="settingsTab === 'profile'" x-transition style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; display: flex; flex-direction: column;">
+                        <div class="settings-section-content" style="flex: 1; overflow-y: auto; padding: 1.5rem;">
+                            <h3 class="settings-section-title">Edit Profile</h3>
+                            <p class="settings-section-description">Update your public profile information.</p>
+                            <template x-if="profileError">
+                                <div class="error-message" x-text="profileError"></div>
+                            </template>
+                            <template x-if="profileSuccess">
+                                <div class="success-message" x-text="profileSuccess"></div>
+                            </template>
+                            <form method="POST" action="/profile/update" @submit="closeSettingsModal()">
+                                <div class="form-group">
+                                    <label for="edit_username">Username</label>
+                                    <input type="text" id="edit_username" name="new_username" :value="user.name" required minlength="3" maxlength="100" :disabled="!canChangeUsername()">
+                                    <small x-text="getUsernameChangeInfo()"></small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_display_name">Display Name</label>
+                                    <input type="text" id="edit_display_name" name="display_name" :value="user.display_name || ''" placeholder="Optional display name">
+                                    <small>This name will be shown publicly instead of your username.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_bio">Bio</label>
+                                    <textarea id="edit_bio" name="bio" rows="4" placeholder="Tell us about yourself..." x-text="user.bio || ''"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="settings-section-footer" style="padding: 1rem 1.5rem; border-top: 1px solid #eee; background: #fafafa;">
+                            <div class="modal-actions" style="justify-content: flex-end;">
+                                <button type="button" class="btn-secondary" @click="closeSettingsModal()">Cancel</button>
+                                <button type="submit" form="profile-form" class="btn-primary">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sessions Section -->
+                    <div class="settings-section" x-show="settingsTab === 'sessions'" x-transition style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; display: flex; flex-direction: column;">
+                        <div class="settings-section-content" style="flex: 1; overflow-y: auto; padding: 1.5rem;">
+                            <h3 class="settings-section-title">Active Sessions</h3>
+                            <p class="settings-section-description">Manage your active login sessions.</p>
+                            <div class="section-header" style="margin-bottom: 1rem;">
+                                <h4 style="font-size: 1rem; font-weight: 500; color: #333;">Sessions</h4>
+                                <button class="view-btn" :class="{ active: showAllSessions }" @click="toggleShowAllSessions" x-text="showAllSessions ? 'Show Active Only' : 'Show All Sessions'"></button>
+                            </div>
+                            <template x-if="sessions.length === 0">
+                                <div class="empty-sessions">
+                                    <p>No sessions found.</p>
+                                </div>
+                            </template>
+                            <template x-if="sessions.length > 0">
+                                <template x-for="session in sessions" :key="session.id">
+                                    <div class="session-item">
+                                        <div class="session-info">
+                                            <span class="session-device" x-text="session.useragent || 'Unknown Device'"></span>
+                                            <span class="session-meta">
+                                                <template x-if="session.ip">
+                                                    <span x-text="session.ip"></span> •
+                                                </template>
+                                                <span x-text="formatDate(session.start_time)"></span>
+                                                <template x-if="session.location">
+                                                    • <span x-text="session.location"></span>
+                                                </template>
+                                            </span>
+                                        </div>
+                                        <div class="session-status">
+                                            <span class="status-badge" :class="session.terminated ? 'terminated' : 'active'" x-text="session.terminated ? 'Terminated' : 'Active'"></span>
+                                            <template x-if="!session.terminated">
+                                                <form method="POST" action="/profile/terminate-session" style="margin: 0;">
+                                                    <input type="hidden" name="session_id" :value="session.id">
+                                                    <button type="submit" class="btn-terminate">Terminate</button>
+                                                </form>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone Section -->
+                    <div class="settings-section" x-show="settingsTab === 'danger'" x-transition style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; display: flex; flex-direction: column;">
+                        <div class="settings-section-content" style="flex: 1; overflow-y: auto; padding: 1.5rem;">
+                            <h3 class="settings-section-title">Delete account</h3>
+                            <p class="settings-section-description" style="color: #dc2626;">Once you delete your account, there is no going back. All your data will be permanently removed.</p>
+                            <template x-if="deleteError">
+                                <div class="error-message" x-text="deleteError"></div>
+                            </template>
+                            <form method="POST" action="/profile/delete-account" class="delete-account-form" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');">
+                                <div class="form-group">
+                                    <label for="delete_password">Confirm Password</label>
+                                    <input
+                                        type="password"
+                                        id="delete_password"
+                                        name="password"
+                                        placeholder="Enter your password to confirm"
+                                        required
+                                        autocomplete="current-password"
+                                    >
+                                </div>
+                                <button type="submit" class="btn-danger">Delete Account</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div x-show="showLogoutConfirm" x-transition.opacity class="settings-modal-overlay" @click.self="showLogoutConfirm = false">
+        <div class="settings-modal" style="max-width: 400px;">
+            <div class="settings-modal-header">
+                <h2>Confirm Logout</h2>
+                <button class="settings-modal-close" @click="showLogoutConfirm = false">✕</button>
+            </div>
+            <div class="settings-content" style="padding: 1.5rem 2rem 2rem;">
+                <p style="color: #666; margin-bottom: 1.5rem;">Are you sure you want to log out? You'll need to log in again to access your account.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" @click="showLogoutConfirm = false">Cancel</button>
+                    <form method="POST" action="/logout" style="margin: 0;">
+                        <button type="submit" class="btn-primary">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                activeTab: 'profile',
+                showSettingsModal: false,
+                settingsTab: 'profile',
+                showAllSessions: false,
+                user: {{ user | tojson }},
+                badges: {{ badges | tojson }},
+                stories: {{ stories | tojson }},
+                sessions: {{ sessions | tojson }},
+                profileError: new URLSearchParams(window.location.search).get('profile_error'),
+                profileSuccess: new URLSearchParams(window.location.search).get('profile_success'),
+                deleteError: new URLSearchParams(window.location.search).get('error'),
+
+                openSettingsModal() {
+                    this.showSettingsModal = true;
+                    this.settingsTab = 'profile';
+                },
+
+                closeSettingsModal() {
+                    this.showSettingsModal = false;
+                },
+
+                handleKeydown(event) {
+                    if (event.key === 'Escape') {
+                        if (this.showSettingsModal) {
+                            this.closeSettingsModal();
+                        } else if (this.showLogoutConfirm) {
+                            this.showLogoutConfirm = false;
+                        }
+                    }
+                },
+
+                switchSettingsTab(tab) {
+                    this.settingsTab = tab;
+                },
+
+                toggleShowAllSessions() {
+                    this.showAllSessions = !this.showAllSessions;
+                    // Reload page with new filter
+                    window.location.href = '/profile?show_all=' + this.showAllSessions;
+                },
+
+                logout() {
+                    // Submit logout form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/logout';
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+
+                getInitial(name) {
+                    return name ? name.charAt(0).toUpperCase() : '?';
+                },
+
+                getBadgeIcon(type) {
+                    const icons = {
+                        'distance': '🏃',
+                        'elevation': '⛰️',
+                        'speed': '⚡',
+                        'consistency': '🔥',
+                        'exploration': '🗺️',
+                        'social': '👥',
+                        'custom': '⭐'
+                    };
+                    return icons[type] || '🏅';
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                getUsernameChangeInfo() {
+                    if (!this.user.last_username_change) {
+                        return 'You can change your username 2 times per week.';
+                    }
+                    const lastChange = new Date(this.user.last_username_change);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    if (lastChange > weekAgo) {
+                        const remaining = 2 - this.user.username_change_count;
+                        return `You have ${remaining} username change${remaining !== 1 ? 's' : ''} left this week.`;
+                    }
+                    return 'You can change your username 2 times per week.';
+                },
+
+                canChangeUsername() {
+                    if (!this.user.last_username_change) {
+                        return true;
+                    }
+                    const lastChange = new Date(this.user.last_username_change);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    if (lastChange > weekAgo) {
+                        return this.user.username_change_count < 2;
+                    }
+                    return true;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+

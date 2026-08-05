@@ -1,0 +1,53 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: peerpeak-app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/peerpeak
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - peerpeak-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    container_name: peerpeak-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=peerpeak
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - peerpeak-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: peerpeak-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    networks:
+      - peerpeak-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+
+networks:
+  peerpeak-network:
+    driver: bridge

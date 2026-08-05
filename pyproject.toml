@@ -27,5 +27,8 @@ dev = [
     "pylint>=4.0.6",
 ]
 
+[project.scripts]
+peerpeak = "cli:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

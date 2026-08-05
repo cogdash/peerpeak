@@ -1,22 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PeerPeak</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerPeak</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .nav-btn {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            border-radius: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover {
+            background-color: #e0e0e0;
+        }
+        .nav-btn.active {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        main {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .feed-item {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #eee;
+        }
+        .feed-item-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #666;
+        }
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .username {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .timestamp {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .feed-content {
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .feed-stats {
+            display: flex;
+            gap: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .stat-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #888;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .stat-btn:hover {
+            color: #1a1a1a;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+    </style>
 </head>
-<body>
-  <h1>AIGHT BET!</h1>
-  <h2>shittings</h2>
-  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbQkw-NwL51nvVcslf7XshVLO_e0hc0hsnRgcYL_rzH1d9QzxzIoWgiDte&s=10" alt="VERITY">
+<body x-data="app()">
+    <header>
+        <a href="/" class="logo">PeerPeak</a>
+        <nav class="nav-buttons">
+            <button class="nav-btn" :class="{ active: activeTab === 'search' }" @click="activeTab = 'search'">Search</button>
+            <button class="nav-btn" :class="{ active: activeTab === 'trending' }" @click="activeTab = 'trending'">Trending</button>
+            <button class="nav-btn" :class="{ active: activeTab === 'profile' }" @click="activeTab = 'profile'">Profile</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="feed" x-show="activeTab === 'search'">
+            <div class="empty-state">
+                <p>Search results will appear here</p>
+            </div>
+        </section>
+
+        <section class="feed" x-show="activeTab === 'trending'">
+            <article class="feed-item">
+                <div class="feed-item-header">
+                    <div class="avatar">JD</div>
+                    <div class="user-info">
+                        <span class="username">john_doe</span>
+                        <span class="timestamp">2 hours ago</span>
+                    </div>
+                </div>
+                <p class="feed-content">Just completed my first 100km bikepacking trip! The views were absolutely incredible. 🚴‍♂️🏔️</p>
+                <div class="feed-stats">
+                    <button class="stat-btn">❤️ 42</button>
+                    <button class="stat-btn">💬 12</button>
+                    <button class="stat-btn">🔁 5</button>
+                </div>
+            </article>
+            <article class="feed-item">
+                <div class="feed-item-header">
+                    <div class="avatar">SR</div>
+                    <div class="user-info">
+                        <span class="username">sarah_rides</span>
+                        <span class="timestamp">5 hours ago</span>
+                    </div>
+                </div>
+                <p class="feed-content">New personal best on the local climb segment! Training is paying off. 💪</p>
+                <div class="feed-stats">
+                    <button class="stat-btn">❤️ 28</button>
+                    <button class="stat-btn">💬 8</button>
+                    <button class="stat-btn">🔁 3</button>
+                </div>
+            </article>
+            <article class="feed-item">
+                <div class="feed-item-header">
+                    <div class="avatar">MC</div>
+                    <div class="user-info">
+                        <span class="username">mike_cyclist</span>
+                        <span class="timestamp">1 day ago</span>
+                    </div>
+                </div>
+                <p class="feed-content">Anyone up for a group ride this weekend? Thinking of doing the coastal route.</p>
+                <div class="feed-stats">
+                    <button class="stat-btn">❤️ 15</button>
+                    <button class="stat-btn">💬 22</button>
+                    <button class="stat-btn">🔁 2</button>
+                </div>
+            </article>
+        </section>
+
+        <section class="feed" x-show="activeTab === 'profile'">
+            <div class="empty-state">
+                <p>Your profile feed will appear here</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function app() {
+            return {
+                activeTab: 'trending'
+            }
+        }
+    </script>
 </body>
 </html>
+

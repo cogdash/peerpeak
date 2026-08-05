@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - PeerPeak</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/auth.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <h1 class="auth-logo">PeerPeak</h1>
+        <p class="auth-subtitle">Welcome back! Sign in to your account.</p>
+
+        <div x-data="{ showPassword: false, error: {{ error | tojson }} }">
+            <template x-if="error">
+                <div class="auth-error-message" x-text="error"></div>
+            </template>
+
+            <form method="POST" action="/login">
+                <div class="auth-form-group">
+                    <label class="auth-form-label" for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="auth-form-input"
+                        placeholder="Enter your username"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label" for="password">Password</label>
+                    <div class="password-input-wrapper">
+                        <input
+                            :type="showPassword ? 'text' : 'password'"
+                            id="password"
+                            name="password"
+                            class="auth-form-input"
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            @click="showPassword = !showPassword"
+                        >
+                            <span x-show="!showPassword">👁️</span>
+                            <span x-show="showPassword">🙈</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn-primary">Sign In</button>
+            </form>
+
+            <p class="auth-footer">
+                Don't have an account? <a href="/signup">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize error from URL parameter if present
+        document.addEventListener('alpine:init', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            if (error) {
+                // Alpine will pick this up
+            }
+        });
+    </script>
+</body>
+</html>
+

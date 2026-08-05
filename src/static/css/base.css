@@ -1,0 +1,422 @@
+/* Base styles shared across all pages */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.nav-btn {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.nav-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.nav-btn.active {
+    background-color: #1a1a1a;
+    color: #fff;
+}
+
+.nav-btn.logout {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.nav-btn.logout:hover {
+    background-color: #fecaca;
+}
+
+main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Form styles */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #333;
+}
+
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+}
+
+.error-message {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.success-message {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+/* Modal base styles */
+.settings-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 5vh 5vw;
+}
+
+.settings-modal {
+    background-color: #fff;
+    border-radius: 12px;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.settings-modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.settings-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.settings-modal-close:hover {
+    color: #1a1a1a;
+}
+
+.settings-modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.settings-sidebar {
+    width: 200px;
+    border-right: 1px solid #eee;
+    padding: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+}
+
+.settings-nav-item:hover {
+    background-color: #f5f5f5;
+    color: #1a1a1a;
+}
+
+.settings-nav-item.active {
+    background-color: #f0f0f0;
+    color: #1a1a1a;
+    border-left-color: #1a1a1a;
+}
+
+.settings-nav-item.danger {
+    color: #dc2626;
+}
+
+.settings-nav-item.danger:hover {
+    background-color: #fef2f2;
+}
+
+.settings-nav-item.danger.active {
+    background-color: #fef2f2;
+    border-left-color: #dc2626;
+}
+
+.settings-nav-icon {
+    font-size: 1.1rem;
+    width: 24px;
+    text-align: center;
+}
+
+.settings-divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 0.75rem 0;
+}
+
+.settings-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: #dc2626;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.settings-logout-btn:hover {
+    background-color: #fef2f2;
+}
+
+.settings-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.settings-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 1.5rem;
+}
+
+.settings-section-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+/* Auth page styles */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+/* Danger button */
+.btn-danger {
+    padding: 0.75rem 1.5rem;
+    background-color: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+/* Empty state styles */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: #888;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+[x-transition:enter] {
+    animation: fadeIn 0.2s ease-out;
+}
+
+[x-transition:leave] {
+    animation: fadeIn 0.2s ease-in reverse;
+}
+
+@media (max-width: 600px) {
+    .settings-modal-body {
+        flex-direction: column;
+    }
+    .settings-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding: 1rem 0;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    .settings-nav-item {
+        white-space: nowrap;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        padding: 0.75rem 1rem;
+    }
+    .settings-nav-item.active {
+        border-left: none;
+        border-bottom-color: #1a1a1a;
+    }
+    .settings-nav-item.danger.active {
+        border-bottom-color: #dc2626;
+    }
+    .settings-divider {
+        display: none;
+    }
+    .settings-logout-btn {
+        display: none;
+    }
+}
+

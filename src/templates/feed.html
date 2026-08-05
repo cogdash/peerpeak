@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - PeerPeak</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/feed.css">
+</head>
+<body x-data="app()">
+    <header>
+        <a href="/feed" class="logo">PeerPeak</a>
+        <nav class="nav-buttons">
+            <a href="/feed" class="nav-btn" :class="{ active: activeTab === 'feed' }">Feed</a>
+            <a href="/profile" class="nav-btn" :class="{ active: activeTab === 'profile' }">Profile</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="welcome-banner">
+            <h2>Welcome back, {{ user.name }}! 👋</h2>
+            <p>This is your feed. Share your achievements and discover what others are up to.</p>
+        </div>
+
+        <section class="feed">
+            <div class="empty-state">
+                <p>No posts yet. Be the first to share something!</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function app() {
+            return {
+                activeTab: 'feed'
+            }
+        }
+    </script>
+</body>
+</html>
+

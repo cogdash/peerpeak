@@ -176,6 +176,21 @@ main {
     padding: 5vh 5vw;
 }
 
+/* Logout modal - appears above settings modal */
+.logout-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 5vh 5vw;
+}
+
 .settings-modal {
     background-color: #fff;
     border-radius: 12px;
@@ -187,6 +202,15 @@ main {
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     display: flex;
     flex-direction: column;
+}
+
+/* Logout modal - wider and shorter */
+.logout-modal {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    height: auto;
+    min-height: 0;
 }
 
 .settings-modal-header {

@@ -80,7 +80,7 @@
 
     <!-- Settings Modal -->
     <div x-show="showSettingsModal" x-transition.opacity class="settings-modal-overlay" @click.self="closeSettingsModal()">
-        <div class="settings-modal" @click.outside="closeSettingsModal()">
+            <div class="settings-modal">
             <div class="settings-modal-header">
                 <h2>Settings</h2>
                 <button class="settings-modal-close" @click="closeSettingsModal()">✕</button>
@@ -102,7 +102,7 @@
                         <span>Delete account</span>
                     </a>
                     <div class="settings-divider"></div>
-                    <button class="settings-logout-btn" @click="showLogoutConfirm = true; closeSettingsModal()">
+                                        <button class="settings-logout-btn" @click="showLogoutConfirm = true">
                         <span class="settings-nav-icon">🚪</span>
                         <span>Logout</span>
                     </button>
@@ -220,8 +220,8 @@
     </div>
 
     <!-- Logout Confirmation Modal -->
-    <div x-show="showLogoutConfirm" x-transition.opacity class="settings-modal-overlay" @click.self="showLogoutConfirm = false">
-        <div class="settings-modal" style="max-width: 400px;">
+        <div x-show="showLogoutConfirm" x-transition.opacity class="logout-modal-overlay" @click.self="showLogoutConfirm = false">
+            <div class="logout-modal">
             <div class="settings-modal-header">
                 <h2>Confirm Logout</h2>
                 <button class="settings-modal-close" @click="showLogoutConfirm = false">✕</button>
@@ -245,6 +245,7 @@
                 showSettingsModal: false,
                 settingsTab: 'profile',
                 showAllSessions: false,
+                            showLogoutConfirm: false,
                 user: {{ user | tojson }},
                 badges: {{ badges | tojson }},
                 stories: {{ stories | tojson }},

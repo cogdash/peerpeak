@@ -97,10 +97,10 @@
                         <span>Sessions</span>
                     </a>
                     <div class="settings-divider"></div>
-                    <a href="#" class="settings-nav-item danger" :class="{ active: settingsTab === 'danger' }" @click.prevent="switchSettingsTab('danger')">
+                                        <button class="settings-nav-item danger" @click="showDeleteConfirm = true">
                         <span class="settings-nav-icon">⚠️</span>
                         <span>Delete account</span>
-                    </a>
+                                        </button>
                     <div class="settings-divider"></div>
                                         <button class="settings-logout-btn" @click="showLogoutConfirm = true">
                         <span class="settings-nav-icon">🚪</span>
@@ -188,33 +188,6 @@
                                 </template>
                             </template>
                         </div>
-                    </div>
-
-                    <!-- Danger Zone Section -->
-                    <div class="settings-section" x-show="settingsTab === 'danger'" x-transition style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; display: flex; flex-direction: column;">
-                        <div class="settings-section-content" style="flex: 1; overflow-y: auto; padding: 1.5rem;">
-                            <h3 class="settings-section-title">Delete account</h3>
-                            <p class="settings-section-description" style="color: #dc2626;">Once you delete your account, there is no going back. All your data will be permanently removed.</p>
-                            <template x-if="deleteError">
-                                <div class="error-message" x-text="deleteError"></div>
-                            </template>
-                            <form method="POST" action="/profile/delete-account" class="delete-account-form" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');">
-                                <div class="form-group">
-                                    <label for="delete_password">Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        id="delete_password"
-                                        name="password"
-                                        placeholder="Enter your password to confirm"
-                                        required
-                                        autocomplete="current-password"
-                                    >
-                                </div>
-                                <button type="submit" class="btn-danger">Delete Account</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -236,6 +209,37 @@
                 </div>
             </div>
         </div>
+        </div>
+    
+        <!-- Delete Account Confirmation Modal -->
+        <div x-show="showDeleteConfirm" x-transition.opacity class="logout-modal-overlay" @click.self="showDeleteConfirm = false">
+            <div class="logout-modal">
+                <div class="settings-modal-header">
+                    <h2>Delete Account</h2>
+                    <button class="settings-modal-close" @click="showDeleteConfirm = false">✕</button>
+                </div>
+                <div class="settings-content" style="padding: 1.5rem 2rem 2rem;">
+                    <p style="color: #dc2626; margin-bottom: 1rem; font-weight: 500;">This action is irreversible!</p>
+                    <p style="color: #666; margin-bottom: 1.5rem;">All your data including stories, badges, and sessions will be permanently deleted. This cannot be undone.</p>
+                    <form method="POST" action="/profile/delete-account" style="margin: 0;">
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label for="delete_password_confirm">Confirm Password</label>
+                            <input
+                                type="password"
+                                id="delete_password_confirm"
+                                name="password"
+                                placeholder="Enter your password to confirm"
+                                required
+                                autocomplete="current-password"
+                            >
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" @click="showDeleteConfirm = false">Cancel</button>
+                            <button type="submit" class="btn-danger">Delete Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
     </div>
 
     <script>
@@ -246,6 +250,7 @@
                 settingsTab: 'profile',
                 showAllSessions: false,
                             showLogoutConfirm: false,
+                            showDeleteConfirm: false,
                 user: {{ user | tojson }},
                 badges: {{ badges | tojson }},
                 stories: {{ stories | tojson }},
@@ -269,6 +274,8 @@
                             this.closeSettingsModal();
                         } else if (this.showLogoutConfirm) {
                             this.showLogoutConfirm = false;
+                                        } else if (this.showDeleteConfirm) {
+                                            this.showDeleteConfirm = false;
                         }
                     }
                 },

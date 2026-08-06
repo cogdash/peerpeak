@@ -4,6 +4,7 @@ from core.database import Base
 
 # Import all models to register them with Base.metadata
 from models.user import User
+from models.avatar import Avatar, AvatarStatus
 from models.badge import Badge, BadgeType
 from models.story import Story
 from models.session import Session
@@ -14,6 +15,8 @@ from models.user_story import UserStory
 __all__ = [
     "Base",
     "User",
+    "Avatar",
+    "AvatarStatus",
     "Badge",
     "BadgeType",
     "Story",

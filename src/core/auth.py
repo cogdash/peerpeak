@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from core.database import SessionLocal
@@ -89,7 +90,10 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Optiona
 def require_auth(request: Request, db: Session = Depends(get_db)) -> User:
     user = get_current_user(request, db)
     if not user:
+        # Redirect to signup page when session is missing or invalid
         raise HTTPException(
-            status_code=status.HTTP_302_FOUND, detail="Not authenticated"
+            status_code=status.HTTP_302_FOUND,
+            detail="Not authenticated",
+            headers={"Location": "/signup"},
         )
     return user

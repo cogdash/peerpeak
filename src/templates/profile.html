@@ -279,8 +279,15 @@
 
                 toggleShowAllSessions() {
                     this.showAllSessions = !this.showAllSessions;
-                    // Reload page with new filter
-                    window.location.href = '/profile?show_all=' + this.showAllSessions;
+                                    // Fetch sessions with new filter via AJAX
+                                    fetch('/profile/sessions?show_all=' + this.showAllSessions)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            this.sessions = data.sessions;
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching sessions:', error);
+                                        });
                 },
 
                 logout() {

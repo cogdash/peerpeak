@@ -27,7 +27,10 @@ router = APIRouter()
 
 @router.get("/profile", response_class=HTMLResponse)
 def profile_page(
-    request: Request, user: User = Depends(require_auth), db: Session = Depends(get_db)
+    request: Request,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+    show_all: bool = False,
 ):
     # Get user's badges
     from models import UserBadge, Badge
@@ -45,6 +48,31 @@ def profile_page(
         .order_by(Story.created_at.desc())
         .all()
     )
+
+    # Get user's sessions
+    from models import Session as SessionModel
+
+    query = db.query(SessionModel).filter(SessionModel.user_id == user.id)
+    if not show_all:
+        query = query.filter(SessionModel.terminated == False)
+    sessions = query.order_by(SessionModel.start_time.desc()).all()
+
+    # Convert sessions to dict for JSON serialization
+    sessions_data = []
+    for session in sessions:
+        sessions_data.append(
+            {
+                "id": session.id,
+                "useragent": session.useragent,
+                "ip": session.ip,
+                "location": session.location,
+                "start_time": session.start_time.isoformat()
+                if session.start_time
+                else None,
+                "end_time": session.end_time.isoformat() if session.end_time else None,
+                "terminated": session.terminated,
+            }
+        )
 
     # Convert user to dict for JSON serialization
     user_data = {
@@ -89,9 +117,9 @@ def profile_page(
         "user": user_data,
         "badges": badges_data,
         "stories": stories_data,
-        "sessions": [],  # Empty for profile view
-        "view": "profile",  # default view
-        "show_all": False,
+        "sessions": sessions_data,
+        "view": "profile",
+        "show_all": show_all,
     }
     return templates.TemplateResponse(request, "profile.html", context)
 
@@ -148,6 +176,39 @@ def account_page(
         "show_all": show_all,
     }
     return templates.TemplateResponse(request, "profile.html", context)
+
+
+@router.get("/profile/sessions")
+def get_sessions(
+    request: Request,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+    show_all: bool = False,
+):
+    # Get user's sessions
+    query = db.query(SessionModel).filter(SessionModel.user_id == user.id)
+    if not show_all:
+        query = query.filter(SessionModel.terminated == False)
+    sessions = query.order_by(SessionModel.start_time.desc()).all()
+
+    # Convert sessions to dict for JSON serialization
+    sessions_data = []
+    for session in sessions:
+        sessions_data.append(
+            {
+                "id": session.id,
+                "useragent": session.useragent,
+                "ip": session.ip,
+                "location": session.location,
+                "start_time": session.start_time.isoformat()
+                if session.start_time
+                else None,
+                "end_time": session.end_time.isoformat() if session.end_time else None,
+                "terminated": session.terminated,
+            }
+        )
+
+    return {"sessions": sessions_data}
 
 
 @router.post("/profile/terminate-session")

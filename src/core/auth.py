@@ -76,14 +76,8 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Optiona
         return None
 
     # Check if session expired (90 days)
-    # Handle both naive and timezone-aware datetimes for compatibility
-    now = datetime.now(timezone.utc)
-    start_time = session.start_time
-    if start_time.tzinfo is None:
-        # Naive datetime - assume UTC
-        start_time = start_time.replace(tzinfo=timezone.utc)
-
-    if start_time < now - timedelta(days=SESSION_EXPIRY_DAYS):
+    # Use utcnow() for naive datetime comparison (SQLite stores naive datetimes)
+    if session.start_time < datetime.utcnow() - timedelta(days=SESSION_EXPIRY_DAYS):
         session.terminated = True
         db.commit()
         return None

@@ -10,6 +10,7 @@ from models.session import Session
 from models.user_badge import UserBadge, UserBadgeStatus
 from models.badge_story import BadgeStory
 from models.user_story import UserStory
+from models.avatar import Avatar, AvatarStatus
 
 __all__ = [
     "Base",
@@ -22,4 +23,6 @@ __all__ = [
     "UserBadgeStatus",
     "BadgeStory",
     "UserStory",
+    "Avatar",
+    "AvatarStatus",
 ]

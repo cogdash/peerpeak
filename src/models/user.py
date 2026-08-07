@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from models.session import Session
     from models.user_badge import UserBadge
     from models.user_story import UserStory
-    from models.avatar import Avatar
 
 
 class User(Base):
@@ -65,9 +64,6 @@ class User(Base):
     )
     liked_stories: Mapped[list["UserStory"]] = relationship(
         "UserStory", back_populates="user", cascade="all, delete-orphan"
-    )
-    avatar: Mapped["Avatar | None"] = relationship(
-        "Avatar", back_populates="user", cascade="all, delete-orphan", uselist=False
     )
 
     def __repr__(self) -> str:

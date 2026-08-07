@@ -1,0 +1,2 @@
+If running tests or executing a command fails, you are FORBIDDEN to repeat the same action without changing the code.
+If the error occurs more than twice in a row, stop, acknowledge the problem, and ask the user for advice.

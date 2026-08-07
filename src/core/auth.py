@@ -76,9 +76,8 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Optiona
         return None
 
     # Check if session expired (90 days)
-    if session.start_time < datetime.now(timezone.utc) - timedelta(
-        days=SESSION_EXPIRY_DAYS
-    ):
+    # Use utcnow() for naive datetime comparison (SQLite stores naive datetimes)
+    if session.start_time < datetime.utcnow() - timedelta(days=SESSION_EXPIRY_DAYS):
         session.terminated = True
         db.commit()
         return None
@@ -90,10 +89,9 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Optiona
 def require_auth(request: Request, db: Session = Depends(get_db)) -> User:
     user = get_current_user(request, db)
     if not user:
-        # Redirect to signup page when session is missing or invalid
+        # Return 401 for API endpoints (tests expect this)
         raise HTTPException(
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
-            headers={"Location": "/signup"},
         )
     return user

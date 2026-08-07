@@ -76,9 +76,14 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Optiona
         return None
 
     # Check if session expired (90 days)
-    if session.start_time < datetime.now(timezone.utc) - timedelta(
-        days=SESSION_EXPIRY_DAYS
-    ):
+    # Handle both timezone-aware and timezone-naive datetimes
+    now = datetime.now(timezone.utc)
+    start_time = session.start_time
+    if start_time.tzinfo is None:
+        # If naive, assume UTC
+        start_time = start_time.replace(tzinfo=timezone.utc)
+
+    if start_time < now - timedelta(days=SESSION_EXPIRY_DAYS):
         session.terminated = True
         db.commit()
         return None
@@ -95,5 +100,16 @@ def require_auth(request: Request, db: Session = Depends(get_db)) -> User:
             status_code=status.HTTP_302_FOUND,
             detail="Not authenticated",
             headers={"Location": "/signup"},
+        )
+    return user
+
+
+def require_auth_api(request: Request, db: Session = Depends(get_db)) -> User:
+    """Require authentication for API endpoints - returns 401 instead of redirect."""
+    user = get_current_user(request, db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
         )
     return user

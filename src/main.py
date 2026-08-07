@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from core.database import engine
 from core.auth import get_db, SESSION_EXPIRY_DAYS
 from models import Base
-from routers import auth_router, profile_router, feed_router, avatar_router
+from routers import auth_router, profile_router, feed_router
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -27,4 +27,3 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(feed_router)
-app.include_router(avatar_router)

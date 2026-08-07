@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: PeerPeak Avatar Image Processing Lambda
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        S3_BUCKET_NAME: !Ref AvatarBucket
+    Layers:
+      - !Ref PillowLayer
+
+Resources:
+  # S3 Bucket for avatar storage
+  AvatarBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: avatars/
+                  - Name: suffix
+                    Value: ""
+            Function: !GetAtt ProcessAvatarFunction.Arn
+
+  # Lambda Layer for Pillow
+  PillowLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: peerpeak-pillow-layer
+      Description: Pillow image processing library for PeerPeak
+      ContentUri: layers/pillow/
+      CompatibleRuntimes:
+        - python3.11
+      RetentionPolicy: Retain
+
+  # Lambda Function for avatar processing
+  ProcessAvatarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: peerpeak-process-avatar
+      Handler: handler.lambda_handler
+      CodeUri: src/
+      Description: Processes avatar uploads and generates WebP thumbnails
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref AvatarBucket
+        - S3WritePolicy:
+            BucketName: !Ref AvatarBucket
+      Events:
+        S3Upload:
+          Type: S3
+          Properties:
+            Bucket: !Ref AvatarBucket
+            Events:
+              - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: avatars/
+                  - Name: suffix
+                    Value: ""
+
+Outputs:
+  ProcessAvatarFunctionArn:
+    Description: ARN of the avatar processing Lambda function
+    Value: !GetAtt ProcessAvatarFunction.Arn
+  AvatarBucketName:
+    Description: Name of the avatar storage bucket
+    Value: !Ref AvatarBucket
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: peerpeak-user-content
+    Description: Name of the S3 bucket for avatar storage

@@ -1,10 +1,12 @@
 - name: Deploy Peerpeak
   hosts: all
-  become: true
+  vars:
+    ansible_user: "{{ deploy_user }}"
+    ansible_ssh_private_key_file: "~/.ssh/peerpeak_deploy_id"
   tasks:
     - name: Pull latest code from GitHub
       git: 
-        repo: 'https://github.com/cogdash/{{ github_repository }}.git'
+        repo: 'https://github.com/{{ github_repository }}.git'
         dest: "{{ app_directory }}"
         version: main
 

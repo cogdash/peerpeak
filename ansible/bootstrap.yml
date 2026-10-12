@@ -15,7 +15,7 @@
       user:
         name: "{{ deploy_user }}"
         create_home: yes
-        home: "{{ app_directory }}"
+        home: "/home/{{ deploy_user }}"
         groups: docker
         shell: /bin/bash
         append: yes

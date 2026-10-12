@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мои значки — достижения и антидостижения</title>
+<style>
+  :root {
+    --bg: #0b0d13;
+    --card: #161a24;
+    --card-2: #1b2130;
+    --field: #0f1219;
+    --border: #252c3b;
+    --text: #e8ecf4;
+    --muted: #8b93a7;
+    --pos: #34d399;
+    --neg: #fb7185;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 16px 72px;
+    font: 15px/1.5 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(circle at 12% -5%, rgba(124, 140, 255, .18), transparent 45%),
+      radial-gradient(circle at 90% 5%, rgba(52, 211, 153, .12), transparent 40%),
+      radial-gradient(circle at 50% 110%, rgba(251, 113, 133, .10), transparent 45%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 780px; margin: 0 auto; }
+
+  h1 {
+    margin: 0 0 28px;
+    text-align: center;
+    font-size: clamp(26px, 5vw, 38px);
+    letter-spacing: -.5px;
+    background: linear-gradient(135deg, #fff, #9aa7ff 60%, #5eead4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .card {
+    background: linear-gradient(180deg, #171b26, #141822);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .35);
+    transition: border-color .25s, box-shadow .25s;
+  }
+
+  .card h2 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  /* ---------- Подсветка после определения типа ---------- */
+
+  .card.detected-positive,
+  .badge.editing.detected-positive {
+    border-color: rgba(52, 211, 153, .5);
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, .12), 0 14px 34px rgba(0, 0, 0, .35);
+  }
+
+  .card.detected-negative,
+  .badge.editing.detected-negative {
+    border-color: rgba(251, 113, 133, .5);
+    box-shadow: 0 0 0 2px rgba(251, 113, 133, .12), 0 14px 34px rgba(0, 0, 0, .35);
+  }
+
+  .type-note {
+    margin-left: 6px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+  .type-note[data-state="positive"] { color: #5eead4; }
+  .type-note[data-state="negative"] { color: #fda4af; }
+
+  input[type="text"], textarea {
+    width: 100%;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    padding: 12px 14px;
+    font: inherit;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+
+  textarea { min-height: 78px; resize: vertical; }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: rgba(124, 140, 255, .65);
+    box-shadow: 0 0 0 3px rgba(124, 140, 255, .15);
+  }
+
+  textarea.invalid {
+    border-color: rgba(251, 113, 133, .8);
+    box-shadow: 0 0 0 3px rgba(251, 113, 133, .15);
+  }
+
+  ::placeholder { color: #5c6478; }
+
+  .btn {
+    border: 0;
+    border-radius: 12px;
+    padding: 11px 18px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .18s;
+    white-space: nowrap;
+  }
+
+  .btn.primary {
+    background: linear-gradient(135deg, #7c8cff, #5b6cff);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(91, 108, 255, .32);
+  }
+  .btn.primary:hover { transform: translateY(-1px); }
+  .btn.primary:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn.ghost { background: var(--card-2); color: var(--muted); }
+  .btn.ghost:hover { background: #262e40; color: var(--text); }
+
+  .btn.danger {
+    background: linear-gradient(135deg, #f43f5e, #be123c);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(244, 63, 94, .3);
+  }
+  .btn.danger:hover { transform: translateY(-1px); }
+
+  .icon-btn {
+    background: 0;
+    border: 0;
+    color: var(--muted);
+    font-size: 15px;
+    padding: 8px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: .15s;
+  }
+  .icon-btn:hover { background: #252c3d; color: #fff; }
+  .icon-btn.danger:hover { background: rgba(251, 113, 133, .15); color: #fda4af; }
+
+  /* ---------- Checkbox line ---------- */
+
+  .check-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--field);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    transition: .18s;
+    min-height: 32px;
+    white-space: nowrap;
+  }
+  .check-line:hover {
+    color: var(--text);
+    border-color: #313a4d;
+  }
+  .check-line.active {
+    background: rgba(124, 140, 255, .14);
+    border-color: rgba(124, 140, 255, .45);
+    color: #a5b4fc;
+  }
+  .check-line input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background .18s, border-color .18s;
+  }
+  .check-line input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, #7c8cff, #5b6cff);
+    border-color: #7c8cff;
+  }
+  .check-line input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center/11px no-repeat;
+  }
+  .check-line input[type="checkbox"]:focus-visible {
+    box-shadow: 0 0 0 3px rgba(124, 140, 255, .25);
+  }
+
+  /* ---------- Emoji picker ---------- */
+
+  .emoji-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .emoji-input {
+    width: 70px;
+    flex: 0 0 70px;
+    text-align: center;
+    font-size: 28px;
+    line-height: 1;
+    height: 56px;
+    padding: 0 6px;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    outline: none;
+    transition: .18s;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  }
+  .emoji-input:focus {
+    border-color: rgba(124, 140, 255, .65);
+    box-shadow: 0 0 0 3px rgba(124, 140, 255, .15);
+  }
+
+  .emoji-quick {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 5px;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-height: 56px;
+    align-content: center;
+  }
+
+  .emoji-quick button {
+    border: 0;
+    background: 0;
+    font-size: 19px;
+    padding: 3px 5px;
+    border-radius: 7px;
+    cursor: pointer;
+    line-height: 1;
+    transition: .15s;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  }
+  .emoji-quick button:hover { background: #252c3d; transform: scale(1.15); }
+
+  /* ---------- Form footer + label chip ---------- */
+
+  .form-foot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .counter {
+    font-size: 13px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .counter.near { color: #fbbf24; }
+
+  .spacer { flex: 1; }
+
+  .hint { font-size: 12px; color: #5c6478; margin-top: 10px; }
+
+  kbd {
+    background: #1d2432;
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-size: 11px;
+    font-family: inherit;
+    color: var(--muted);
+  }
+
+  .label-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--field);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: .18s;
+    min-height: 32px;
+  }
+
+  .label-chip[data-state="positive"] {
+    background: rgba(52, 211, 153, .14);
+    border-color: rgba(52, 211, 153, .4);
+    color: #5eead4;
+  }
+
+  .label-chip[data-state="negative"] {
+    background: rgba(251, 113, 133, .14);
+    border-color: rgba(251, 113, 133, .4);
+    color: #fda4af;
+  }
+
+  .label-chip[data-state="error"] {
+    background: rgba(251, 191, 36, .14);
+    border-color: rgba(251, 191, 36, .4);
+    color: #fbbf24;
+  }
+
+  .label-chip[data-state="pending"]::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--muted);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Toolbar ---------- */
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 26px 0 14px;
+  }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    background: #12161f;
+    border: 1px solid var(--border);
+    padding: 5px;
+    border-radius: 12px;
+  }
+
+  .filters button {
+    border: 0;
+    background: 0;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .18s;
+  }
+  .filters button:hover { color: var(--text); }
+  .filters button.active { background: var(--card-2); color: #fff; }
+
+  .stats { font-size: 13px; color: var(--muted); margin-left: auto; }
+  .stats b { color: #5eead4; }
+  .stats i { color: #fda4af; font-style: normal; }
+
+  /* ---------- Badge list ---------- */
+
+  #list { display: flex; flex-direction: column; gap: 12px; }
+
+  .badge {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px 16px 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: linear-gradient(180deg, #151a25, #131722);
+    overflow: hidden;
+    animation: pop .25s ease both;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(8px) scale(.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .badge::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .badge.is-positive::before { background: linear-gradient(180deg, #34d399, #0ea5e9); }
+  .badge.is-negative::before { background: linear-gradient(180deg, #fb7185, #a855f7); }
+
+  /* Полоска прогресса при долгом нажатии */
+  .badge::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    height: 3px;
+    width: 0;
+    background: linear-gradient(90deg, #34d399, #5eead4);
+    border-radius: 0 3px 3px 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .badge.pressing {
+    border-color: rgba(52, 211, 153, .55);
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, .12), 0 14px 34px rgba(0, 0, 0, .35);
+  }
+  .badge.pressing::after {
+    opacity: 1;
+    animation: pressFill 1.2s linear forwards;
+  }
+  @keyframes pressFill {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+
+  .badge-ico {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--field);
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    line-height: 1;
+  }
+  .badge.is-positive .badge-ico {
+    background: rgba(52, 211, 153, .10);
+    border-color: rgba(52, 211, 153, .25);
+  }
+  .badge.is-negative .badge-ico {
+    background: rgba(251, 113, 133, .10);
+    border-color: rgba(251, 113, 133, .25);
+  }
+
+  .badge-body { flex: 1; min-width: 0; }
+
+  .badge-text {
+    margin: 2px 0 6px;
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 600;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .badge-meta { margin: 0; font-size: 12px; color: var(--muted); }
+  .badge.is-positive .badge-meta .kind { color: #5eead4; }
+  .badge.is-negative .badge-meta .kind { color: #fda4af; }
+
+  .badge-meta .received-date { color: #5eead4; }
+
+  /* ---------- Unreceived state ---------- */
+
+  .badge.is-unreceived {
+    background: linear-gradient(180deg, #12151c, #0f1218);
+    border-style: dashed;
+    border-color: #2a3142;
+    cursor: pointer;
+  }
+  .badge.is-unreceived::before {
+    background: linear-gradient(180deg, #4a5568, #2d3748);
+  }
+  .badge.is-unreceived .badge-ico {
+    background: rgba(255, 255, 255, .03);
+    border-color: #2a3142;
+    filter: grayscale(1);
+    opacity: .55;
+  }
+  .badge.is-unreceived .badge-text {
+    color: #9aa3b8;
+  }
+  .badge.is-unreceived .badge-meta .kind {
+    color: #7a8499;
+  }
+
+  /* Кнопки появляются только при наведении на плашку */
+  .badge-actions {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transform: translateX(4px);
+    pointer-events: none;
+    transition: opacity .18s, transform .18s;
+  }
+  .badge:hover .badge-actions,
+  .badge:focus-within .badge-actions {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .badge.editing {
+    display: block;
+    background: linear-gradient(180deg, #1a1f2c, #161a25);
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  .badge.editing .edit-text { min-height: 74px; }
+
+  .edit-foot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Empty state ---------- */
+
+  .empty {
+    text-align: center;
+    padding: 44px 20px;
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .empty .big { display: block; font-size: 30px; margin-bottom: 10px; }
+
+  /* ---------- Toast ---------- */
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translate(-50%, 18px);
+    background: #1d2432;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
+    opacity: 0;
+    pointer-events: none;
+    transition: .25s;
+    z-index: 50;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- Modal ---------- */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 7, 12, .7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: .18s;
+    z-index: 100;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: auto; }
+
+  .modal {
+    background: linear-gradient(180deg, #1b2130, #161a24);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .6);
+    transform: translateY(10px) scale(.97);
+    transition: transform .2s;
+  }
+  .modal-overlay.show .modal { transform: none; }
+
+  .modal h3 { margin: 0 0 8px; font-size: 18px; }
+  .modal p {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .modal p .quote { color: #fff; font-weight: 600; }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  @media (max-width: 520px) {
+    .badge { gap: 11px; padding-left: 17px; }
+    .badge-ico { flex-basis: 42px; width: 42px; height: 42px; font-size: 20px; border-radius: 10px; }
+    .stats { margin-left: 0; width: 100%; }
+    .emoji-input { width: 60px; flex-basis: 60px; font-size: 24px; height: 52px; }
+    .emoji-quick button { font-size: 18px; }
+
+    /* На тач-устройствах наведения нет — показываем кнопки всегда */
+    .badge-actions { opacity: 1; transform: none; pointer-events: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>Мои значки</h1>
+
+  <section class="card" id="createCard">
+    <h2>Новый значок<span class="type-note" id="createNote"></span></h2>
+
+    <div class="emoji-row">
+      <input type="text" id="newEmoji" class="emoji-input" maxlength="8" placeholder="🏆"
+             autocomplete="off" spellcheck="false" title="Введите любое эмодзи">
+      <div class="emoji-quick" id="newQuick"></div>
+    </div>
+
+    <textarea id="newText" maxlength="50" placeholder="Опишите достижение или провал… (до 50 символов)"></textarea>
+
+    <div class="form-foot">
+      <label class="check-line" id="newReceivedLabel" title="Отметить значок как уже полученный">
+        <input type="checkbox" id="newReceived">
+        <span>Получено</span>
+      </label>
+      <span class="counter" id="newCnt">0/50</span>
+      <div class="spacer"></div>
+      <button class="btn primary" id="addBtn" disabled>Создать значок</button>
+    </div>
+
+    <p class="hint">
+      Тип значка определяется автоматически на основе текста.
+      <kbd>Ctrl</kbd>+<kbd>Enter</kbd> — создать.
+      Зажмите значок, чтобы получить.
+    </p>
+  </section>
+
+  <div class="toolbar">
+    <div class="filters" id="filters">
+      <button type="button" data-filter="all" class="active">Все</button>
+      <button type="button" data-filter="positive">🏆 Достижения</button>
+      <button type="button" data-filter="negative">💀 Анти</button>
+    </div>
+    <label class="check-line" id="receivedToggle" title="Показывать только полученные значки">
+      <input type="checkbox" id="showReceived">
+      <span>Полученные</span>
+    </label>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <section id="list"></section>
+
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3>Удалить значок?</h3>
+    <p>«<span class="quote" id="modalText"></span>»<br>Действие нельзя отменить.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modalCancel" type="button">Отмена</button>
+      <button class="btn danger" id="modalConfirm" type="button">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =================================================================
+     Константы
+     ================================================================= */
+
+  const LS_KEY      = 'badges-app-v1';
+  const MAX_LEN     = 50;
+  const API_URL     = 'http://localhost:8000/rate';
+  const DEBOUNCE_MS = 400;
+  const LONGPRESS_MS = 1200;
+
+  const EMOJI_LIST = [
+    '🏆','🥇','⭐','💪','🔥','✨','🎯','🚀','🎉','🎨',
+    '📚','🧠','🎮','☕','🍕','💀','😅','🥴','🐢','💤'
+  ];
+
+  /* =================================================================
+     Состояние приложения
+     ================================================================= */
+
+  const state = {
+    // { id, text, label: 'positive'|'negative', emoji, received, receivedAt }
+    badges: []
+  };
+
+  let filter = 'all';
+  let showReceivedOnly = false;
+  let editingId = null;
+  let pendingDeleteId = null;
+  let toastTimer = null;
+
+  let newLabel = { status: 'empty', label: null };
+  let editLabel = { status: 'empty', label: null };
+  let editDetector = null;
+
+  // Long-press состояние
+  let pressTimer = null;
+  let pressTarget = null;
+
+  /* =================================================================
+     Утилиты
+     ================================================================= */
+
+  const $ = (sel) => document.querySelector(sel);
+
+  function esc(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[c]));
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function normalizeText(text) {
+    return String(text)
+      .toLowerCase()
+      .replace(/ё/g, 'е')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, MAX_LEN);
+  }
+
+  function normalizeEmoji(str) {
+    return String(str).replace(/\s+/g, '').slice(0, 8);
+  }
+
+  function normalizeLabel(raw) {
+    if (raw === 'negative' || raw === 'anti') return 'negative';
+    return 'positive';
+  }
+
+  function defaultEmoji(label) {
+    return label === 'negative' ? '💀' : '🏆';
+  }
+
+  function labelTitle(label) {
+    return label === 'negative' ? 'Антидостижение' : 'Достижение';
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('ru-RU', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function toast(message) {
+    const el = $('#toast');
+    el.textContent = message;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  function vibrate(ms) {
+    if (navigator.vibrate) {
+      try { navigator.vibrate(ms); } catch (e) { /* ignore */ }
+    }
+  }
+
+  /* =================================================================
+     Хранилище
+     ================================================================= */
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return;
+
+      state.badges = Array.isArray(parsed.badges)
+        ? parsed.badges
+            .filter((b) => b && typeof b.text === 'string')
+            .map((b) => {
+              const received = Boolean(b.received);
+              let receivedAt = typeof b.receivedAt === 'string' ? b.receivedAt : null;
+              if (received && !receivedAt) receivedAt = new Date().toISOString();
+              if (!received) receivedAt = null;
+
+              return {
+                id:    typeof b.id === 'string' ? b.id : uid(),
+                text:  normalizeText(b.text),
+                label: normalizeLabel(b.label || b.type),
+                emoji: typeof b.emoji === 'string' ? normalizeEmoji(b.emoji) : '',
+                received: received,
+                receivedAt: receivedAt
+              };
+            })
+        : [];
+    } catch (err) {
+      console.warn('Не удалось прочитать сохранённые данные', err);
+    }
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    } catch (err) {
+      console.warn('Не удалось сохранить данные', err);
+    }
+  }
+
+  /* =================================================================
+     Детектор типа значка
+     ================================================================= */
+
+  function createDetector(onState) {
+    let timer = null;
+    let controller = null;
+    let lastToken = 0;
+
+    function cancelAll() {
+      clearTimeout(timer);
+      timer = null;
+      if (controller) {
+        controller.abort();
+        controller = null;
+      }
+    }
+
+    async function sendRequest(text, token) {
+      const myController = new AbortController();
+      controller = myController;
+
+      try {
+        const url = API_URL + '?text=' + encodeURIComponent(text);
+        const res = await fetch(url, { signal: myController.signal });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        const data = await res.json();
+        if (token !== lastToken) return;
+
+        const label = data && data.label === 'negative' ? 'negative' : 'positive';
+        onState({ status: 'ready', label });
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        if (token !== lastToken) return;
+        console.warn('Ошибка запроса к API:', err);
+        onState({ status: 'error', label: null });
+      } finally {
+        if (controller === myController) controller = null;
+      }
+    }
+
+    return function detect(text) {
+      cancelAll();
+      const token = ++lastToken;
+      const trimmed = String(text).trim();
+
+      if (!trimmed) {
+        onState({ status: 'empty', label: null });
+        return;
+      }
+
+      onState({ status: 'pending', label: null });
+      timer = setTimeout(() => sendRequest(trimmed, token), DEBOUNCE_MS);
+    };
+  }
+
+  const detectNewLabel = createDetector((s) => {
+    newLabel = s;
+    renderNewForm();
+  });
+
+  /* =================================================================
+     Чип с типом значка
+     ================================================================= */
+
+  function chipInfo(s) {
+    if (s.status === 'ready') {
+      return s.label === 'negative'
+        ? { state: 'negative', text: '💀 Антидостижение' }
+        : { state: 'positive', text: '🏆 Достижение' };
+    }
+    if (s.status === 'pending') return { state: 'pending', text: 'Определяем…' };
+    if (s.status === 'error')   return { state: 'error',   text: '⚠️ Ошибка определения' };
+    return { state: 'empty', text: '' };
+  }
+
+  function applyChip(el, s) {
+    const info = chipInfo(s);
+    el.dataset.state = info.state;
+    el.textContent = info.text;
+  }
+
+  /* =================================================================
+     Отрисовка
+     ================================================================= */
+
+  function renderStats() {
+    const source = showReceivedOnly
+      ? state.badges.filter((b) => b.received)
+      : state.badges;
+
+    const pos = source.filter((b) => b.label === 'positive').length;
+    const neg = source.length - pos;
+    $('#stats').innerHTML = '🏆 <b>' + pos + '</b> · 💀 <i>' + neg + '</i>';
+  }
+
+  function renderNewForm() {
+    const text = $('#newText').value;
+    const ready = newLabel.status === 'ready' && text.trim().length > 0;
+    $('#addBtn').disabled = !ready;
+
+    const emojiInput = $('#newEmoji');
+    if (!emojiInput.value) {
+      emojiInput.placeholder = newLabel.label ? defaultEmoji(newLabel.label) : '🏆';
+    }
+
+    const card = $('#createCard');
+    const note = $('#createNote');
+    const detected = ready && !!newLabel.label;
+
+    card.classList.toggle('detected-positive', detected && newLabel.label === 'positive');
+    card.classList.toggle('detected-negative', detected && newLabel.label === 'negative');
+
+    if (detected) {
+      note.dataset.state = newLabel.label;
+      note.textContent = newLabel.label === 'negative'
+        ? '(за антидостижение)'
+        : '(за достижение)';
+    } else {
+      note.removeAttribute('data-state');
+      note.textContent = '';
+    }
+  }
+
+  function renderEditForm() {
+    if (!editingId) return;
+    const card = document.querySelector('.badge.editing[data-id="' + editingId + '"]');
+    if (!card) return;
+
+    const ready = editLabel.status === 'ready' && !!editLabel.label;
+
+    card.classList.toggle('detected-positive', ready && editLabel.label === 'positive');
+    card.classList.toggle('detected-negative', ready && editLabel.label === 'negative');
+
+    const chip = card.querySelector('.label-chip');
+    if (chip) applyChip(chip, editLabel);
+
+    const saveBtn = card.querySelector('[data-act="save"]');
+    if (saveBtn) saveBtn.disabled = !ready;
+
+    const emojiInput = card.querySelector('.emoji-input');
+    if (emojiInput && !emojiInput.value) {
+      emojiInput.placeholder = editLabel.label ? defaultEmoji(editLabel.label) : '🏆';
+    }
+  }
+
+  function cardHTML(b) {
+    const isPos = b.label === 'positive';
+    const emoji = b.emoji || defaultEmoji(b.label);
+    const received = b.received;
+
+    const classes = ['badge', isPos ? 'is-positive' : 'is-negative'];
+    if (!received) classes.push('is-unreceived');
+
+    let meta = '<span class="kind">' + labelTitle(b.label) + '</span>';
+
+    if (received) {
+      const dateStr = formatDate(b.receivedAt);
+      meta += ' · <span class="received-date">📅 ' + (dateStr || '—') + '</span>';
+    }
+
+    return '' +
+      '<article class="' + classes.join(' ') + '" data-id="' + b.id + '">' +
+        '<div class="badge-ico">' + esc(emoji) + '</div>' +
+        '<div class="badge-body">' +
+          '<p class="badge-text">' + esc(b.text) + '</p>' +
+          '<p class="badge-meta">' + meta + '</p>' +
+        '</div>' +
+        '<div class="badge-actions">' +
+          '<button class="icon-btn" data-act="edit" data-id="' + b.id + '" title="Редактировать">✏️</button>' +
+          '<button class="icon-btn danger" data-act="del" data-id="' + b.id + '" title="Удалить">🗑️</button>' +
+        '</div>' +
+      '</article>';
+  }
+
+  function editCardHTML(b) {
+    const isPos = b.label === 'positive';
+    const emoji = b.emoji || '';
+    const placeholder = defaultEmoji(b.label);
+    const chip = chipInfo(editLabel);
+    const near = b.text.length >= MAX_LEN - 5 ? ' near' : '';
+    const detected = (editLabel.status === 'ready' && editLabel.label)
+      ? (editLabel.label === 'negative' ? ' detected-negative' : ' detected-positive')
+      : '';
+
+    return '' +
+      '<article class="badge editing ' + (isPos ? 'is-positive' : 'is-negative') + detected +
+        '" data-id="' + b.id + '">' +
+        '<div class="emoji-row">' +
+          '<input type="text" class="emoji-input" maxlength="8" ' +
+            'value="' + esc(emoji) + '" placeholder="' + esc(placeholder) + '" ' +
+            'autocomplete="off" spellcheck="false" title="Введите любое эмодзи">' +
+          '<div class="emoji-quick">' +
+            EMOJI_LIST.map((e) =>
+              '<button type="button" data-pick="' + e + '" title="' + e + '">' + e + '</button>'
+            ).join('') +
+          '</div>' +
+        '</div>' +
+        '<textarea class="edit-text" data-id="' + b.id + '" maxlength="' + MAX_LEN + '">' + esc(b.text) + '</textarea>' +
+        '<div class="edit-foot">' +
+          '<span class="label-chip" data-state="' + chip.state + '">' + chip.text + '</span>' +
+          '<label class="check-line" title="Отметить значок как полученный">' +
+            '<input type="checkbox" class="edit-received"' + (b.received ? ' checked' : '') + '>' +
+            '<span>Получено</span>' +
+          '</label>' +
+          '<span class="counter edit-cnt' + near + '">' + b.text.length + '/' + MAX_LEN + '</span>' +
+          '<div class="spacer"></div>' +
+          '<button class="btn ghost" data-act="cancel" data-id="' + b.id + '">Отмена</button>' +
+          '<button class="btn primary" data-act="save" data-id="' + b.id + '"' +
+            (editLabel.status !== 'ready' ? ' disabled' : '') + '>Сохранить</button>' +
+        '</div>' +
+      '</article>';
+  }
+
+  function renderList() {
+    const list = $('#list');
+
+    let items = filter === 'all'
+      ? state.badges
+      : state.badges.filter((b) => b.label === filter);
+
+    if (showReceivedOnly) {
+      items = items.filter((b) => b.received);
+    }
+
+    if (items.length === 0) {
+      if (state.badges.length === 0) {
+        list.innerHTML = '<div class="empty"><span class="big">✨</span>Пока нет ни одного значка.<br>Создайте первый!</div>';
+      } else if (showReceivedOnly) {
+        list.innerHTML = '<div class="empty"><span class="big">⏳</span>Полученных значков в этой категории пока нет.</div>';
+      } else {
+        list.innerHTML = '<div class="empty"><span class="big">🔍</span>В этой категории пока ничего нет.</div>';
+      }
+      return;
+    }
+
+    list.innerHTML = items
+      .map((b) => editingId === b.id ? editCardHTML(b) : cardHTML(b))
+      .join('');
+  }
+
+  /* =================================================================
+     Быстрые эмодзи
+     ================================================================= */
+
+  function buildEmojiQuick(container) {
+    container.innerHTML = EMOJI_LIST
+      .map((e) => '<button type="button" data-pick="' + e + '" title="' + e + '">' + e + '</button>')
+      .join('');
+  }
+
+  /* =================================================================
+     Действия
+     ================================================================= */
+
+  function updateCounter(el, len) {
+    if (!el) return;
+    el.textContent = len + '/' + MAX_LEN;
+    el.classList.toggle('near', len >= MAX_LEN - 5);
+  }
+
+  function updateNewCounter() {
+    updateCounter($('#newCnt'), $('#newText').value.length);
+  }
+
+  function addBadge() {
+    const ta = $('#newText');
+    const text = normalizeText(ta.value);
+
+    if (!text) { ta.focus(); return; }
+    if (newLabel.status !== 'ready' || !newLabel.label) {
+      toast('Подождите, тип ещё не определён');
+      return;
+    }
+
+    const label = newLabel.label;
+    const received = $('#newReceived').checked;
+
+    state.badges.unshift({
+      id: uid(),
+      text: text,
+      label: label,
+      emoji: normalizeEmoji($('#newEmoji').value),
+      received: received,
+      receivedAt: received ? new Date().toISOString() : null
+    });
+
+    ta.value = '';
+    $('#newEmoji').value = '';
+    $('#newReceived').checked = false;
+    $('#newReceivedLabel').classList.remove('active');
+    newLabel = { status: 'empty', label: null };
+
+    updateNewCounter();
+    renderNewForm();
+    persist();
+    renderList();
+    renderStats();
+    toast(label === 'negative' ? '💀 Антидостижение добавлено' : '🏆 Достижение добавлено');
+  }
+
+  function markReceived(id) {
+    const badge = state.badges.find((b) => b.id === id);
+    if (!badge || badge.received) return;
+
+    badge.received = true;
+    badge.receivedAt = new Date().toISOString();
+
+    persist();
+    renderList();
+    renderStats();
+    toast('✅ Значок получен!');
+    vibrate(30);
+  }
+
+  function startEdit(id) {
+    const badge = state.badges.find((b) => b.id === id);
+    if (!badge) return;
+
+    editingId = id;
+    editLabel = { status: 'ready', label: badge.label };
+    editDetector = createDetector((s) => {
+      editLabel = s;
+      renderEditForm();
+    });
+
+    renderList();
+
+    const ta = document.querySelector('.edit-text[data-id="' + id + '"]');
+    if (ta) {
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    }
+  }
+
+  function saveEdit(id) {
+    const badge = state.badges.find((b) => b.id === id);
+    if (!badge) return;
+
+    const card = document.querySelector('.badge.editing[data-id="' + id + '"]');
+    if (!card) return;
+
+    const ta = card.querySelector('.edit-text');
+    const emojiInput = card.querySelector('.emoji-input');
+    const receivedInput = card.querySelector('.edit-received');
+
+    const text = normalizeText(ta.value);
+
+    if (!text) {
+      ta.classList.add('invalid');
+      ta.focus();
+      toast('Текст значка не может быть пустым');
+      return;
+    }
+    if (editLabel.status !== 'ready' || !editLabel.label) {
+      toast('Подождите, тип ещё не определён');
+      return;
+    }
+
+    const newReceived = receivedInput ? receivedInput.checked : badge.received;
+
+    if (newReceived && !badge.received) {
+      badge.receivedAt = new Date().toISOString();
+    } else if (!newReceived) {
+      badge.receivedAt = null;
+    }
+    badge.received = newReceived;
+
+    badge.text  = text;
+    badge.label = editLabel.label;
+    badge.emoji = normalizeEmoji(emojiInput ? emojiInput.value : '');
+
+    editingId = null;
+    editDetector = null;
+
+    persist();
+    renderList();
+    renderStats();
+    toast('Значок обновлён');
+  }
+
+  function cancelEdit() {
+    editingId = null;
+    editDetector = null;
+    renderList();
+  }
+
+  /* =================================================================
+     Удаление через модальное окно
+     ================================================================= */
+
+  function openDeleteModal(id) {
+    const badge = state.badges.find((b) => b.id === id);
+    if (!badge) return;
+
+    pendingDeleteId = id;
+    $('#modalText').textContent = badge.text;
+    $('#modal').classList.add('show');
+    $('#modalConfirm').focus();
+  }
+
+  function closeDeleteModal() {
+    pendingDeleteId = null;
+    $('#modal').classList.remove('show');
+  }
+
+  function confirmDelete() {
+    if (!pendingDeleteId) return;
+
+    const id = pendingDeleteId;
+    const before = state.badges.length;
+
+    state.badges = state.badges.filter((b) => b.id !== id);
+
+    if (editingId === id) {
+      editingId = null;
+      editDetector = null;
+    }
+    closeDeleteModal();
+
+    if (state.badges.length < before) {
+      persist();
+      renderList();
+      renderStats();
+      toast('Значок удалён');
+    }
+  }
+
+  /* =================================================================
+     Long-press
+     ================================================================= */
+
+  function cancelPress() {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+    if (pressTarget) {
+      pressTarget.classList.remove('pressing');
+      pressTarget = null;
+    }
+  }
+
+  function completePress() {
+    const badge = pressTarget;
+    pressTimer = null;
+    pressTarget = null;
+
+    if (!badge) return;
+    badge.classList.remove('pressing');
+
+    const id = badge.dataset.id;
+    if (id) markReceived(id);
+  }
+
+  function onListPointerDown(e) {
+    // только левая кнопка мыши
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    const badge = e.target.closest('.badge');
+    if (!badge) return;
+    if (badge.classList.contains('editing')) return;
+    // не мешаем кнопкам внутри плашки
+    if (e.target.closest('button')) return;
+    // если уже получен — нечего делать
+    if (!badge.classList.contains('is-unreceived')) return;
+
+    cancelPress();
+
+    pressTarget = badge;
+    badge.classList.add('pressing');
+
+    pressTimer = setTimeout(completePress, LONGPRESS_MS);
+  }
+
+  /* =================================================================
+     Обработчики
+     ================================================================= */
+
+  function onListClick(e) {
+    const pick = e.target.closest('[data-pick]');
+    if (pick) {
+      const card = pick.closest('.badge, .card');
+      const input = card ? card.querySelector('.emoji-input') : null;
+      if (input) {
+        input.value = pick.dataset.pick;
+        input.focus();
+      }
+      return;
+    }
+
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+
+    const action = btn.dataset.act;
+    const id = btn.dataset.id;
+
+    if (action === 'edit')        startEdit(id);
+    else if (action === 'del')    openDeleteModal(id);
+    else if (action === 'cancel') cancelEdit();
+    else if (action === 'save')   saveEdit(id);
+  }
+
+  function onListInput(e) {
+    const ta = e.target.closest('.edit-text');
+    if (!ta) return;
+
+    ta.classList.remove('invalid');
+
+    const card = ta.closest('.badge.editing');
+    if (card) updateCounter(card.querySelector('.edit-cnt'), ta.value.length);
+
+    if (editDetector) editDetector(normalizeText(ta.value));
+  }
+
+  function bindEvents() {
+    const newText = $('#newText');
+    newText.addEventListener('input', () => {
+      updateNewCounter();
+      renderNewForm();
+      detectNewLabel(normalizeText(newText.value));
+    });
+
+    newText.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        if (!$('#addBtn').disabled) addBadge();
+      }
+    });
+
+    $('#addBtn').addEventListener('click', addBadge);
+
+    $('#newReceived').addEventListener('change', (e) => {
+      $('#newReceivedLabel').classList.toggle('active', e.target.checked);
+    });
+
+    $('#newQuick').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pick]');
+      if (!btn) return;
+      $('#newEmoji').value = btn.dataset.pick;
+      $('#newEmoji').focus();
+    });
+
+    const filterButtons = document.querySelectorAll('#filters button');
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filter = btn.dataset.filter;
+        filterButtons.forEach((b) => b.classList.toggle('active', b === btn));
+        renderList();
+      });
+    });
+
+    $('#showReceived').addEventListener('change', (e) => {
+      showReceivedOnly = e.target.checked;
+      $('#receivedToggle').classList.toggle('active', showReceivedOnly);
+      renderList();
+      renderStats();
+    });
+
+    const list = $('#list');
+    list.addEventListener('click', onListClick);
+    list.addEventListener('input', onListInput);
+
+    // Long-press
+    list.addEventListener('pointerdown', onListPointerDown);
+    list.addEventListener('contextmenu', (e) => {
+      // подавляем системное меню на плашках (мобильный long-tap)
+      if (e.target.closest('.badge') && !e.target.closest('.badge.editing')) {
+        e.preventDefault();
+      }
+    });
+    // отпускание в любом месте — отменяем
+    document.addEventListener('pointerup', cancelPress);
+    document.addEventListener('pointercancel', cancelPress);
+    // при скролле / уходе со страницы тоже отменяем
+    window.addEventListener('blur', cancelPress);
+    document.addEventListener('scroll', cancelPress, true);
+
+    $('#modalCancel').addEventListener('click', closeDeleteModal);
+    $('#modalConfirm').addEventListener('click', confirmDelete);
+    $('#modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') closeDeleteModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && pendingDeleteId) closeDeleteModal();
+    });
+  }
+
+  /* =================================================================
+     Старт
+     ================================================================= */
+
+  function init() {
+    loadState();
+
+    $('#newEmoji').placeholder = '🏆';
+
+    buildEmojiQuick($('#newQuick'));
+
+    renderStats();
+    renderList();
+    updateNewCounter();
+    renderNewForm();
+
+    bindEvents();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

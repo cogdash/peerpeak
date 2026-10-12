@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peerpeak — вход и регистрация</title>
+<style>
+/* ============================================================
+   1. ДИЗАЙН-ТОКЕНЫ
+   ============================================================ */
+:root {
+  /* --- Поверхности --- */
+  --bg:            #0b0d13;
+  --card:          #161a24;
+  --card-2:        #1b2130;
+  --field:         #0f1219;
+  --field-deep:    #0d1017;
+
+  /* --- Границы --- */
+  --border:        #252c3b;
+  --border-strong: #313a4d;
+  --border-dashed: #2a3142;
+
+  /* --- Текст --- */
+  --text:          #e8ecf4;
+  --muted:         #8b93a7;
+  --faint:         #5c6478;
+
+  /* --- Акцент (индиго) --- */
+  --accent:        #7c8cff;
+  --accent-2:      #5b6cff;
+  --accent-soft:   #a5b4fc;
+  --accent-bg:     rgba(124, 140, 255, .14);
+  --accent-border: rgba(124, 140, 255, .45);
+  --accent-focus:  rgba(124, 140, 255, .65);
+  --accent-ring:   rgba(124, 140, 255, .15);
+
+  /* --- Семантика --- */
+  --pos:           #34d399;
+  --pos-soft:      #5eead4;
+  --pos-bg:        rgba(52, 211, 153, .14);
+  --pos-border:    rgba(52, 211, 153, .4);
+
+  --neg:           #fb7185;
+  --neg-soft:      #fda4af;
+  --neg-bg:        rgba(251, 113, 133, .14);
+  --neg-border:    rgba(251, 113, 133, .4);
+
+  --warn:          #fbbf24;
+  --warn-bg:       rgba(251, 191, 36, .14);
+  --warn-border:   rgba(251, 191, 36, .4);
+
+  /* --- Радиусы --- */
+  --r-xs: 5px;
+  --r-sm: 9px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 18px;
+
+  /* --- Отступы --- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 28px;
+  --s-7: 48px;
+
+  /* --- Тени --- */
+  --shadow-card:   0 14px 34px rgba(0, 0, 0, .35);
+  --shadow-modal:  0 24px 60px rgba(0, 0, 0, .6);
+  --shadow-accent: 0 8px 20px rgba(91, 108, 255, .32);
+  --shadow-danger: 0 8px 20px rgba(244, 63, 94, .3);
+  --shadow-pos:    0 8px 20px rgba(52, 211, 153, .28);
+
+  /* --- Градиенты --- */
+  --grad-accent:  linear-gradient(135deg, #7c8cff, #5b6cff);
+  --grad-danger:  linear-gradient(135deg, #f43f5e, #be123c);
+  --grad-success: linear-gradient(135deg, #34d399, #059669);
+  --grad-title:   linear-gradient(135deg, #fff, #9aa7ff 60%, #5eead4);
+  --grad-card:    linear-gradient(180deg, #171b26, #141822);
+  --grad-card-2:  linear-gradient(180deg, #1a1f2c, #161a25);
+
+  /* --- Анимация --- */
+  --t-fast: .18s;
+  --t-base: .25s;
+}
+
+/* ============================================================
+   2. БАЗА
+   ============================================================ */
+* { box-sizing: border-box; }
+
+/* КРИТИЧНО: класс .auth-form задаёт display:flex и перебивает
+   браузерный [hidden] { display:none }. Форсируем скрытие. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  padding: 48px 16px 72px;
+  font: 15px/1.5 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 12% -5%, rgba(124, 140, 255, .18), transparent 45%),
+    radial-gradient(circle at 90% 5%, rgba(52, 211, 153, .12), transparent 40%),
+    radial-gradient(circle at 50% 110%, rgba(251, 113, 133, .10), transparent 45%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: clamp(26px, 5vw, 38px);
+  letter-spacing: -.5px;
+  background: var(--grad-title);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lead {
+  text-align: center;
+  color: var(--muted);
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ============================================================
+   3. КАРТОЧКИ
+   ============================================================ */
+.card {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--s-5);
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+}
+
+/* ============================================================
+   4. ФОРМЫ
+   ============================================================ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text);
+  padding: 12px 14px;
+  font: inherit;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent-focus);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+input.invalid {
+  border-color: rgba(251, 113, 133, .8);
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, .15);
+}
+
+::placeholder { color: var(--faint); }
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+.field-group > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.field-group .help {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* ============================================================
+   5. КНОПКИ
+   ============================================================ */
+.btn {
+  border: 0;
+  border-radius: var(--r-md);
+  padding: 11px 18px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--t-fast);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn.primary {
+  background: var(--grad-accent);
+  color: #fff;
+  box-shadow: var(--shadow-accent);
+}
+.btn.primary:hover { transform: translateY(-1px); }
+.btn.primary:disabled,
+.btn.primary[aria-busy="true"] {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn.ghost { background: var(--card-2); color: var(--muted); }
+.btn.ghost:hover { background: #262e40; color: var(--text); }
+
+.btn.danger {
+  background: var(--grad-danger);
+  color: #fff;
+  box-shadow: var(--shadow-danger);
+}
+.btn.danger:hover { transform: translateY(-1px); }
+
+.btn.sm { padding: 7px 12px; font-size: 13px; border-radius: var(--r-sm); }
+.btn.lg { padding: 14px 24px; font-size: 16px; border-radius: 14px; }
+
+/* ============================================================
+   6. TOAST
+   ============================================================ */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 18px);
+  background: #1d2432;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 20px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--t-base);
+  z-index: 50;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   7. УТИЛИТЫ
+   ============================================================ */
+.divider { height: 1px; background: var(--border); border: 0; margin: 14px 0; }
+.muted { color: var(--muted); }
+.faint { color: var(--faint); }
+
+/* ============================================================
+   8. AUTH-СТРАНИЦА
+   ============================================================ */
+.auth-wrap {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.auth-head { margin-bottom: 26px; }
+
+/* Заголовок в одну строку: уменьшаем кегль и запрещаем перенос */
+.auth-head h1 {
+  font-size: clamp(18px, 5.8vw, 28px);
+  white-space: nowrap;
+  letter-spacing: -.3px;
+}
+
+.auth-card { padding: 24px; }
+
+/* Табы «Вход / Регистрация» */
+.auth-tabs {
+  display: flex;
+  gap: 5px;
+  background: #12161f;
+  border: 1px solid var(--border);
+  padding: 5px;
+  border-radius: var(--r-md);
+  margin-bottom: 22px;
+}
+.auth-tabs button {
+  flex: 1;
+  border: 0;
+  background: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.auth-tabs button:hover { color: var(--text); }
+.auth-tabs button.active {
+  background: var(--grad-accent);
+  color: #fff;
+  box-shadow: var(--shadow-accent);
+}
+
+/* Форма */
+.auth-form { display: flex; flex-direction: column; }
+.auth-form .field-group:last-of-type { margin-bottom: var(--s-5); }
+.auth-form .btn { width: 100%; }
+
+/* Поле пароля с глазком */
+.pass-wrap { position: relative; }
+.pass-wrap input { padding-right: 48px; }
+
+.pass-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.pass-toggle:hover { background: #252c3d; color: var(--text); }
+.pass-toggle[aria-pressed="true"] { color: var(--accent-soft); }
+.pass-toggle svg { display: block; }
+.pass-toggle .ico-eye-off { display: none; }
+.pass-toggle[aria-pressed="true"] .ico-eye { display: none; }
+.pass-toggle[aria-pressed="true"] .ico-eye-off { display: block; }
+
+/* Блок ошибки */
+.form-error {
+  display: none;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 var(--s-4);
+  padding: 10px 13px;
+  font-size: 13px;
+  line-height: 1.45;
+  border-radius: var(--r-md);
+  background: var(--neg-bg);
+  border: 1px solid var(--neg-border);
+  color: var(--neg-soft);
+  word-break: break-word;
+  animation: shake .28s ease;
+}
+.form-error.show { display: flex; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+
+/* Подвал карточки */
+.auth-foot {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 18px 0 0;
+}
+.link-btn {
+  border: 0;
+  background: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-soft);
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.link-btn:hover { color: #fff; text-decoration: underline; }
+
+@media (max-width: 520px) {
+  body { padding-top: 32px; }
+  .auth-card { padding: 18px; }
+  .auth-tabs button { font-size: 13px; padding: 9px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap auth-wrap">
+
+  <header class="auth-head">
+    <h1>Добро пожаловать в Peerpeak</h1>
+    <p class="lead">Войди, чтобы хвастаться</p>
+  </header>
+
+  <section class="card auth-card">
+
+    <div class="auth-tabs" role="tablist" aria-label="Вход или регистрация">
+      <button type="button" class="active" data-tab="signin" role="tab" aria-selected="true">Вход</button>
+      <button type="button" data-tab="signup" role="tab" aria-selected="false">Регистрация</button>
+    </div>
+
+    <!-- ================= ВХОД ================= -->
+    <form class="auth-form" id="form-signin" novalidate>
+      <div class="field-group">
+        <label for="signin-username">Юзернейм</label>
+        <input type="text" id="signin-username" name="username"
+               autocomplete="username" placeholder="например, peer_peaker"
+               spellcheck="false" autocapitalize="none">
+      </div>
+
+      <div class="field-group">
+        <label for="signin-password">Пароль</label>
+        <div class="pass-wrap">
+          <input type="password" id="signin-password" name="password"
+                 autocomplete="current-password" placeholder="••••••••">
+          <button type="button" class="pass-toggle" aria-pressed="false" aria-label="Показать пароль">
+            <svg class="ico-eye" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="ico-eye-off" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3l18 18"/>
+              <path d="M10.6 6.2A9.7 9.7 0 0 1 12 6c6.4 0 10 6 10 6a17.6 17.6 0 0 1-3.4 4.1"/>
+              <path d="M6.3 7.8A17.4 17.4 0 0 0 2 12s3.6 6 10 6a9.9 9.9 0 0 0 4.2-.9"/>
+              <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <p class="form-error" id="error-signin" role="alert"></p>
+
+      <button type="submit" class="btn primary lg">Войти</button>
+    </form>
+
+    <!-- ============== РЕГИСТРАЦИЯ ============== -->
+    <form class="auth-form" id="form-signup" novalidate hidden>
+      <div class="field-group">
+        <label for="signup-username">Юзернейм</label>
+        <input type="text" id="signup-username" name="username"
+               autocomplete="username" placeholder="например, peer_peaker"
+               spellcheck="false" autocapitalize="none">
+      </div>
+
+      <div class="field-group">
+        <label for="signup-fullname">Полное имя</label>
+        <input type="text" id="signup-fullname" name="full_name"
+               autocomplete="name" placeholder="Иван Петров">
+      </div>
+
+      <div class="field-group">
+        <label for="signup-password">Пароль</label>
+        <div class="pass-wrap">
+          <input type="password" id="signup-password" name="password"
+                 autocomplete="new-password" placeholder="••••••••">
+          <button type="button" class="pass-toggle" aria-pressed="false" aria-label="Показать пароль">
+            <svg class="ico-eye" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="ico-eye-off" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3l18 18"/>
+              <path d="M10.6 6.2A9.7 9.7 0 0 1 12 6c6.4 0 10 6 10 6a17.6 17.6 0 0 1-3.4 4.1"/>
+              <path d="M6.3 7.8A17.4 17.4 0 0 0 2 12s3.6 6 10 6a9.9 9.9 0 0 0 4.2-.9"/>
+              <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <p class="form-error" id="error-signup" role="alert"></p>
+
+      <button type="submit" class="btn primary lg">Создать аккаунт</button>
+    </form>
+
+    <p class="auth-foot">
+      <span id="foot-text">Ещё нет аккаунта?</span>
+      <button type="button" class="link-btn" id="foot-switch">Зарегистрироваться</button>
+    </p>
+
+  </section>
+
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ==========================================================
+     ТОКЕН
+     ========================================================== */
+  var AUTH_TOKEN_KEY = 'AUTH_TOKEN';
+
+  function saveToken(token) {
+    window.AUTH_TOKEN = token;
+    try { localStorage.setItem(AUTH_TOKEN_KEY, token); } catch (e) { /* приватный режим */ }
+  }
+
+  /* ==========================================================
+     TOAST
+     ========================================================== */
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('show');
+    }, 2200);
+  }
+
+  /* ==========================================================
+     ОШИБКИ ФОРМЫ
+     ========================================================== */
+  function showError(form, msg) {
+    var box = form.querySelector('.form-error');
+    box.textContent = '⚠️ ' + msg;
+    box.classList.add('show');
+  }
+
+  function hideError(form) {
+    var box = form.querySelector('.form-error');
+    box.classList.remove('show');
+    box.textContent = '';
+  }
+
+  /* ==========================================================
+     СОСТОЯНИЕ ЗАГРУЗКИ
+     ========================================================== */
+  function setBusy(form, busy, label) {
+    var btn = form.querySelector('button[type="submit"]');
+    if (busy) {
+      btn.dataset.idle = btn.textContent;
+      btn.textContent = label;
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+    } else {
+      btn.textContent = btn.dataset.idle || btn.textContent;
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+    }
+    form.querySelectorAll('input').forEach(function (i) { i.disabled = busy; });
+  }
+
+  /* ==========================================================
+     ЗАПРОС
+     ========================================================== */
+  async function submitAuth(form, url, payload, successMsg, loadingLabel) {
+    hideError(form);
+    setBusy(form, true, loadingLabel);
+
+    try {
+      var res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      var data = null;
+      try { data = await res.json(); } catch (e) { data = null; }
+
+      /* Успех: 201 (или 200) + auth_token */
+      if (res.ok && data && data.auth_token) {
+        saveToken(data.auth_token);
+        toast('🏆 ' + successMsg);
+        form.reset();
+        resetPasswordToggles(form);
+        return;
+      }
+
+      /* 400 — показываем reason от сервера */
+      if (res.status === 400) {
+        showError(form, (data && data.reason) || 'Проверь введённые данные');
+        return;
+      }
+
+      /* Всё остальное */
+      showError(form, (data && data.reason) || 'Что-то пошло не так (' + res.status + ')');
+
+    } catch (err) {
+      showError(form, 'Нет связи с сервером. Проверь подключение и попробуй ещё раз.');
+    } finally {
+      setBusy(form, false);
+    }
+  }
+
+  /* ==========================================================
+     ГЛАЗОК У ПАРОЛЯ
+     ========================================================== */
+  function resetPasswordToggles(form) {
+    form.querySelectorAll('.pass-toggle').forEach(function (btn) {
+      var input = btn.parentElement.querySelector('input');
+      input.type = 'password';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', 'Показать пароль');
+    });
+  }
+
+  document.querySelectorAll('.pass-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = btn.parentElement.querySelector('input');
+      var show = input.type === 'password';
+
+      input.type = show ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(show));
+      btn.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+      input.focus();
+    });
+  });
+
+  /* ==========================================================
+     ТАБЫ
+     ========================================================== */
+  var tabs       = Array.prototype.slice.call(document.querySelectorAll('.auth-tabs button'));
+  var formSignin = document.getElementById('form-signin');
+  var formSignup = document.getElementById('form-signup');
+  var footText   = document.getElementById('foot-text');
+  var footSwitch = document.getElementById('foot-switch');
+
+  var FOOT = {
+    signin: { text: 'Ещё нет аккаунта?',   action: 'Зарегистрироваться', to: 'signup' },
+    signup: { text: 'Уже есть аккаунт?',   action: 'Войти',              to: 'signin' }
+  };
+
+  function activateTab(name, focus) {
+    tabs.forEach(function (t) {
+      var on = t.dataset.tab === name;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', String(on));
+    });
+
+    formSignin.hidden = (name !== 'signin');
+    formSignup.hidden = (name !== 'signup');
+
+    hideError(formSignin);
+    hideError(formSignup);
+
+    var f = FOOT[name];
+    footText.textContent = f.text + ' ';
+    footSwitch.textContent = f.action;
+    footSwitch.dataset.to = f.to;
+
+    if (focus) {
+      var first = (name === 'signin' ? formSignin : formSignup).querySelector('input');
+      if (first) first.focus();
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () { activateTab(tab.dataset.tab, true); });
+  });
+
+  footSwitch.addEventListener('click', function () {
+    activateTab(footSwitch.dataset.to || 'signup', true);
+  });
+
+  /* ==========================================================
+     ОТПРАВКА ФОРМ
+     ========================================================== */
+  formSignin.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var username = document.getElementById('signin-username').value.trim();
+    var password = document.getElementById('signin-password').value;
+
+    if (!username || !password) {
+      showError(formSignin, 'Заполни юзернейм и пароль');
+      return;
+    }
+
+    submitAuth(
+      formSignin,
+      '/api/signin',
+      { username: username, password: password },
+      'С возвращением!',
+      'Входим…'
+    );
+  });
+
+  formSignup.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var username  = document.getElementById('signup-username').value.trim();
+    var fullName  = document.getElementById('signup-fullname').value.trim();
+    var password  = document.getElementById('signup-password').value;
+
+    if (!username || !fullName || !password) {
+      showError(formSignup, 'Заполни юзернейм, полное имя и пароль');
+      return;
+    }
+
+    submitAuth(
+      formSignup,
+      '/api/signup',
+      { username: username, full_name: fullName, password: password },
+      'Аккаунт создан. Добро пожаловать!',
+      'Создаём…'
+    );
+  });
+
+  /* Стартовое состояние */
+  activateTab('signin', false);
+
+})();
+</script>
+
+</body>
+</html>

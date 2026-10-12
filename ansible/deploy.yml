@@ -1,0 +1,17 @@
+- name: Deploy Peerpeak
+  hosts: all
+  become: true
+  tasks:
+    - name: Pull latest code from GitHub
+      git: 
+        repo: 'https://github.com/cogdash/{{ github_repository }}.git'
+        dest: "{{ app_directory }}"
+        version: main
+
+    - name: Restart Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_directory }}"
+        state: present
+        build: always
+        pull: always
+

@@ -1,0 +1,3 @@
+github_repository: cogdash/peerpeak
+deploy_user: peerpeak
+app_directory: "/home/{{ deploy_user }}/app"

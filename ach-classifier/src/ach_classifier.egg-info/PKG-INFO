@@ -6,11 +6,9 @@ Author-email: Maksim Panov <mxm@pnv.life>
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Requires-Python: >=3.13
-Requires-Dist: fastapi[standard]==0.143.0
 Requires-Dist: psycopg2-binary>=2.9.0
 Requires-Dist: alembic>=1.19.0
 Requires-Dist: jinja2==3.1.6
-Requires-Dist: uvicorn==0.54.0
 Requires-Dist: python-dotenv==1.2.4
 Requires-Dist: passlib[bcrypt]<1.7.4
 Requires-Dist: bcrypt<5.0.0
@@ -58,3 +56,5 @@ Requires-Dist: typing-extensions==4.16.0
 Requires-Dist: uvloop==0.23.0
 Requires-Dist: watchfiles==1.3.0
 Requires-Dist: websockets==17.2
+Requires-Dist: grpcio-tools>=1.84.0
+Requires-Dist: grpcio>=1.84.0

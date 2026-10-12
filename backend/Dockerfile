@@ -6,11 +6,16 @@ user app
 
 copy --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin
 
-copy --chown=app:app pyproject.toml uv.lock .
-copy --chown=app:app src/ ./src/
+copy --chown=app:app ./backend/pyproject.toml ./backend/uv.lock .
 
 run uv sync --frozen --no-dev
 
+copy proto/ ./proto/
+run mkdir -p out && uv run -m grpc_tools.protoc \
+  -Iproto \
+  --python_out=out \
+  --grpc_python_out=out \
+  proto/classifier.proto
 
 from python:3.13-slim as runtime
 
@@ -20,7 +25,8 @@ user app
 
 copy --from=builder --chown=app:app /app/.venv /app/.venv
 copy --from=builder --chown=app:app /home/app/.cache /home/app/.cache
-copy --chown=app:app src/ ./src/
+copy --from=builder --chown=app:app /app/out/* /app/src/
+copy --chown=app:app ./backend/src/ ./src/
 
 env PATH="/app/.venv/bin:$PATH"
 expose 8090

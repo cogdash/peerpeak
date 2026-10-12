@@ -1,64 +1,60 @@
 import warnings
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, Query
-from fastapi.concurrency import run_in_threadpool
-from fastapi.middleware.cors import CORSMiddleware
+import asyncio
+import grpc
+from concurrent import futures
 from transformers import pipeline
+
+import classifier_pb2
+import classifier_pb2_grpc
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# метки не должны пересекаться по токенам — иначе NLI путается
 CANDIDATE_LABELS = ["успех", "провал"]
 POSITIVE_LABEL = "успех"
 
-_classifier = None
+class ClassifierServicer(classifier_pb2_grpc.AchievementClassifierServicer):
+    def __init__(self):
+        print("Loading model...")
+        self._classifier = pipeline(
+                "zero-shot-classification",
+                model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli",
+                )
+        print("Model loaded successfully!")
 
+    async def ClassifyAchievement(self, request, context):
+        text = request.text
+        loop = asyncio.get_running_loop()
+        res = await loop.run_in_executor(
+                None, 
+                lambda: self._classifier(
+                    text,
+                    candidate_labels=CANDIDATE_LABELS,
+                    hypothesis_template="Это {}.",
+                    multi_label=False
+                    )
+                )
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # грузим модель один раз при старте
-    global _classifier
-    _classifier = pipeline(
-        "zero-shot-classification",
-        model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli",
+        top = res["labels"][0]
+        label = "positive" if top == POSITIVE_LABEL else "negative"
+        score = round(res["scores"][0], 3)
+        scores = {lbl: round(s, 3) for lbl, s in zip(res["labels"], res["scores"])}
+
+        return classifier_pb2.ClassifyResponse(
+                text=text,
+                label=label,
+                score=score,
+                scores=scores
+                )
+
+async def serve():
+    server = grpc.aio.server()
+    classifier_pb2_grpc.add_AchievementClassifierServicer_to_server(
+        ClassifierServicer(), server
     )
-    yield
-    _classifier = None
+    server.add_insecure_port('[::]:50051')
+    print("gRPC Server started on port 50051")
+    await server.start()
+    await server.wait_for_termination()
 
-
-app = FastAPI(lifespan=lifespan)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],       # для локальной разработки ок
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-def _classify(text: str) -> dict:
-    res = _classifier(
-        text,
-        candidate_labels=CANDIDATE_LABELS,
-        hypothesis_template="Это {}.",
-        multi_label=False,
-    )
-    top = res["labels"][0]
-    return {
-        "label": "positive" if top == POSITIVE_LABEL else "negative",
-        "score": round(res["scores"][0], 3),
-        "scores": {
-            lbl: round(s, 3) for lbl, s in zip(res["labels"], res["scores"])
-        },
-    }
-
-
-@app.get("/rate")
-async def rate(text: str = Query(..., min_length=1, max_length=500)):
-    # pipeline синхронный → уводим в threadpool, чтобы не блокировать loop
-    result = await run_in_threadpool(_classify, text)
-    return {"text": text, **result}
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "model_loaded": _classifier is not None}
+if __name__ == '__main__':
+    asyncio.run(serve())

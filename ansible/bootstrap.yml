@@ -1,0 +1,41 @@
+---
+- name: Host preparation for deployment
+  hosts: all
+  become: yes
+  tasks:
+    - name: Generate SSH-key
+      delegate_to: localhost
+      become: no
+      openssh_keypair:
+        path: "~/.ssh/peerpeak_deploy_id"
+        type: ed25519
+      register: ssh_key
+
+    - name: Create deploy user
+      user:
+        name: "{{ deploy_user }}"
+        create_home: yes
+        home: "{{ app_directory }}"
+        groups: docker
+        shell: /bin/bash
+        append: yes
+
+    - name: Add SSH-key to server
+      ansible.posix.authorized_key:
+        user: "{{ deploy_user }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/peerpeak_deploy_id.pub') }}"
+
+    - name: Ensure app folder exists
+      file: 
+        path: "{{ app_directory }}"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0755"
+
+    - name: Install Docker
+      include_role:
+        name: geerlingguy.docker
+      vars:
+        docker_install_compose_install: true

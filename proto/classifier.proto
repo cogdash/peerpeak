@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package classifier;
+
+service AchievementClassifier {
+  rpc ClassifyAchievement (ClassifyRequest) returns (ClassifyResponse);
+}
+
+message ClassifyRequest {
+  string text = 1;
+}
+
+message ScoreMap {
+  map<string, float> scores = 1;
+}
+
+message ClassifyResponse {
+  string text = 1;
+  string label = 2;
+  float score = 3;
+  map <string, float> scores = 4;
+}

@@ -1,4 +1,6 @@
 pyproject.toml
+src/classifier_pb2.py
+src/classifier_pb2_grpc.py
 src/main.py
 src/ach_classifier.egg-info/PKG-INFO
 src/ach_classifier.egg-info/SOURCES.txt

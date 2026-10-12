@@ -1,25 +1,47 @@
+# Python 
 __pycache__
-
-.venv
-venv
-env/
-
 *-egg.info/
 src/*-egg.info/
 dist/
 build/
+*_pb2.py
+*_pb2_grpc_py
+
+# === Virtual environment ===
+.venv
+venv
+env/
+
+# === App-related data ===
 
 pgdata/
 
+# === Secrets ====
 .env
 *.env
 !.env.example
 
+# === IDE ===
 .vscode/
 .vscode/extensions.json
 
 .idea/
 
+# === OS stuff ==
 *.log
 .DS_Store
 Thumbs.db
+
+# === Ansible ===
+*.key
+*_id
+!*.pub
+inventory.ini
+hosts.yaml
+*vault*
+*secrets*
+vars/private_*.yml
+ansible.cfg
+*.retry
+.ansible/
+

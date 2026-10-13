@@ -1,9 +1,15 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+# Import the declarative base and all models so that Base.metadata is fully
+# populated before autogenerate runs.
+from db.base import Base
+import db.models  # noqa: F401  (ensures every model is registered)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -14,16 +20,13 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+# The database URL is provided via the environment (see docker-compose.yaml).
+# Alembic runs synchronously, but psycopg v3 accepts the same URL as the async
+# application engine, so no URL translation is needed.
+config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Model metadata used by 'autogenerate' support.
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:

@@ -27,8 +27,11 @@ copy --from=builder --chown=app:app /app/.venv /app/.venv
 copy --from=builder --chown=app:app /home/app/.cache /home/app/.cache
 copy --from=builder --chown=app:app /app/out/* /app/src/
 copy --chown=app:app ./backend/src/ ./src/
+copy --chown=app:app ./backend/alembic/ ./alembic/
+copy --chown=app:app ./backend/alembic.ini ./alembic.ini
 
 env PATH="/app/.venv/bin:$PATH"
 expose 8090
 
-cmd ["fastapi", "dev", "src/main.py", "--host", "0.0.0.0", "--port", "8090"]
+# Apply pending migrations before starting the server.
+cmd ["sh", "-c", "alembic upgrade head && fastapi dev src/main.py --host 0.0.0.0 --port 8090"]

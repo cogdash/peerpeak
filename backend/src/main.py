@@ -1,44 +1,71 @@
 import os
 
-from fastapi import FastAPI, Query
-from fastapi.responses import FileResponse
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
-import grpc
-import classifier_pb2
-import classifier_pb2_grpc
+from auth import get_current_user
+from db.models import User
+from db.session import get_session
+from routers.auth import router as auth_router
+from routers.badges import router as badges_router
 
 app = FastAPI()
-GRPC_TARGET = os.environ.get("GRPC_TARGET", "localhost:50051")
 
 BASE_DIR = Path(__file__).resolve().parent
 
 STATIC_DIR = BASE_DIR / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+app.include_router(auth_router)
+app.include_router(badges_router)
+
+
+async def _optional_user(request: Request, session: AsyncSession) -> User | None:
+    """Return the authenticated user for a page request, or ``None``.
+
+    Page routes cannot use the ``get_current_user`` dependency directly because
+    they must redirect to ``/auth`` instead of returning a ``401``.
+    """
+    token = request.cookies.get("AUTH_TOKEN")
+    if not token:
+        return None
+    try:
+        return await get_current_user(auth_token=token, session=session)
+    except Exception:
+        return None
+
+
 @app.get("/")
-async def read_index():
+async def read_index(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    # Unauthenticated visitors are sent straight to the auth page.
+    user = await _optional_user(request, session)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=302)
     return FileResponse(STATIC_DIR / "badges.html")
 
+
 @app.get("/auth")
-async def read_auth():
+async def read_auth(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    # Already logged-in users have no business on the auth page.
+    user = await _optional_user(request, session)
+    if user is not None:
+        return RedirectResponse(url="/", status_code=302)
     return FileResponse(STATIC_DIR / "auth.html")
 
-@app.get("/api/rate-achievement")
-async def rate_achievement(text: str = Query(..., min_length=1, max_length=500)):
-    # Открываем асинхронный gRPC канал
-    async with grpc.aio.insecure_channel(GRPC_TARGET) as channel:
-        stub = classifier_pb2_grpc.AchievementClassifierStub(channel)
-        
-        response = await stub.ClassifyAchievement(
-            classifier_pb2.ClassifyRequest(text=text)
-        )
-        
-    return {
-        "text": response.text,
-        "label": response.label,
-        "score": response.score,
-        "scores": dict(response.scores)
-    }
+
+@app.get("/api/health/db")
+async def health_db(session: AsyncSession = Depends(get_session)):
+    # Simple connectivity check that exercises the session dependency.
+    await session.execute(text("SELECT 1"))
+    return {"database": "ok"}

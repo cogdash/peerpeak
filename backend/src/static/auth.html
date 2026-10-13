@@ -506,12 +506,13 @@ input.invalid {
 
   /* ==========================================================
      ТОКЕН
+     Токен хранится в HttpOnly-куке AUTH_TOKEN, которую ставит
+     сервер. JavaScript её не читает и не пишет — после успешного
+     входа/регистрации просто переходим на главную.
      ========================================================== */
-  var AUTH_TOKEN_KEY = 'AUTH_TOKEN';
 
-  function saveToken(token) {
-    window.AUTH_TOKEN = token;
-    try { localStorage.setItem(AUTH_TOKEN_KEY, token); } catch (e) { /* приватный режим */ }
+  function goHome() {
+    window.location.assign('/');
   }
 
   /* ==========================================================
@@ -542,6 +543,50 @@ input.invalid {
     var box = form.querySelector('.form-error');
     box.classList.remove('show');
     box.textContent = '';
+  }
+
+  /* Человекочитаемые названия полей для сообщений валидации */
+  var FIELD_LABELS = {
+    username:  'юзернейм',
+    full_name: 'полное имя',
+    password:  'пароль'
+  };
+
+  /* Превращает ответ FastAPI в понятный текст.
+     - HTTPException: { detail: "строка" }
+     - Ошибка валидации (422): { detail: [ { loc, msg, ... } ] } */
+  function extractErrorMessage(data, status) {
+    if (data && typeof data.detail === 'string') {
+      return data.detail;
+    }
+
+    if (data && Array.isArray(data.detail) && data.detail.length) {
+      return data.detail.map(function (item) {
+        var field = Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : '';
+        var label = FIELD_LABELS[field] || field;
+        var msg = item.msg || 'неверное значение';
+
+        /* Переводим типовые сообщения Pydantic на русский */
+        if (item.type === 'string_too_short') {
+          var min = item.ctx && item.ctx.min_length;
+          return 'Поле «' + label + '»: минимум ' + min + ' симв.';
+        }
+        if (item.type === 'string_too_long') {
+          var max = item.ctx && item.ctx.max_length;
+          return 'Поле «' + label + '»: максимум ' + max + ' симв.';
+        }
+        if (item.type === 'missing') {
+          return 'Заполни поле «' + label + '»';
+        }
+        return label ? ('Поле «' + label + '»: ' + msg) : msg;
+      }).join('; ');
+    }
+
+    if (data && typeof data.reason === 'string') {
+      return data.reason;
+    }
+
+    return 'Что-то пошло не так (' + status + ')';
   }
 
   /* ==========================================================
@@ -582,23 +627,19 @@ input.invalid {
       var data = null;
       try { data = await res.json(); } catch (e) { data = null; }
 
-      /* Успех: 201 (или 200) + auth_token */
-      if (res.ok && data && data.auth_token) {
-        saveToken(data.auth_token);
+      /* Успех: сервер выставил HttpOnly-куку AUTH_TOKEN */
+      if (res.ok) {
         toast('🏆 ' + successMsg);
         form.reset();
         resetPasswordToggles(form);
+        /* Небольшая пауза, чтобы пользователь увидел тост, затем на главную */
+        setTimeout(goHome, 500);
         return;
       }
 
-      /* 400 — показываем reason от сервера */
-      if (res.status === 400) {
-        showError(form, (data && data.reason) || 'Проверь введённые данные');
-        return;
-      }
-
-      /* Всё остальное */
-      showError(form, (data && data.reason) || 'Что-то пошло не так (' + res.status + ')');
+      /* Ошибка: FastAPI отдаёт { detail: "..." } для HTTPException
+         или { detail: [ { msg, loc, ... } ] } для ошибок валидации (422). */
+      showError(form, extractErrorMessage(data, res.status));
 
     } catch (err) {
       showError(form, 'Нет связи с сервером. Проверь подключение и попробуй ещё раз.');
@@ -712,6 +753,21 @@ input.invalid {
       return;
     }
 
+    /* Клиентская проверка совпадает с ограничениями бэкенда,
+       чтобы не ловить 422 от FastAPI. */
+    if (username.length < 3) {
+      showError(formSignup, 'Юзернейм: минимум 3 символа');
+      return;
+    }
+    if (username.length > 32) {
+      showError(formSignup, 'Юзернейм: максимум 32 символа');
+      return;
+    }
+    if (password.length < 6) {
+      showError(formSignup, 'Пароль: минимум 6 символов');
+      return;
+    }
+
     submitAuth(
       formSignup,
       '/api/signup',
@@ -729,3 +785,4 @@ input.invalid {
 
 </body>
 </html>
+

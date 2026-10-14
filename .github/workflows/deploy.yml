@@ -19,7 +19,7 @@ jobs:
       - name: Add SSH known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H {{ secrets.DEPLOY_SERVER }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.DEPLOY_SERVER }} -p ${{ secrets.DEPLOY_SERVER_SSH_PORT }} >> ~/.ssh/known_hosts
 
       - name: Install ansible
         run: |
@@ -32,8 +32,8 @@ jobs:
           all:
             hosts:
               peerpeak:
-                ansible_host: {{ secrets.DEPLOY_SERVER }}
-                ansible_port: {{ secrets.DEPLOY_SERVER_SSH_PORT }}
+                ansible_host: ${{ secrets.DEPLOY_SERVER }}
+                ansible_port: ${{ secrets.DEPLOY_SERVER_SSH_PORT }}
           EOF
 
       - name: Run Ansible playbook

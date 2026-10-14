@@ -471,6 +471,13 @@ button.badge-ico.editable:focus-visible {
 .badge-meta .badge-by { color: var(--faint); }
 .badge-meta .badge-by .at { color: var(--accent-soft); }
 
+/* Дата получения — сразу после «Достижение · by @user» */
+.badge-meta .badge-date {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* Действия */
 .badge-actions {
   display: flex;
@@ -657,7 +664,7 @@ button.badge-ico.editable:focus-visible {
   .emoji-picker {
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 5px;
-    max-height: none;      /* модалка сама скроллится при нехватке высоты */
+    max-height: none;
   }
   .emoji-picker button {
     font-size: 17px;
@@ -840,6 +847,25 @@ button.badge-ico.editable:focus-visible {
     return p === 'negative' ? 'Анти-достижение' : 'Достижение';
   }
 
+  /* Формат даты получения: YYYY-MM-DD (локально) */
+  function formatReceivedAt(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  /* Полная дата+время для tooltip */
+  function formatReceivedAtFull(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    try { return d.toLocaleString('ru-RU'); } catch (e) { return ''; }
+  }
+
   function badgeItemHTML(b) {
     var pos = b.polarity === 'positive';
     var cls = (pos ? 'pos' : 'neg') + (b.received ? '' : ' unreceived');
@@ -857,12 +883,23 @@ button.badge-ico.editable:focus-visible {
       ico = '<div class="badge-ico">' + escapeHtml(b.emoji || '🏅') + '</div>';
     }
 
-        /* Мета: тип + автор (только если автор — не текущий пользователь) */
+    /* Мета: тип + автор (если автор — не текущий пользователь) + дата получения */
     var meta = '<span class="kind">' + polarityLabel(b.polarity) + '</span>';
+
     if (b.creator_username && (!state.me || b.creator_username !== state.me.username)) {
       meta += '<span class="sep">·</span>';
       meta += '<span class="badge-by">by <span class="at">@' +
         escapeHtml(b.creator_username) + '</span></span>';
+    }
+
+    if (b.received && b.received_at) {
+      var humanDate = formatReceivedAt(b.received_at);
+      if (humanDate) {
+        meta += '<span class="badge-date" title="Получен: ' +
+          escapeHtml(formatReceivedAtFull(b.received_at)) + '">' +
+          '📆 ' + escapeHtml(humanDate) +
+          '</span>';
+      }
     }
 
     /* Действия: получен → крестик (отменить получение), иначе → корзина (удалить). */

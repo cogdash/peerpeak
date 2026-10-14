@@ -559,6 +559,9 @@ button.badge-ico.editable:focus-visible {
 .modal {
   width: 100%;
   max-width: 420px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   background: var(--grad-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--r-xl);
@@ -580,20 +583,29 @@ button.badge-ico.editable:focus-visible {
 
 .emoji-picker {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 6px;
   margin-top: var(--s-2);
+  max-height: min(50vh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
 }
 .emoji-picker button {
   aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
   border: 1px solid var(--border);
   background: var(--field);
   border-radius: var(--r-sm);
   font-size: 20px;
+  line-height: 1;
   cursor: pointer;
   transition: var(--t-fast);
   display: grid;
   place-items: center;
+  padding: 0;
+  overflow: hidden;
 }
 .emoji-picker button:hover { border-color: var(--accent-border); background: var(--accent-bg); }
 .emoji-picker button.active { border-color: var(--accent); background: var(--accent-bg); }
@@ -638,6 +650,24 @@ button.badge-ico.editable:focus-visible {
     gap: 6px;
   }
   .icon-btn { width: 32px; height: 32px; }
+
+  .modal-backdrop { padding: 10px; }
+  .modal { padding: var(--s-4); border-radius: var(--r-lg); }
+  .modal h3 { font-size: 17px; margin-bottom: var(--s-3); }
+  .emoji-picker {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 5px;
+    max-height: none;      /* модалка сама скроллится при нехватке высоты */
+  }
+  .emoji-picker button {
+    font-size: 17px;
+    border-radius: 7px;
+  }
+}
+
+@media (max-width: 380px) {
+  .emoji-picker { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .emoji-picker button { font-size: 16px; }
 }
 </style>
 </head>
@@ -647,8 +677,8 @@ button.badge-ico.editable:focus-visible {
 
   <header class="page-head">
     <div>
-      <h1>Мои значки</h1>
-      <p class="lead">Собирай достижения и анти-достижения</p>
+      <h1>Peerpeak</h1>
+      <p class="lead">Ваши значки за достижения (и не очень)</p>
     </div>
     <div class="who">
       <div class="name" id="who-name">…</div>
@@ -663,7 +693,7 @@ button.badge-ico.editable:focus-visible {
       <div class="add-row">
         <div class="grow">
           <input type="text" id="add-title" name="title" maxlength="50"
-                 placeholder="например, выучил новый язык"
+                 placeholder="выучил новый язык"
                  autocomplete="off" spellcheck="false">
         </div>
         <button type="submit" class="btn primary" id="btn-add">Добавить</button>
@@ -709,7 +739,7 @@ button.badge-ico.editable:focus-visible {
   var ME_URL          = '/api/me';
   var SIGNOUT_URL     = '/api/signout';
 
-  var DEFAULT_PLACEHOLDER = 'например, выучил новый язык';
+  var DEFAULT_PLACEHOLDER = 'выучил новый язык';
   var LONGPRESS_MS = 1200;
 
   var EMOJI_CHOICES = [
@@ -902,7 +932,7 @@ button.badge-ico.editable:focus-visible {
       return;
     }
     var pick = titles[Math.floor(Math.random() * titles.length)];
-    input.placeholder = 'например, ' + pick;
+    input.placeholder = pick;
   }
 
   async function loadCatalog() {

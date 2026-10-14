@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Мои значки — достижения и антидостижения</title>
+<title>Peerpeak: мои значки</title>
 <style>
 :root {
   --bg:            #0b0d13;
@@ -76,7 +76,7 @@
 /* ============================================================
    БАЗА
    ============================================================ */
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
 
 body {
@@ -602,14 +602,42 @@ button.badge-ico.editable:focus-visible {
    АДАПТИВ
    ============================================================ */
 @media (max-width: 560px) {
-  body { padding-top: 28px; }
-  .add-row { flex-direction: column; }
-  .add-row .btn { width: 100%; }
+  body { padding: 24px 10px 64px; }
+  .card { padding: var(--s-4); }
+
+  .page-head { margin-bottom: var(--s-5); }
   .page-head .who { text-align: left; }
 
-  .badge { gap: var(--s-3); padding-left: var(--s-4); }
-  .badge-ico { flex-basis: 42px; width: 42px; height: 42px; font-size: 20px; }
-  .badge-actions { opacity: 1; transform: none; pointer-events: auto; }
+  .add-row { flex-direction: column; align-items: stretch; }
+  .add-row .btn { width: 100%; }
+
+  .add-row .grow { width: 100%; }
+  .add-row .bin { width: 100%; }
+
+  .toolbar { gap: var(--s-2); }
+  .filters { flex-wrap: wrap; }
+  .filters button { padding: 6px 10px; font-size: 12px; }
+  .check-line { font-size: 12px; padding: 5px 10px; }
+
+  .badge {
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-3) var(--s-3) var(--s-4);
+    border-radius: var(--r-md);
+  }
+  .badge-ico {
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .badge-text { font-size: 15px; }
+  .badge-actions {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    gap: 6px;
+  }
+  .icon-btn { width: 32px; height: 32px; }
 }
 </style>
 </head>
@@ -799,9 +827,9 @@ button.badge-ico.editable:focus-visible {
       ico = '<div class="badge-ico">' + escapeHtml(b.emoji || '🏅') + '</div>';
     }
 
-    /* Мета: тип + автор */
+        /* Мета: тип + автор (только если автор — не текущий пользователь) */
     var meta = '<span class="kind">' + polarityLabel(b.polarity) + '</span>';
-    if (b.creator_username) {
+    if (b.creator_username && (!state.me || b.creator_username !== state.me.username)) {
       meta += '<span class="sep">·</span>';
       meta += '<span class="badge-by">by <span class="at">@' +
         escapeHtml(b.creator_username) + '</span></span>';
@@ -1142,8 +1170,6 @@ button.badge-ico.editable:focus-visible {
     modalBackdrop.innerHTML = '' +
       '<div class="modal" role="dialog" aria-modal="true" aria-label="Смена иконки">' +
         '<h3>Иконка значка</h3>' +
-        '<p class="faint" style="margin:0 0 8px;font-size:13px">' +
-          escapeHtml(badge.title) + '</p>' +
         '<div class="emoji-picker">' + grid + '</div>' +
         '<div class="modal-actions">' +
           '<button type="button" class="btn ghost" data-close>Отмена</button>' +

@@ -27,6 +27,7 @@ services:
       POSTGRES_USER: peerpeak
       POSTGRES_PASSWORD: peerpeak
       POSTGRES_DB: peerpeak
+    networks: [peerpeak]
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     healthcheck:

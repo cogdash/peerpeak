@@ -11,6 +11,11 @@ services:
     ports:
       - 8090:8090
     networks: [peerpeak]
+    depends_on:
+      peerpeak-database:
+        condition: service_healthy
+      peerpeak-classifier:
+        condition: service_started
 
   peerpeak-classifier:
     container_name: peerpeak-classifier

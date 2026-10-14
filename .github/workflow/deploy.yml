@@ -1,0 +1,44 @@
+name: Deploy Peerpeak via Ansible
+
+on:
+  push: 
+    branches: main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SERVER_SSH_KEY }}
+      
+      - name: Add SSH known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.DEPLOY_SERVER }} >> ~/.ssh/known_hosts
+
+      - name: Install ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Write hosts.yaml
+        run: |
+          cat <<EOF > hosts.yaml
+          all:
+            hosts:
+              peerpeak:
+                ansible_host: ${{ secrets.DEPLOY_SERVER }}
+                ansible_port: ${{ secrets.DEPLOY_SERVER_SSH_PORT }}
+          EOF
+
+      - name: Run Ansible playbook
+        run: |
+          ansible-playbook -i hosts.yaml ansible/deploy.yml
+
+
+

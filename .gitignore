@@ -38,6 +38,7 @@ Thumbs.db
 !*.pub
 inventory.ini
 hosts.yaml
+hosts.yml
 *vault*
 *secrets*
 vars/private_*.yml

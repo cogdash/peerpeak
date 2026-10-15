@@ -12,7 +12,7 @@ from auth import get_current_user
 from db.models import User
 from db.session import get_session
 from routers.auth import router as auth_router
-from routers.badges import router as badges_router
+from routers.profile import router as profile_router
 
 app = FastAPI()
 
@@ -22,7 +22,7 @@ STATIC_DIR = BASE_DIR / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 app.include_router(auth_router)
-app.include_router(badges_router)
+app.include_router(profile_router)
 
 
 async def _optional_user(request: Request, session: AsyncSession) -> User | None:
@@ -49,7 +49,7 @@ async def read_index(
     user = await _optional_user(request, session)
     if user is None:
         return RedirectResponse(url="/auth", status_code=302)
-    return FileResponse(STATIC_DIR / "badges.html")
+    return FileResponse(STATIC_DIR / "profile.html")
 
 
 @app.get("/auth")

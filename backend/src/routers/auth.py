@@ -120,4 +120,3 @@ async def signout(
 async def me(user: User = Depends(get_current_user)) -> UserResponse:
     """Return the currently authenticated user."""
     return _user_response(user)
-

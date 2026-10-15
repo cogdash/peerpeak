@@ -19,13 +19,11 @@ from classifier import classify
 from db.models import Badge, User, UserBadge, normalize_title
 from db.session import get_session
 
-router = APIRouter(prefix="/api", tags=["badges"])
+router = APIRouter(prefix="/api", tags=["profile"])
 
 # Emoji used when a badge is created without an explicit icon.
 DEFAULT_EMOJI = {"positive": "🏆", "negative": "💀"}
-
 VALID_POLARITIES = ("positive", "negative")
-
 
 def _normalize_polarity(raw: str | None) -> str | None:
     """Return a valid polarity or ``None`` when the value is unusable."""

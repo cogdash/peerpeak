@@ -1,5 +1,7 @@
 """Authentication endpoints: sign up, sign in and sign out."""
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -34,6 +36,8 @@ class UserResponse(BaseModel):
     id: str
     username: str
     full_name: str
+    bio: str | None = None
+    created_at: datetime
 
 
 def _user_response(user: User) -> UserResponse:
@@ -41,6 +45,8 @@ def _user_response(user: User) -> UserResponse:
         id=str(user.id),
         username=user.username,
         full_name=user.full_name,
+        bio=user.bio,
+        created_at=user.created_at,
     )
 
 

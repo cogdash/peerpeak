@@ -52,6 +52,18 @@ async def read_index(
     return FileResponse(STATIC_DIR / "profile.html")
 
 
+@app.get("/profile")
+async def read_profile(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    # Unauthenticated visitors are sent straight to the auth page.
+    user = await _optional_user(request, session)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=302)
+    return FileResponse(STATIC_DIR / "profile.html")
+
+
 @app.get("/auth")
 async def read_auth(
     request: Request,

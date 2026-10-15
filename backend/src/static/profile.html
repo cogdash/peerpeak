@@ -136,6 +136,85 @@ h1 {
 }
 
 /* ============================================================
+   ПРОФИЛЬНАЯ КАРТОЧКА
+   ============================================================ */
+.profile-card {
+  margin-bottom: var(--s-5);
+}
+
+.profile-header {
+  display: flex;
+  gap: var(--s-4);
+  align-items: flex-start;
+  margin-bottom: var(--s-4);
+}
+
+.profile-avatar {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r-lg);
+  background: var(--grad-accent);
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  font-family: inherit;
+  box-shadow: var(--shadow-accent);
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  background: var(--grad-title);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.profile-username {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--accent-soft);
+  font-weight: 600;
+}
+
+.profile-bio {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.profile-bio:empty {
+  display: none;
+}
+
+.profile-joined {
+  margin: 0;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile-actions .btn {
+  gap: 6px;
+}
+
+/* ============================================================
    ФОРМЫ
    ============================================================ */
 input[type="text"],
@@ -627,6 +706,20 @@ button.badge-ico.editable:focus-visible {
   .page-head { margin-bottom: var(--s-5); }
   .page-head .who { text-align: left; }
 
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--s-3);
+  }
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+  }
+  .profile-name { font-size: 18px; }
+  .profile-actions { justify-content: center; }
+
   .add-row { flex-direction: column; align-items: stretch; }
   .add-row .btn { width: 100%; }
 
@@ -693,6 +786,30 @@ button.badge-ico.editable:focus-visible {
       <button type="button" class="btn ghost sm" id="btn-signout" style="margin-top:8px">Выйти</button>
     </div>
   </header>
+
+  <section class="card profile-card" id="profile-card" style="display:none;">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profile-avatar"></div>
+      <div class="profile-info">
+        <h2 class="profile-name" id="profile-name"></h2>
+        <p class="profile-username" id="profile-username"></p>
+        <p class="profile-bio" id="profile-bio"></p>
+        <p class="profile-joined" id="profile-joined"></p>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <button type="button" class="btn ghost sm" id="btn-share-profile" title="Поделиться профилем">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="19" r="3"></circle>
+          <path d="M8.59 13.51a5 5 0 0 1 7.07 0"></path>
+          <path d="M15 12a3 3 0 0 0-3-3"></path>
+          <path d="M9 12a3 3 0 0 1 3-3"></path>
+        </svg>
+        <span>Поделиться</span>
+      </button>
+    </div>
+  </section>
 
   <section class="card add-card">
     <h2>Новый значок</h2>
@@ -832,6 +949,95 @@ button.badge-ico.editable:focus-visible {
     if (!state.me) return;
     document.getElementById('who-name').textContent = state.me.full_name;
     document.getElementById('who-uname').textContent = '@' + state.me.username;
+  }
+
+  /* ==========================================================
+     РЕНДЕР: ПРОФИЛЬНАЯ КАРТОЧКА
+     ========================================================== */
+  function renderProfileCard() {
+    if (!state.me) return;
+
+    var profileCard = document.getElementById('profile-card');
+    var avatar = document.getElementById('profile-avatar');
+    var nameEl = document.getElementById('profile-name');
+    var usernameEl = document.getElementById('profile-username');
+    var bioEl = document.getElementById('profile-bio');
+    var joinedEl = document.getElementById('profile-joined');
+
+    // Аватар: первая буква имени
+    var initial = (state.me.full_name || '?').trim().charAt(0).toUpperCase();
+    avatar.textContent = initial;
+
+    nameEl.textContent = state.me.full_name;
+    usernameEl.textContent = '@' + state.me.username;
+
+    if (state.me.bio && state.me.bio.trim()) {
+      bioEl.textContent = state.me.bio;
+      bioEl.style.display = '';
+    } else {
+      bioEl.textContent = '';
+      bioEl.style.display = 'none';
+    }
+
+    // Форматируем дату создания
+    if (state.me.created_at) {
+      var d = new Date(state.me.created_at);
+      if (!isNaN(d.getTime())) {
+        var months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+                      'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        var day = d.getDate();
+        var month = months[d.getMonth()];
+        var year = d.getFullYear();
+        joinedEl.textContent = 'В Peerpeak с ' + day + ' ' + month + ' ' + year + ' г.';
+      }
+    }
+
+    profileCard.style.display = 'block';
+
+    // Share button handler
+    var shareBtn = document.getElementById('btn-share-profile');
+    if (shareBtn) {
+      shareBtn.onclick = function () {
+        shareProfile(state.me.username);
+      };
+    }
+  }
+
+  /* ==========================================================
+     SHARE PROFILE
+     ========================================================== */
+  function shareProfile(username) {
+    var url = window.location.origin + '/@' + username;
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Профиль @' + username + ' на Peerpeak',
+        text: 'Посмотри мой профиль на Peerpeak!',
+        url: url
+      }).catch(function (err) {
+        if (err.name !== 'AbortError') {
+          fallbackCopy(url);
+        }
+      });
+    } else {
+      fallbackCopy(url);
+    }
+  }
+
+  function fallbackCopy(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      toast('Ссылка скопирована: ' + text);
+    } catch (e) {
+      toast('Не удалось скопировать. Ссылка: ' + text);
+    }
+    document.body.removeChild(textarea);
   }
 
   /* ==========================================================
@@ -1296,6 +1502,7 @@ button.badge-ico.editable:focus-visible {
     var ok = await loadMe();
     if (!ok) return;
     renderWho();
+    renderProfileCard();
 
     await loadCatalog();
     setPlaceholderFromCatalog();

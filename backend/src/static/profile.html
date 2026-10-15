@@ -162,10 +162,13 @@ h1 {
   position: relative;
 }
 
-.profile-card .signout-btn {
+.profile-card .profile-top-actions {
   position: absolute;
   top: var(--s-4);
   right: var(--s-4);
+  display: flex;
+  gap: var(--s-2);
+  z-index: 2;
 }
 
 .profile-header {
@@ -173,7 +176,7 @@ h1 {
   gap: var(--s-4);
   align-items: flex-start;
   margin-bottom: var(--s-4);
-  padding-right: 44px;
+  padding-right: 84px;
 }
 
 .profile-avatar {
@@ -228,11 +231,78 @@ h1 {
   color: var(--faint);
 }
 
-.profile-actions {
-  display: flex;
-  justify-content: flex-end;
+/* ============================================================
+   БАЛАНС ПРОФИЛЯ
+   ============================================================ */
+.balance {
+  margin-top: 12px;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--field-deep);
+  transition: border-color var(--t-base);
 }
-.profile-actions .btn { gap: 6px; }
+.balance[data-zone="bal"] { border-color: rgba(52, 211, 153, .32); }
+.balance[data-zone="pos"] { border-color: rgba(251, 113, 133, .28); }
+.balance[data-zone="neg"] { border-color: rgba(124, 140, 255, .32); }
+
+.balance-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.balance-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .2px;
+}
+.balance-verdict .bal-icon { font-size: 15px; line-height: 1; }
+.balance[data-zone="bal"] .balance-verdict { color: var(--pos-soft); }
+.balance[data-zone="pos"] .balance-verdict { color: var(--neg-soft); }
+.balance[data-zone="neg"] .balance-verdict { color: var(--accent-soft); }
+
+.balance-counts {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.balance-track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--border);
+  background: linear-gradient(90deg,
+    rgba(124, 140, 255, .32) 0 55%,
+    rgba(52, 211, 153, .32) 55% 85%,
+    rgba(251, 113, 133, .28) 85% 100%
+  );
+}
+
+.balance-marker {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
+  transform: translateY(-50%);
+  transition: left .55s cubic-bezier(.2, .7, .3, 1), background .25s;
+}
+.balance[data-zone="bal"] .balance-marker { background: #5eead4; }
+.balance[data-zone="pos"] .balance-marker { background: #fda4af; }
+.balance[data-zone="neg"] .balance-marker { background: #a5b4fc; }
 
 input[type="text"],
 input[type="email"],
@@ -761,9 +831,8 @@ input.invalid {
     }
     .profile-avatar { width: 64px; height: 64px; font-size: 28px; }
     .profile-name { font-size: 18px; }
-    .profile-actions { justify-content: center; }
 
-    .profile-card .signout-btn { top: var(--s-3); right: var(--s-3); }
+    .profile-card .profile-top-actions { top: var(--s-3); right: var(--s-3); }
 
     .add-row { flex-direction: column; align-items: stretch; }
     .add-row .btn { width: 100%; }
@@ -782,24 +851,21 @@ input.invalid {
     }
     .badge-ico { flex-basis: 40px; width: 40px; height: 40px; font-size: 20px; }
     .badge-text { font-size: 15px; }
-    @media (max-width: 560px) {
-      /* ...остальное без изменений... */
 
-      .badge-tail {
-        width: auto;
-        height: auto;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .badge-tail > .badge-status,
-      .badge-tail > .badge-actions {
-        position: static;
-        transform: none;
-        opacity: 1;
-        pointer-events: auto;
-        transition: none;
-      }
+    .badge-tail {
+      width: auto;
+      height: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-tail > .badge-status,
+    .badge-tail > .badge-actions {
+      position: static;
+      transform: none;
+      opacity: 1;
+      pointer-events: auto;
+      transition: none;
     }
     .icon-btn { width: 32px; height: 32px; }
 
@@ -838,15 +904,29 @@ input.invalid {
       </header>
 
       <section class="card profile-card" id="profile-card" style="display:none;">
-        <button type="button" class="icon-btn signout-btn" id="btn-signout"
-                                                           title="Выйти" aria-label="Выйти">
-          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                                                                      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"></path>
-            <path d="M10 17l-5-5 5-5"></path>
-            <path d="M5 12h11"></path>
-          </svg>
-        </button>
+        <div class="profile-top-actions">
+          <button type="button" class="icon-btn" id="btn-share-profile"
+                  title="Поделиться профилем" aria-label="Поделиться профилем">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <path d="M8.59 13.51l6.83 3.98"></path>
+              <path d="M15.41 6.51L8.59 10.49"></path>
+            </svg>
+          </button>
+
+          <button type="button" class="icon-btn" id="btn-signout"
+                  title="Выйти" aria-label="Выйти">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"></path>
+              <path d="M10 17l-5-5 5-5"></path>
+              <path d="M5 12h11"></path>
+            </svg>
+          </button>
+        </div>
 
         <div class="profile-header">
           <div class="profile-avatar" id="profile-avatar"></div>
@@ -855,19 +935,16 @@ input.invalid {
             <a class="profile-username" id="profile-username" href="#"></a>
             <p class="profile-bio" id="profile-bio"></p>
             <p class="profile-joined" id="profile-joined"></p>
+            <div class="balance" id="balance" hidden>
+              <div class="balance-top">
+                <span class="balance-verdict" id="balance-verdict"></span>
+                <span class="balance-counts" id="balance-counts"></span>
+              </div>
+              <div class="balance-track" aria-hidden="true">
+                <div class="balance-marker" id="balance-marker"></div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="profile-actions">
-          <button type="button" class="btn ghost sm" id="btn-share-profile" title="Поделиться профилем">
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="5" r="3"></circle>
-              <circle cx="6" cy="19" r="3"></circle>
-              <path d="M8.59 13.51a5 5 0 0 1 7.07 0"></path>
-              <path d="M15 12a3 3 0 0 0-3-3"></path>
-              <path d="M9 12a3 3 0 0 1 3-3"></path>
-            </svg>
-            <span>Поделиться</span>
-          </button>
         </div>
       </section>
 
@@ -1063,7 +1140,83 @@ input.invalid {
           }
         }
 
-        function shareProfile(username) {
+        /* ==========================================================
+   БАЛАНС ПРОФИЛЯ
+   ========================================================== */
+var BALANCE_VERDICTS = {
+  pos: { icon: '🎭', text: 'витрина',      hint: 'Одни достижения. Такое вообще бывает?' },
+  bal: { icon: '⚖️', text: 'баланс',       hint: 'Здоровое соотношение: и победы, и провалы.' },
+  neg: { icon: '🌧️', text: 'траур',        hint: 'Слишком много провалов. Может, стоит вспомнить и победы?' }
+};
+
+/* Границы зон по доле достижений p/(p+n):
+   < 0.55            → «мрачновато»
+   0.55 .. 0.85      → «баланс»   (идеал ≈ 3:1 = 0.75)
+   > 0.85            → «витрина»  */
+var BALANCE_MIN_TOTAL = 5;
+var BALANCE_LOW       = 0.55;
+var BALANCE_HIGH      = 0.85;
+
+function computeBalance(badges) {
+  var p = 0, n = 0;
+  (badges || []).forEach(function (b) {
+    if (!b.received) return;            /* учитываем только полученные */
+    if (b.polarity === 'positive') p++;
+    else n++;
+  });
+  var total = p + n;
+  if (total < BALANCE_MIN_TOTAL) return null;
+
+  var score = p / total;
+  var zone;
+  if (score > BALANCE_HIGH)     zone = 'pos';
+  else if (score < BALANCE_LOW) zone = 'neg';
+  else                          zone = 'bal';
+
+  return { positives: p, negatives: n, total: total, score: score, zone: zone };
+}
+
+      function renderBalance() {
+        var el = document.getElementById('balance');
+        if (!el) return;
+
+        var b = computeBalance(state.badges);
+        if (!b) {
+          el.hidden = true;
+          el.removeAttribute('data-zone');
+          delete el.dataset.rendered;
+          return;
+        }
+
+        el.hidden = false;
+        el.dataset.zone = b.zone;
+
+        var v = BALANCE_VERDICTS[b.zone];
+        var verdictEl = document.getElementById('balance-verdict');
+        var countsEl  = document.getElementById('balance-counts');
+        var marker    = document.getElementById('balance-marker');
+
+        verdictEl.innerHTML =
+          '<span class="bal-icon">' + v.icon + '</span>' +
+          '<span class="bal-text">' + v.text + '</span>';
+
+        countsEl.textContent = '🏆 ' + b.positives + ' · 💀 ' + b.negatives;
+
+        el.title = v.hint +
+          '\nПолученных достижений: ' + b.positives +
+          '\nПолученных антидостижений: ' + b.negatives +
+          '\nИдеал — около 3:1 (75%)';
+
+        /* Анимация: первый раз стартуем из 0, дальше — просто едем к новой точке */
+        if (!el.dataset.rendered) {
+          marker.style.left = '0%';
+          void marker.offsetWidth; /* reflow */
+          el.dataset.rendered = '1';
+        }
+        marker.style.left = (b.score * 100).toFixed(1) + '%';
+      }
+
+      function shareProfile(username) {
           var url = window.location.origin + '/@' + username;
 
           if (navigator.share) {
@@ -1195,10 +1348,10 @@ input.invalid {
             statusHtml = '<span class="badge-status added" title="У вас на странице">📎</span>';
           } else {
             /* Значка у меня нет → плюс, добавить к себе */
-              actionBtn =
+            actionBtn =
               '<button type="button" class="icon-btn add" data-action="add" data-id="' +
               b.id + '" title="Добавить к себе" aria-label="Добавить к себе">' +
-              ICON_PLUS + '</button>';             ICON_PLUS + '</button>';
+              ICON_PLUS + '</button>';
           }
 
           var tail = '';
@@ -1259,6 +1412,7 @@ input.invalid {
         function renderAll() {
           renderWho();
           renderList();
+          renderBalance();
         }
 
         function setPlaceholderFromCatalog() {

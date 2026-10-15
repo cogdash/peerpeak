@@ -352,3 +352,61 @@ async def remove_user_badge(
     await session.delete(user_badge)
     await session.commit()
 
+
+@router.get("/badges/@{username}")
+async def list_user_badges(
+    username: str,
+    session: AsyncSession = Depends(get_session),
+) -> list[UserBadgeResponse]:
+    """List every badge a specific user has added to their page.
+
+    This endpoint is public and doesn't require authentication.
+    """
+    # Find the target user
+    result = await session.execute(select(User).where(User.username == username))
+    target_user = result.scalar_one_or_none()
+    if target_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    result = await session.execute(
+        select(UserBadge, Badge)
+        .join(Badge, UserBadge.badge_id == Badge.id)
+        .options(selectinload(Badge.creator))
+        .where(UserBadge.user_id == target_user.id)
+        .order_by(UserBadge.created_at.desc())
+    )
+
+    return [
+        _user_badge_response(user_badge, badge, target_user)
+        for user_badge, badge in result.all()
+    ]
+
+
+@router.get("/users/@{username}")
+async def get_user_profile(
+    username: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get a user's public profile information.
+
+    This endpoint is public and doesn't require authentication.
+    """
+    result = await session.execute(select(User).where(User.username == username))
+    target_user = result.scalar_one_or_none()
+    if target_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    return {
+        "id": str(target_user.id),
+        "username": target_user.username,
+        "full_name": target_user.full_name,
+        "bio": target_user.bio,
+        "created_at": target_user.created_at,
+    }
+

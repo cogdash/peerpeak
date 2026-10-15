@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from sqlalchemy import text
+from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import get_current_user
@@ -49,7 +49,8 @@ async def read_index(
     user = await _optional_user(request, session)
     if user is None:
         return RedirectResponse(url="/auth", status_code=302)
-    return FileResponse(STATIC_DIR / "profile.html")
+    # Redirect logged-in users to their own profile page
+    return RedirectResponse(url=f"/@{user.username}", status_code=302)
 
 
 @app.get("/profile")
@@ -61,6 +62,24 @@ async def read_profile(
     user = await _optional_user(request, session)
     if user is None:
         return RedirectResponse(url="/auth", status_code=302)
+    # Redirect to the user's profile page
+    return RedirectResponse(url=f"/@{user.username}", status_code=302)
+
+
+@app.get("/@{username}")
+async def read_user_profile(
+    username: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    # Check if the user exists
+    result = await session.execute(select(User).where(User.username == username))
+    target_user = result.scalar_one_or_none()
+    if target_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Unauthenticated visitors can view the profile
+    user = await _optional_user(request, session)
     return FileResponse(STATIC_DIR / "profile.html")
 
 

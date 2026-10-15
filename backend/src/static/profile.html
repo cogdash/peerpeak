@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Peerpeak: мои значки</title>
+    <title>Peerpeak</title>
     <style>
 :root {
   --bg:            #0b0d13;
@@ -235,7 +235,7 @@ h1 {
    БАЛАНС ПРОФИЛЯ
    ============================================================ */
 .balance {
-  margin-top: 12px;
+  margin-top: 0;
   padding: 10px 12px 12px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
@@ -681,16 +681,41 @@ input.invalid {
     pointer-events: none;
     transform: translate(-50%, -50%) translateX(10px);
   }
-  .badge:hover .badge-actions,
-  .badge:focus-within .badge-actions {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translate(-50%, -50%);
+
+  /* Раскрытие кнопок — только там, где есть настоящий hover.
+     На тач-экранах блок не применяется, поэтому «залипший» hover
+     после тапа больше не выталкивает кнопки. */
+  @media (hover: hover) and (pointer: fine) {
+    .badge:hover .badge-actions,
+    .badge:focus-within .badge-actions {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%);
+    }
+
+    .badge:hover .badge-status,
+    .badge:focus-within .badge-status {
+      transform: translate(-50%, -50%) translateX(-40px);
+    }
   }
 
-  .badge:hover .badge-status,
-  .badge:focus-within .badge-status {
-    transform: translate(-50%, -50%) translateX(-40px);
+  /* Тач-устройства: статус и кнопка всегда видны, статично, без выезда */
+  @media (hover: none), (pointer: coarse) {
+    .badge-tail {
+      width: auto;
+      height: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-tail > .badge-status,
+    .badge-tail > .badge-actions {
+      position: static;
+      transform: none;
+      opacity: 1;
+      pointer-events: auto;
+      transition: none;
+    }
   }
 
   /* Индикатор «мой» состояния значка */
@@ -824,11 +849,12 @@ input.invalid {
 
     .profile-header {
       flex-direction: column;
-      align-items: center;
-      text-align: center;
+      align-items: flex-start;
+      text-align: left;
       gap: var(--s-3);
       padding-right: 0;
     }
+    .profile-info { width: 100%; }
     .profile-avatar { width: 64px; height: 64px; font-size: 28px; }
     .profile-name { font-size: 18px; }
 
@@ -852,21 +878,6 @@ input.invalid {
     .badge-ico { flex-basis: 40px; width: 40px; height: 40px; font-size: 20px; }
     .badge-text { font-size: 15px; }
 
-    .badge-tail {
-      width: auto;
-      height: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .badge-tail > .badge-status,
-    .badge-tail > .badge-actions {
-      position: static;
-      transform: none;
-      opacity: 1;
-      pointer-events: auto;
-      transition: none;
-    }
     .icon-btn { width: 32px; height: 32px; }
 
     .modal-backdrop { padding: 10px; }
@@ -935,15 +946,16 @@ input.invalid {
             <a class="profile-username" id="profile-username" href="#"></a>
             <p class="profile-bio" id="profile-bio"></p>
             <p class="profile-joined" id="profile-joined"></p>
-            <div class="balance" id="balance" hidden>
-              <div class="balance-top">
-                <span class="balance-verdict" id="balance-verdict"></span>
-                <span class="balance-counts" id="balance-counts"></span>
-              </div>
-              <div class="balance-track" aria-hidden="true">
-                <div class="balance-marker" id="balance-marker"></div>
-              </div>
-            </div>
+          </div>
+        </div>
+
+        <div class="balance" id="balance" hidden>
+          <div class="balance-top">
+            <span class="balance-verdict" id="balance-verdict"></span>
+            <span class="balance-counts" id="balance-counts"></span>
+          </div>
+          <div class="balance-track" aria-hidden="true">
+            <div class="balance-marker" id="balance-marker"></div>
           </div>
         </div>
       </section>
@@ -1111,6 +1123,9 @@ input.invalid {
           avatar.textContent = initial;
 
           nameEl.textContent = user.full_name;
+
+          document.title = 'Peerpeak: @' + user.username;
+
           usernameEl.textContent = '@' + user.username;
           usernameEl.href = '/@' + encodeURIComponent(user.username);
 

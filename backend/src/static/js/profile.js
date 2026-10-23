@@ -74,6 +74,9 @@ document.addEventListener('alpine:init', function () {
       emojiChoices: EMOJI_CHOICES,
       emojiModal: { open: false, badge: null },
 
+      /* --- Модалка редактирования профиля --- */
+      editModal: { open: false, full_name: '', username: '', bio: '', saving: false },
+
       /* --- Long-press --- */
       pressingId: null,
       pressTimer: null,
@@ -558,6 +561,80 @@ document.addEventListener('alpine:init', function () {
 
         this.$store.toast.show('Иконка обновлена');
         await this.loadBadges();
+      },
+
+      /* ======================================================
+         РЕДАКТИРОВАНИЕ ПРОФИЛЯ
+         ====================================================== */
+      openEditModal() {
+        if (!this.isOwnProfile || !this.me) return;
+        this.editModal = {
+          open: true,
+          full_name: this.me.full_name || '',
+          username: this.me.username || '',
+          bio: this.me.bio || '',
+          saving: false
+        };
+      },
+
+      closeEditModal() {
+        if (this.editModal.saving) return;
+        this.editModal.open = false;
+      },
+
+      async saveProfile() {
+        if (this.editModal.saving) return;
+
+        var fullName = (this.editModal.full_name || '').trim();
+        var username = (this.editModal.username || '').trim();
+        var bio = (this.editModal.bio || '').trim();
+
+        if (!fullName) {
+          this.$store.toast.show('Полное имя не может быть пустым');
+          return;
+        }
+        if (username.length < 3) {
+          this.$store.toast.show('Юзернейм должен содержать минимум 3 символа');
+          return;
+        }
+
+        this.editModal.saving = true;
+
+        try {
+          var r = await apiFetch(ME_URL, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              full_name: fullName,
+              username: username,
+              bio: bio
+            })
+          });
+
+          if (r.status === 401) { window.location.assign('/auth'); return; }
+          if (!r.ok) {
+            this.$store.toast.show(extractErrorMessage(r.data, r.status));
+            return;
+          }
+
+          var newUsername = r.data.username;
+          this.me = r.data;
+          if (this.isOwnProfile) this.profile = this.me;
+
+          this.editModal.saving = false;
+          this.editModal.open = false;
+
+          if (this.isOwnProfile && this.viewedUsername !== newUsername) {
+            document.title = 'Peerpeak: @' + newUsername;
+            window.location.assign('/@' + encodeURIComponent(newUsername));
+            return;
+          }
+
+          this.$store.toast.show('Профиль обновлён');
+        } catch (e) {
+          this.$store.toast.show('Нет связи с сервером');
+        } finally {
+          this.editModal.saving = false;
+        }
       },
 
       /* ======================================================

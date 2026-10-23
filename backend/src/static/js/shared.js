@@ -9,6 +9,7 @@
     username:  'юзернейм',
     full_name: 'полное имя',
     password:  'пароль',
+    bio:       'о себе',
     title:     'название'
   };
 

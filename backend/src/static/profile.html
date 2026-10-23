@@ -29,6 +29,16 @@
 
       <section class="card profile-card" x-show="profile" x-cloak>
         <div class="profile-top-actions">
+          <button type="button" class="icon-btn" x-show="isOwnProfile"
+                  title="Редактировать профиль" aria-label="Редактировать профиль"
+                  @click="openEditModal()">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            </svg>
+          </button>
+
           <button type="button" class="icon-btn"
                   title="Поделиться профилем" aria-label="Поделиться профилем"
                   @click="shareProfile()">
@@ -54,7 +64,7 @@
           </button>
         </div>
 
-        <div class="profile-header">
+        <div class="profile-header" :class="{ 'with-edit': isOwnProfile }">
           <div class="profile-avatar" x-text="profile ? initial(profile.full_name) : ''"></div>
           <div class="profile-info">
             <h2 class="profile-name" x-text="profile ? profile.full_name : ''"></h2>
@@ -259,6 +269,52 @@
       </section>
 
     </div>
+
+    <!-- ================= МОДАЛКА РЕДАКТИРОВАНИЯ ПРОФИЛЯ ================= -->
+    <template x-if="editModal.open">
+      <div class="modal-backdrop"
+           @click.self="closeEditModal()"
+           @keydown.escape.window="closeEditModal()">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Редактирование профиля">
+          <h3>Редактировать профиль</h3>
+          <form @submit.prevent="saveProfile()">
+            <div class="field-group">
+              <label for="edit-full-name">Полное имя</label>
+              <input type="text" id="edit-full-name" maxlength="255"
+                     x-model="editModal.full_name"
+                     :disabled="editModal.saving"
+                     autocomplete="name" placeholder="Иван Петров">
+            </div>
+
+            <div class="field-group">
+              <label for="edit-username">Юзернейм</label>
+              <input type="text" id="edit-username" maxlength="32"
+                     x-model="editModal.username"
+                     :disabled="editModal.saving"
+                     autocomplete="username" placeholder="peer_peaker"
+                     spellcheck="false" autocapitalize="none">
+            </div>
+
+            <div class="field-group">
+              <label for="edit-bio">О себе</label>
+              <textarea id="edit-bio" rows="3" maxlength="500"
+                        x-model="editModal.bio"
+                        :disabled="editModal.saving"
+                        placeholder="Пара слов о себе"></textarea>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn ghost"
+                      @click="closeEditModal()" :disabled="editModal.saving">Отмена</button>
+              <button type="submit" class="btn primary"
+                      :disabled="editModal.saving"
+                      :aria-busy="editModal.saving ? 'true' : 'false'"
+                      x-text="editModal.saving ? 'Сохраняем…' : 'Сохранить'"></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </template>
 
     <!-- ================= МОДАЛКА ИКОНКИ ================= -->
     <template x-if="emojiModal.open">

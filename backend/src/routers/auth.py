@@ -32,6 +32,12 @@ class SignInRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class UpdateProfileRequest(BaseModel):
+    username: str | None = Field(default=None, min_length=3, max_length=32)
+    full_name: str | None = Field(default=None, min_length=1, max_length=255)
+    bio: str | None = Field(default=None, max_length=500)
+
+
 class UserResponse(BaseModel):
     id: str
     username: str
@@ -125,4 +131,54 @@ async def signout(
 @router.get("/me")
 async def me(user: User = Depends(get_current_user)) -> UserResponse:
     """Return the currently authenticated user."""
+    return _user_response(user)
+
+
+@router.patch("/me")
+async def update_me(
+    payload: UpdateProfileRequest,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> UserResponse:
+    """Update the current user's profile fields.
+
+    Only the fields included in the request body are changed. Sending an empty
+    ``bio`` (or ``null``) clears it.
+    """
+    fields = payload.model_fields_set
+
+    if "full_name" in fields:
+        full_name = (payload.full_name or "").strip()
+        if not full_name:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Полное имя не может быть пустым",
+            )
+        user.full_name = full_name
+
+    if "username" in fields:
+        username = (payload.username or "").strip()
+        if len(username) < 3:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Юзернейм должен содержать минимум 3 символа",
+            )
+
+        if username != user.username:
+            result = await session.execute(
+                select(User).where(User.username == username)
+            )
+            if result.scalar_one_or_none() is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Этот юзернейм уже занят",
+                )
+            user.username = username
+
+    if "bio" in fields:
+        bio = (payload.bio or "").strip()
+        user.bio = bio or None
+
+    await session.commit()
+    await session.refresh(user)
     return _user_response(user)

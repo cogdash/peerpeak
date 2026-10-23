@@ -69,6 +69,7 @@ body {
   margin-bottom: var(--s-4);
   padding-right: 84px;
 }
+.profile-header.with-edit { padding-right: 126px; }
 
 .profile-avatar {
   flex: 0 0 72px;
@@ -619,6 +620,18 @@ button.badge-ico.editable:focus-visible {
   to   { transform: scale(1); opacity: 1; }
 }
 .modal h3 { margin: 0 0 var(--s-4); font-size: 18px; }
+.modal .field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+.modal .field-group > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.modal textarea { resize: vertical; min-height: 84px; }
 .modal-actions {
   display: flex;
   gap: var(--s-3);
@@ -672,6 +685,7 @@ button.badge-ico.editable:focus-visible {
     gap: var(--s-3);
     padding-right: 0;
   }
+  .profile-header.with-edit { padding-right: 0; }
   .profile-info { width: 100%; }
   .profile-avatar { width: 64px; height: 64px; font-size: 28px; }
   .profile-name { font-size: 18px; }

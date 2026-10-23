@@ -1,3 +1,1 @@
-classifier_pb2
-classifier_pb2_grpc
 main

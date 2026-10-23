@@ -1,0 +1,715 @@
+/* ============================================================
+   ПРОФИЛЬ
+   ============================================================ */
+body {
+  padding: 40px 16px 72px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-bottom: var(--s-6);
+  flex-wrap: wrap;
+}
+
+.page-head .me {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.who-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-soft);
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--t-fast);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.who-link:hover {
+  color: #fff;
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+.who-link:focus-visible {
+  outline: none;
+  border-color: var(--accent-focus);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.profile-card {
+  margin-bottom: var(--s-5);
+  position: relative;
+}
+
+.profile-card .profile-top-actions {
+  position: absolute;
+  top: var(--s-4);
+  right: var(--s-4);
+  display: flex;
+  gap: var(--s-2);
+  z-index: 2;
+}
+
+.profile-header {
+  display: flex;
+  gap: var(--s-4);
+  align-items: flex-start;
+  margin-bottom: var(--s-4);
+  padding-right: 84px;
+}
+
+.profile-avatar {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r-lg);
+  background: var(--grad-accent);
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: var(--shadow-accent);
+}
+
+.profile-info { flex: 1; min-width: 0; }
+
+.profile-name {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  background: var(--grad-title);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.profile-username {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--accent-soft);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+}
+.profile-username:hover { text-decoration: underline; }
+
+.profile-bio {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.profile-bio:empty { display: none; }
+
+.profile-joined {
+  margin: 0;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* ============================================================
+   БАЛАНС ПРОФИЛЯ
+   ============================================================ */
+.balance {
+  margin-top: 0;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--field-deep);
+  transition: border-color var(--t-base);
+}
+.balance[data-zone="bal"] { border-color: rgba(52, 211, 153, .32); }
+.balance[data-zone="pos"] { border-color: rgba(251, 113, 133, .28); }
+.balance[data-zone="neg"] { border-color: rgba(124, 140, 255, .32); }
+
+.balance-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.balance-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .2px;
+}
+.balance-verdict .bal-icon { font-size: 15px; line-height: 1; }
+.balance[data-zone="bal"] .balance-verdict { color: var(--pos-soft); }
+.balance[data-zone="pos"] .balance-verdict { color: var(--neg-soft); }
+.balance[data-zone="neg"] .balance-verdict { color: var(--accent-soft); }
+
+.balance-counts {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.balance-track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--border);
+  background: linear-gradient(90deg,
+    rgba(124, 140, 255, .32) 0 55%,
+    rgba(52, 211, 153, .32) 55% 85%,
+    rgba(251, 113, 133, .28) 85% 100%
+  );
+}
+
+.balance-marker {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
+  transform: translateY(-50%);
+  transition: left .55s cubic-bezier(.2, .7, .3, 1), background .25s;
+}
+.balance[data-zone="bal"] .balance-marker { background: #5eead4; }
+.balance[data-zone="pos"] .balance-marker { background: #fda4af; }
+.balance[data-zone="neg"] .balance-marker { background: #a5b4fc; }
+
+/* ============================================================
+   ДОБАВЛЕНИЕ ЗНАЧКА
+   ============================================================ */
+.add-card { margin-bottom: var(--s-5); }
+.add-card h2 { margin: 0 0 var(--s-4); font-size: 17px; font-weight: 600; }
+
+.add-row { display: flex; gap: var(--s-3); align-items: flex-start; }
+.add-row .grow { flex: 1; }
+
+.detect {
+  margin-top: var(--s-3);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px dashed var(--border-dashed);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--muted);
+}
+.detect.pos { border-color: var(--pos-border); background: var(--pos-bg); color: var(--pos-soft); }
+.detect.neg { border-color: var(--neg-border); background: var(--neg-bg); color: var(--neg-soft); }
+.detect .tag { font-weight: 700; }
+.detect .spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   ПАНЕЛЬ ФИЛЬТРОВ
+   ============================================================ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-4);
+}
+
+.filters {
+  display: flex;
+  gap: 4px;
+  background: var(--field-deep);
+  border: 1px solid var(--border);
+  padding: 4px;
+  border-radius: var(--r-md);
+}
+.filters button {
+  border: 0;
+  background: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: var(--t-fast);
+  white-space: nowrap;
+}
+.filters button:hover { color: var(--text); }
+.filters button.active { background: var(--card-2); color: #fff; }
+
+.check-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--field);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  transition: var(--t-fast);
+  min-height: 34px;
+  white-space: nowrap;
+}
+.check-line:hover { color: var(--text); border-color: var(--border-strong); }
+.check-line.active {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--accent-soft);
+}
+.check-line input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.check-line input[type="checkbox"]:checked {
+  background: var(--grad-accent);
+  border-color: var(--accent);
+}
+.check-line input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center/11px no-repeat;
+}
+
+/* ============================================================
+   СПИСОК ЗНАЧКОВ
+   ============================================================ */
+.badge-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.badge {
+  position: relative;
+  display: flex;
+  gap: var(--s-4);
+  align-items: flex-start;
+  padding: var(--s-4) var(--s-4) var(--s-4) var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--grad-card-2);
+  overflow: hidden;
+  animation: popIn .22s ease both;
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(6px) scale(.99); }
+  to   { opacity: 1; transform: none; }
+}
+
+.badge::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.badge.pos::before { background: linear-gradient(180deg, #34d399, #0ea5e9); }
+.badge.neg::before { background: linear-gradient(180deg, #fb7185, #a855f7); }
+
+.badge::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 3px;
+  width: 0;
+  background: linear-gradient(90deg, #34d399, #5eead4);
+  border-radius: 0 3px 3px 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.badge.pressing {
+  border-color: rgba(52, 211, 153, .55);
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, .12);
+}
+.badge.pressing::after {
+  opacity: 1;
+  animation: pressFill 1.2s linear forwards;
+}
+@keyframes pressFill {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+/* Значок доступен для «зажать → получить» */
+.badge.can-press { cursor: pointer; }
+
+.badge-ico {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--field);
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  line-height: 1;
+  padding: 0;
+  color: inherit;
+}
+.badge.pos .badge-ico {
+  background: rgba(52, 211, 153, .10);
+  border-color: rgba(52, 211, 153, .25);
+}
+.badge.neg .badge-ico {
+  background: rgba(251, 113, 133, .10);
+  border-color: rgba(251, 113, 133, .25);
+}
+button.badge-ico.editable { cursor: pointer; transition: var(--t-fast); }
+button.badge-ico.editable:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  transform: scale(1.06);
+}
+button.badge-ico.editable:focus-visible {
+  outline: none;
+  border-color: var(--accent-focus);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.badge-body { flex: 1; min-width: 0; }
+
+.badge-text {
+  margin: 2px 0 6px;
+  font-size: 16px;
+  line-height: 1.45;
+  font-weight: 600;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.badge-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.badge-meta .kind { font-weight: 600; }
+.badge.pos .badge-meta .kind { color: var(--pos-soft); }
+.badge.neg .badge-meta .kind { color: var(--neg-soft); }
+.badge-meta .sep { color: var(--faint); }
+
+.badge-meta .badge-by {
+  color: var(--faint);
+  text-decoration: none;
+  border-bottom: 1px dotted transparent;
+  transition: var(--t-fast);
+}
+.badge-meta .badge-by .at { color: var(--accent-soft); }
+.badge-meta .badge-by:hover {
+  color: var(--text);
+  border-bottom-color: var(--accent-border);
+}
+.badge-meta .badge-by:hover .at { color: var(--accent); }
+.badge-meta .badge-by:focus-visible {
+  outline: none;
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.badge-meta .badge-date {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Хвост: [эмодзи-статус] → [кнопка действия].
+   На hover статус уезжает левее, кнопка встаёт на его место. */
+.badge-tail {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  align-self: flex-start;
+}
+
+.badge-tail > .badge-status,
+.badge-tail > .badge-actions {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transition: opacity .18s ease, transform .22s cubic-bezier(.2,.7,.3,1);
+  will-change: transform, opacity;
+}
+
+.badge-status {
+  z-index: 1;
+  flex-shrink: 0;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 2px;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translate(-50%, -50%);
+}
+.badge-status.added { opacity: .85; }
+
+.badge-actions {
+  z-index: 2;
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) translateX(10px);
+}
+
+/* Раскрытие кнопок — только там, где есть настоящий hover.
+   На тач-экранах блок не применяется, поэтому «залипший» hover
+   после тапа больше не выталкивает кнопки. */
+@media (hover: hover) and (pointer: fine) {
+  .badge:hover .badge-actions,
+  .badge:focus-within .badge-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+  }
+
+  .badge:hover .badge-status,
+  .badge:focus-within .badge-status {
+    transform: translate(-50%, -50%) translateX(-40px);
+  }
+}
+
+/* Тач-устройства: статус и кнопка всегда видны, статично, без выезда */
+@media (hover: none), (pointer: coarse) {
+  .badge-tail {
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-tail > .badge-status,
+  .badge-tail > .badge-actions {
+    position: static;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+    transition: none;
+  }
+}
+
+.badge.unreceived {
+  background: linear-gradient(180deg, #12151c, #0f1218);
+  border-style: dashed;
+  border-color: var(--border-dashed);
+}
+.badge.unreceived::before {
+  background: linear-gradient(180deg, #4a5568, #2d3748);
+}
+.badge.unreceived .badge-ico {
+  background: rgba(255, 255, 255, .03);
+  border-color: #2a3142;
+  filter: grayscale(1);
+  opacity: .55;
+}
+.badge.unreceived .badge-text { color: #9aa3b8; }
+.badge.unreceived .badge-meta .kind { color: #7a8499; }
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  background: var(--field);
+  color: var(--muted);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: var(--t-fast);
+  padding: 0;
+}
+.icon-btn svg { display: block; }
+.icon-btn:hover { color: var(--text); border-color: var(--border-strong); }
+.icon-btn.danger:hover { color: #fff; background: var(--grad-danger); border-color: transparent; }
+.icon-btn.cancel:hover { color: #fff; background: var(--grad-accent); border-color: transparent; }
+.icon-btn.add:hover    { color: #fff; background: var(--grad-accent); border-color: transparent; }
+.icon-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ============================================================
+   ПУСТОЕ СОСТОЯНИЕ
+   ============================================================ */
+.empty {
+  text-align: center;
+  padding: var(--s-7) var(--s-4);
+  color: var(--muted);
+  border: 1px dashed var(--border-dashed);
+  border-radius: var(--r-lg);
+}
+.empty .big { font-size: 40px; margin-bottom: var(--s-3); }
+
+/* ============================================================
+   МОДАЛКА
+   ============================================================ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 12, .72);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 40;
+}
+.modal {
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  background: var(--grad-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xl);
+  padding: var(--s-5);
+  box-shadow: var(--shadow-modal);
+  animation: pop .2s ease;
+}
+@keyframes pop {
+  from { transform: scale(.96); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.modal h3 { margin: 0 0 var(--s-4); font-size: 18px; }
+.modal-actions {
+  display: flex;
+  gap: var(--s-3);
+  justify-content: flex-end;
+  margin-top: var(--s-5);
+}
+
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: var(--s-2);
+  max-height: min(50vh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+.emoji-picker button {
+  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--border);
+  background: var(--field);
+  border-radius: var(--r-sm);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--t-fast);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
+}
+.emoji-picker button:hover { border-color: var(--accent-border); background: var(--accent-bg); }
+.emoji-picker button.active { border-color: var(--accent); background: var(--accent-bg); }
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
+@media (max-width: 560px) {
+  body { padding: 24px 10px 64px; }
+  .card { padding: var(--s-4); }
+
+  .page-head { margin-bottom: var(--s-5); }
+  .who-link { max-width: 140px; font-size: 12px; }
+
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--s-3);
+    padding-right: 0;
+  }
+  .profile-info { width: 100%; }
+  .profile-avatar { width: 64px; height: 64px; font-size: 28px; }
+  .profile-name { font-size: 18px; }
+
+  .profile-card .profile-top-actions { top: var(--s-3); right: var(--s-3); }
+
+  .add-row { flex-direction: column; align-items: stretch; }
+  .add-row .btn { width: 100%; }
+  .add-row .grow { width: 100%; }
+  .add-row .bin { width: 100%; }
+
+  .toolbar { gap: var(--s-2); }
+  .filters { flex-wrap: wrap; }
+  .filters button { padding: 6px 10px; font-size: 12px; }
+  .check-line { font-size: 12px; padding: 5px 10px; }
+
+  .badge {
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-3) var(--s-3) var(--s-4);
+    border-radius: var(--r-md);
+  }
+  .badge-ico { flex-basis: 40px; width: 40px; height: 40px; font-size: 20px; }
+  .badge-text { font-size: 15px; }
+
+  .icon-btn { width: 32px; height: 32px; }
+
+  .modal-backdrop { padding: 10px; }
+  .modal { padding: var(--s-4); border-radius: var(--r-lg); }
+  .modal h3 { font-size: 17px; margin-bottom: var(--s-3); }
+  .emoji-picker {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 5px;
+    max-height: none;
+  }
+  .emoji-picker button { font-size: 17px; border-radius: 7px; }
+}
+
+@media (max-width: 380px) {
+  .emoji-picker { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .emoji-picker button { font-size: 16px; }
+}

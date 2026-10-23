@@ -1,0 +1,236 @@
+/* ============================================================
+   ДИЗАЙН-ТОКЕНЫ
+   ============================================================ */
+:root {
+  /* --- Поверхности --- */
+  --bg:            #0b0d13;
+  --card:          #161a24;
+  --card-2:        #1b2130;
+  --field:         #0f1219;
+  --field-deep:    #0d1017;
+
+  /* --- Границы --- */
+  --border:        #252c3b;
+  --border-strong: #313a4d;
+  --border-dashed: #2a3142;
+
+  /* --- Текст --- */
+  --text:          #e8ecf4;
+  --muted:         #8b93a7;
+  --faint:         #5c6478;
+
+  /* --- Акцент (индиго) --- */
+  --accent:        #7c8cff;
+  --accent-2:      #5b6cff;
+  --accent-soft:   #a5b4fc;
+  --accent-bg:     rgba(124, 140, 255, .14);
+  --accent-border: rgba(124, 140, 255, .45);
+  --accent-focus:  rgba(124, 140, 255, .65);
+  --accent-ring:   rgba(124, 140, 255, .15);
+
+  /* --- Семантика --- */
+  --pos:           #34d399;
+  --pos-soft:      #5eead4;
+  --pos-bg:        rgba(52, 211, 153, .14);
+  --pos-border:    rgba(52, 211, 153, .4);
+
+  --neg:           #fb7185;
+  --neg-soft:      #fda4af;
+  --neg-bg:        rgba(251, 113, 133, .14);
+  --neg-border:    rgba(251, 113, 133, .4);
+
+  --warn:          #fbbf24;
+  --warn-bg:       rgba(251, 191, 36, .14);
+  --warn-border:   rgba(251, 191, 36, .4);
+
+  /* --- Радиусы --- */
+  --r-xs: 5px;
+  --r-sm: 9px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 18px;
+
+  /* --- Отступы --- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 28px;
+  --s-7: 48px;
+
+  /* --- Тени --- */
+  --shadow-card:   0 14px 34px rgba(0, 0, 0, .35);
+  --shadow-modal:  0 24px 60px rgba(0, 0, 0, .6);
+  --shadow-accent: 0 8px 20px rgba(91, 108, 255, .32);
+  --shadow-danger: 0 8px 20px rgba(244, 63, 94, .3);
+  --shadow-pos:    0 8px 20px rgba(52, 211, 153, .28);
+
+  /* --- Градиенты --- */
+  --grad-accent:  linear-gradient(135deg, #7c8cff, #5b6cff);
+  --grad-danger:  linear-gradient(135deg, #f43f5e, #be123c);
+  --grad-success: linear-gradient(135deg, #34d399, #059669);
+  --grad-title:   linear-gradient(135deg, #fff, #9aa7ff 60%, #5eead4);
+  --grad-card:    linear-gradient(180deg, #171b26, #141822);
+  --grad-card-2:  linear-gradient(180deg, #1a1f2c, #161a25);
+
+  /* --- Анимация --- */
+  --t-fast: .18s;
+  --t-base: .25s;
+}
+
+/* ============================================================
+   БАЗА
+   ============================================================ */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+[hidden] { display: none !important; }
+
+/* Alpine: скрываем компонент до инициализации, чтобы не мигал
+   «сырой» шаблон. */
+[x-cloak] { display: none !important; }
+
+body {
+  margin: 0;
+  font: 15px/1.5 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 12% -5%, rgba(124, 140, 255, .18), transparent 45%),
+    radial-gradient(circle at 90% 5%, rgba(52, 211, 153, .12), transparent 40%),
+    radial-gradient(circle at 50% 110%, rgba(251, 113, 133, .10), transparent 45%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: clamp(24px, 4.5vw, 34px);
+  letter-spacing: -.5px;
+  background: var(--grad-title);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lead { color: var(--muted); margin: 0; font-size: 14px; }
+
+.wrap { max-width: 780px; margin: 0 auto; }
+
+/* ============================================================
+   КАРТОЧКИ
+   ============================================================ */
+.card {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--s-5);
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+}
+
+/* ============================================================
+   ФОРМЫ
+   ============================================================ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text);
+  padding: 12px 14px;
+  font: inherit;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent-focus);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+input.invalid {
+  border-color: rgba(251, 113, 133, .8);
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, .15);
+}
+
+::placeholder { color: var(--faint); }
+
+/* ============================================================
+   КНОПКИ
+   ============================================================ */
+.btn {
+  border: 0;
+  border-radius: var(--r-md);
+  padding: 11px 18px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--t-fast);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn.primary { background: var(--grad-accent); color: #fff; box-shadow: var(--shadow-accent); }
+.btn.primary:hover { transform: translateY(-1px); }
+.btn.primary:disabled,
+.btn.primary[aria-busy="true"] {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn.ghost { background: var(--card-2); color: var(--muted); }
+.btn.ghost:hover { background: #262e40; color: var(--text); }
+
+.btn.danger { background: var(--grad-danger); color: #fff; box-shadow: var(--shadow-danger); }
+.btn.danger:hover { transform: translateY(-1px); }
+
+.btn.success { background: var(--grad-success); color: #fff; box-shadow: var(--shadow-pos); }
+.btn.success:hover { transform: translateY(-1px); }
+
+.btn.sm { padding: 7px 12px; font-size: 13px; border-radius: var(--r-sm); }
+.btn.lg { padding: 14px 24px; font-size: 16px; border-radius: 14px; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 18px);
+  background: #1d2432;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 20px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--t-base);
+  z-index: 50;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+.divider { height: 1px; background: var(--border); border: 0; margin: 14px 0; }
+.muted { color: var(--muted); }
+.faint { color: var(--faint); }

@@ -4,900 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Peerpeak</title>
-    <style>
-:root {
-  --bg:            #0b0d13;
-  --card:          #161a24;
-  --card-2:        #1b2130;
-  --field:         #0f1219;
-  --field-deep:    #0d1017;
 
-  --border:        #252c3b;
-  --border-strong: #313a4d;
-  --border-dashed: #2a3142;
-
-  --text:          #e8ecf4;
-  --muted:         #8b93a7;
-  --faint:         #5c6478;
-
-  --accent:        #7c8cff;
-  --accent-2:      #5b6cff;
-  --accent-soft:   #a5b4fc;
-  --accent-bg:     rgba(124, 140, 255, .14);
-  --accent-border: rgba(124, 140, 255, .45);
-  --accent-focus:  rgba(124, 140, 255, .65);
-  --accent-ring:   rgba(124, 140, 255, .15);
-
-  --pos:           #34d399;
-  --pos-soft:      #5eead4;
-  --pos-bg:        rgba(52, 211, 153, .14);
-  --pos-border:    rgba(52, 211, 153, .4);
-
-  --neg:           #fb7185;
-  --neg-soft:      #fda4af;
-  --neg-bg:        rgba(251, 113, 133, .14);
-  --neg-border:    rgba(251, 113, 133, .4);
-
-  --warn:          #fbbf24;
-  --warn-bg:       rgba(251, 191, 36, .14);
-  --warn-border:   rgba(251, 191, 36, .4);
-
-  --r-xs: 5px;
-  --r-sm: 9px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 18px;
-
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 12px;
-  --s-4: 16px;
-  --s-5: 20px;
-  --s-6: 28px;
-  --s-7: 48px;
-
-  --shadow-card:   0 14px 34px rgba(0, 0, 0, .35);
-  --shadow-modal:  0 24px 60px rgba(0, 0, 0, .6);
-  --shadow-accent: 0 8px 20px rgba(91, 108, 255, .32);
-  --shadow-danger: 0 8px 20px rgba(244, 63, 94, .3);
-  --shadow-pos:    0 8px 20px rgba(52, 211, 153, .28);
-
-  --grad-accent:  linear-gradient(135deg, #7c8cff, #5b6cff);
-  --grad-danger:  linear-gradient(135deg, #f43f5e, #be123c);
-  --grad-success: linear-gradient(135deg, #34d399, #059669);
-  --grad-title:   linear-gradient(135deg, #fff, #9aa7ff 60%, #5eead4);
-  --grad-card:    linear-gradient(180deg, #171b26, #141822);
-  --grad-card-2:  linear-gradient(180deg, #1a1f2c, #161a25);
-
-  --t-fast: .18s;
-  --t-base: .25s;
-}
-
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-[hidden] { display: none !important; }
-
-body {
-  margin: 0;
-  padding: 40px 16px 72px;
-  font: 15px/1.5 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  color: var(--text);
-  background-color: var(--bg);
-  background-image:
-    radial-gradient(circle at 12% -5%, rgba(124, 140, 255, .18), transparent 45%),
-  radial-gradient(circle at 90% 5%, rgba(52, 211, 153, .12), transparent 40%),
-  radial-gradient(circle at 50% 110%, rgba(251, 113, 133, .10), transparent 45%);
-background-repeat: no-repeat;
-background-attachment: fixed;
--webkit-font-smoothing: antialiased;
-}
-
-h1 {
-  margin: 0 0 6px;
-  font-size: clamp(24px, 4.5vw, 34px);
-  letter-spacing: -.5px;
-  background: var(--grad-title);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.lead { color: var(--muted); margin: 0; font-size: 14px; }
-
-.wrap { max-width: 780px; margin: 0 auto; }
-
-.page-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--s-4);
-  margin-bottom: var(--s-6);
-  flex-wrap: wrap;
-}
-
-.page-head .me {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.who-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-soft);
-  background: var(--card-2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: var(--t-fast);
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.who-link:hover {
-  color: #fff;
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
-}
-.who-link:focus-visible {
-  outline: none;
-  border-color: var(--accent-focus);
-  box-shadow: 0 0 0 3px var(--accent-ring);
-}
-
-.card {
-  background: var(--grad-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: var(--s-5);
-  box-shadow: var(--shadow-card);
-  transition: border-color var(--t-base), box-shadow var(--t-base);
-}
-
-.profile-card {
-  margin-bottom: var(--s-5);
-  position: relative;
-}
-
-.profile-card .profile-top-actions {
-  position: absolute;
-  top: var(--s-4);
-  right: var(--s-4);
-  display: flex;
-  gap: var(--s-2);
-  z-index: 2;
-}
-
-.profile-header {
-  display: flex;
-  gap: var(--s-4);
-  align-items: flex-start;
-  margin-bottom: var(--s-4);
-  padding-right: 84px;
-}
-
-.profile-avatar {
-  flex: 0 0 72px;
-  width: 72px;
-  height: 72px;
-  border-radius: var(--r-lg);
-  background: var(--grad-accent);
-  display: grid;
-  place-items: center;
-  font-size: 32px;
-  font-weight: 700;
-  color: #fff;
-  box-shadow: var(--shadow-accent);
-}
-
-.profile-info { flex: 1; min-width: 0; }
-
-.profile-name {
-  margin: 0 0 4px;
-  font-size: 20px;
-  font-weight: 700;
-  background: var(--grad-title);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.profile-username {
-  margin: 0 0 8px;
-  font-size: 14px;
-  color: var(--accent-soft);
-  font-weight: 600;
-  text-decoration: none;
-  display: inline-block;
-}
-.profile-username:hover { text-decoration: underline; }
-
-.profile-bio {
-  margin: 0 0 8px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.profile-bio:empty { display: none; }
-
-.profile-joined {
-  margin: 0;
-  font-size: 12px;
-  color: var(--faint);
-}
-
-/* ============================================================
-   БАЛАНС ПРОФИЛЯ
-   ============================================================ */
-.balance {
-  margin-top: 0;
-  padding: 10px 12px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  background: var(--field-deep);
-  transition: border-color var(--t-base);
-}
-.balance[data-zone="bal"] { border-color: rgba(52, 211, 153, .32); }
-.balance[data-zone="pos"] { border-color: rgba(251, 113, 133, .28); }
-.balance[data-zone="neg"] { border-color: rgba(124, 140, 255, .32); }
-
-.balance-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-  font-size: 12px;
-}
-
-.balance-verdict {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: .2px;
-}
-.balance-verdict .bal-icon { font-size: 15px; line-height: 1; }
-.balance[data-zone="bal"] .balance-verdict { color: var(--pos-soft); }
-.balance[data-zone="pos"] .balance-verdict { color: var(--neg-soft); }
-.balance[data-zone="neg"] .balance-verdict { color: var(--accent-soft); }
-
-.balance-counts {
-  color: var(--faint);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.balance-track {
-  position: relative;
-  height: 8px;
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 1px var(--border);
-  background: linear-gradient(90deg,
-    rgba(124, 140, 255, .32) 0 55%,
-    rgba(52, 211, 153, .32) 55% 85%,
-    rgba(251, 113, 133, .28) 85% 100%
-  );
-}
-
-.balance-marker {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 14px;
-  height: 14px;
-  margin-left: -7px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid var(--bg);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
-  transform: translateY(-50%);
-  transition: left .55s cubic-bezier(.2, .7, .3, 1), background .25s;
-}
-.balance[data-zone="bal"] .balance-marker { background: #5eead4; }
-.balance[data-zone="pos"] .balance-marker { background: #fda4af; }
-.balance[data-zone="neg"] .balance-marker { background: #a5b4fc; }
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-textarea,
-select {
-  width: 100%;
-  background: var(--field);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  color: var(--text);
-  padding: 12px 14px;
-  font: inherit;
-  line-height: 1.5;
-  outline: none;
-  transition: border-color var(--t-fast), box-shadow var(--t-fast);
-}
-input:focus, textarea:focus, select:focus {
-  border-color: var(--accent-focus);
-  box-shadow: 0 0 0 3px var(--accent-ring);
-}
-input.invalid {
-  border-color: rgba(251, 113, 133, .8);
-  box-shadow: 0 0 0 3px rgba(251, 113, 133, .15);
-}
-::placeholder { color: var(--faint); }
-
-.btn {
-  border: 0;
-  border-radius: var(--r-md);
-  padding: 11px 18px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--t-fast);
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  text-decoration: none;
-}
-.btn.primary { background: var(--grad-accent); color: #fff; box-shadow: var(--shadow-accent); }
-.btn.primary:hover { transform: translateY(-1px); }
-.btn.primary:disabled, .btn.primary[aria-busy="true"] {
-  opacity: .55; cursor: not-allowed; transform: none; box-shadow: none;
-}
-.btn.ghost { background: var(--card-2); color: var(--muted); }
-.btn.ghost:hover { background: #262e40; color: var(--text); }
-.btn.danger { background: var(--grad-danger); color: #fff; box-shadow: var(--shadow-danger); }
-.btn.danger:hover { transform: translateY(-1px); }
-.btn.success { background: var(--grad-success); color: #fff; box-shadow: var(--shadow-pos); }
-.btn.success:hover { transform: translateY(-1px); }
-.btn.sm { padding: 7px 12px; font-size: 13px; border-radius: var(--r-sm); }
-.btn.lg { padding: 14px 24px; font-size: 16px; border-radius: 14px; }
-
-#toast {
-  position: fixed;
-  left: 50%;
-  bottom: 26px;
-  transform: translate(-50%, 18px);
-  background: #1d2432;
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 11px 20px;
-  border-radius: var(--r-md);
-  font-size: 14px;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
-  opacity: 0;
-  pointer-events: none;
-  transition: var(--t-base);
-  z-index: 50;
-  max-width: calc(100vw - 32px);
-  text-align: center;
-}
-#toast.show { opacity: 1; transform: translate(-50%, 0); }
-
-.divider { height: 1px; background: var(--border); border: 0; margin: 14px 0; }
-.muted { color: var(--muted); }
-.faint { color: var(--faint); }
-
-.add-card { margin-bottom: var(--s-5); }
-.add-card h2 { margin: 0 0 var(--s-4); font-size: 17px; font-weight: 600; }
-
-.add-row { display: flex; gap: var(--s-3); align-items: flex-start; }
-.add-row .grow { flex: 1; }
-
-.detect {
-  margin-top: var(--s-3);
-  padding: 12px 14px;
-  border-radius: var(--r-md);
-  border: 1px dashed var(--border-dashed);
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  color: var(--muted);
-}
-.detect.pos { border-color: var(--pos-border); background: var(--pos-bg); color: var(--pos-soft); }
-.detect.neg { border-color: var(--neg-border); background: var(--neg-bg); color: var(--neg-soft); }
-.detect .tag { font-weight: 700; }
-.detect .spinner {
-  width: 14px; height: 14px;
-  border: 2px solid var(--border-strong);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--s-4);
-}
-
-.filters {
-  display: flex;
-  gap: 4px;
-  background: var(--field-deep);
-  border: 1px solid var(--border);
-  padding: 4px;
-  border-radius: var(--r-md);
-}
-.filters button {
-  border: 0;
-  background: 0;
-  color: var(--muted);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 7px 13px;
-  border-radius: var(--r-sm);
-  cursor: pointer;
-  transition: var(--t-fast);
-  white-space: nowrap;
-}
-.filters button:hover { color: var(--text); }
-.filters button.active { background: var(--card-2); color: #fff; }
-
-.check-line {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: var(--r-sm);
-  font-size: 13px;
-  font-weight: 600;
-  background: var(--field);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  cursor: pointer;
-  user-select: none;
-  transition: var(--t-fast);
-  min-height: 34px;
-  white-space: nowrap;
-}
-.check-line:hover { color: var(--text); border-color: var(--border-strong); }
-.check-line.active {
-  background: var(--accent-bg);
-  border-color: var(--accent-border);
-  color: var(--accent-soft);
-}
-.check-line input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  border: 1.5px solid var(--border);
-  border-radius: 5px;
-  background: var(--bg);
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-  transition: background var(--t-fast), border-color var(--t-fast);
-}
-.check-line input[type="checkbox"]:checked {
-  background: var(--grad-accent);
-  border-color: var(--accent);
-}
-.check-line input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center/11px no-repeat;
-}
-
-.badge-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-}
-
-.badge {
-  position: relative;
-  display: flex;
-  gap: var(--s-4);
-  align-items: flex-start;
-  padding: var(--s-4) var(--s-4) var(--s-4) var(--s-5);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--grad-card-2);
-  overflow: hidden;
-  animation: popIn .22s ease both;
-  transition: border-color var(--t-base), box-shadow var(--t-base);
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-  @keyframes popIn {
-    from { opacity: 0; transform: translateY(6px) scale(.99); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  .badge::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
-  }
-  .badge.pos::before { background: linear-gradient(180deg, #34d399, #0ea5e9); }
-  .badge.neg::before { background: linear-gradient(180deg, #fb7185, #a855f7); }
-
-  .badge::after {
-    content: "";
-    position: absolute;
-    left: 0; bottom: 0;
-    height: 3px;
-    width: 0;
-    background: linear-gradient(90deg, #34d399, #5eead4);
-    border-radius: 0 3px 3px 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .badge.pressing {
-    border-color: rgba(52, 211, 153, .55);
-    box-shadow: 0 0 0 2px rgba(52, 211, 153, .12);
-  }
-  .badge.pressing::after {
-    opacity: 1;
-    animation: pressFill 1.2s linear forwards;
-  }
-  @keyframes pressFill {
-    from { width: 0; }
-    to   { width: 100%; }
-  }
-
-  /* Значок доступен для «зажать → получить» */
-  .badge.can-press { cursor: pointer; }
-
-  .badge-ico {
-    flex: 0 0 48px;
-    width: 48px;
-    height: 48px;
-    display: grid;
-    place-items: center;
-    font-size: 24px;
-    border-radius: var(--r-md);
-    border: 1px solid var(--border);
-    background: var(--field);
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-    line-height: 1;
-    padding: 0;
-    color: inherit;
-  }
-  .badge.pos .badge-ico {
-    background: rgba(52, 211, 153, .10);
-    border-color: rgba(52, 211, 153, .25);
-  }
-  .badge.neg .badge-ico {
-    background: rgba(251, 113, 133, .10);
-    border-color: rgba(251, 113, 133, .25);
-  }
-  button.badge-ico.editable { cursor: pointer; transition: var(--t-fast); }
-  button.badge-ico.editable:hover {
-    border-color: var(--accent-border);
-    background: var(--accent-bg);
-    transform: scale(1.06);
-  }
-  button.badge-ico.editable:focus-visible {
-    outline: none;
-    border-color: var(--accent-focus);
-    box-shadow: 0 0 0 3px var(--accent-ring);
-  }
-
-  .badge-body { flex: 1; min-width: 0; }
-
-  .badge-text {
-    margin: 2px 0 6px;
-    font-size: 16px;
-    line-height: 1.45;
-    font-weight: 600;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-
-  .badge-meta {
-    margin: 0;
-    font-size: 12px;
-    color: var(--muted);
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .badge-meta .kind { font-weight: 600; }
-  .badge.pos .badge-meta .kind { color: var(--pos-soft); }
-  .badge.neg .badge-meta .kind { color: var(--neg-soft); }
-  .badge-meta .sep { color: var(--faint); }
-
-  .badge-meta .badge-by {
-    color: var(--faint);
-    text-decoration: none;
-    border-bottom: 1px dotted transparent;
-    transition: var(--t-fast);
-  }
-  .badge-meta .badge-by .at { color: var(--accent-soft); }
-  .badge-meta .badge-by:hover {
-    color: var(--text);
-    border-bottom-color: var(--accent-border);
-  }
-  .badge-meta .badge-by:hover .at { color: var(--accent); }
-  .badge-meta .badge-by:focus-visible {
-    outline: none;
-    border-radius: 3px;
-    box-shadow: 0 0 0 2px var(--accent-ring);
-  }
-
-  .badge-meta .badge-date {
-    color: var(--faint);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  /* Хвост: [эмодзи-статус] → [кнопка действия].
-     На hover статус уезжает левее, кнопка встаёт на его место. */
-  .badge-tail {
-    position: relative;
-    flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    align-self: flex-start;
-  }
-
-  .badge-tail > .badge-status,
-  .badge-tail > .badge-actions {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transition: opacity .18s ease, transform .22s cubic-bezier(.2,.7,.3,1);
-    will-change: transform, opacity;
-  }
-
-  .badge-status {
-    z-index: 1;
-    font-size: 15px;
-    line-height: 1;
-    padding: 0 2px;
-    user-select: none;
-    -webkit-user-select: none;
-    transform: translate(-50%, -50%);
-  }
-  .badge-status.added { opacity: .85; }
-
-  .badge-actions {
-    z-index: 2;
-    display: flex;
-    gap: var(--s-2);
-    align-items: center;
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(-50%, -50%) translateX(10px);
-  }
-
-  /* Раскрытие кнопок — только там, где есть настоящий hover.
-     На тач-экранах блок не применяется, поэтому «залипший» hover
-     после тапа больше не выталкивает кнопки. */
-  @media (hover: hover) and (pointer: fine) {
-    .badge:hover .badge-actions,
-    .badge:focus-within .badge-actions {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, -50%);
-    }
-
-    .badge:hover .badge-status,
-    .badge:focus-within .badge-status {
-      transform: translate(-50%, -50%) translateX(-40px);
-    }
-  }
-
-  /* Тач-устройства: статус и кнопка всегда видны, статично, без выезда */
-  @media (hover: none), (pointer: coarse) {
-    .badge-tail {
-      width: auto;
-      height: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .badge-tail > .badge-status,
-    .badge-tail > .badge-actions {
-      position: static;
-      transform: none;
-      opacity: 1;
-      pointer-events: auto;
-      transition: none;
-    }
-  }
-
-  /* Индикатор «мой» состояния значка */
-  .badge-status {
-    flex-shrink: 0;
-    font-size: 15px;
-    line-height: 1;
-    padding: 0 2px;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .badge-status.added { opacity: .85; }
-
-  .badge.unreceived {
-    background: linear-gradient(180deg, #12151c, #0f1218);
-    border-style: dashed;
-    border-color: var(--border-dashed);
-  }
-  .badge.unreceived::before {
-    background: linear-gradient(180deg, #4a5568, #2d3748);
-  }
-  .badge.unreceived .badge-ico {
-    background: rgba(255, 255, 255, .03);
-    border-color: #2a3142;
-    filter: grayscale(1);
-    opacity: .55;
-  }
-  .badge.unreceived .badge-text { color: #9aa3b8; }
-  .badge.unreceived .badge-meta .kind { color: #7a8499; }
-
-  .icon-btn {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--border);
-    background: var(--field);
-    color: var(--muted);
-    border-radius: var(--r-sm);
-    cursor: pointer;
-    transition: var(--t-fast);
-    padding: 0;
-  }
-  .icon-btn svg { display: block; }
-  .icon-btn:hover { color: var(--text); border-color: var(--border-strong); }
-  .icon-btn.danger:hover { color: #fff; background: var(--grad-danger); border-color: transparent; }
-  .icon-btn.cancel:hover { color: #fff; background: var(--grad-accent); border-color: transparent; }
-  .icon-btn.add:hover    { color: #fff; background: var(--grad-accent); border-color: transparent; }
-  .icon-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-  .empty {
-    text-align: center;
-    padding: var(--s-7) var(--s-4);
-    color: var(--muted);
-    border: 1px dashed var(--border-dashed);
-    border-radius: var(--r-lg);
-  }
-  .empty .big { font-size: 40px; margin-bottom: var(--s-3); }
-
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(4, 6, 12, .72);
-    backdrop-filter: blur(3px);
-    display: grid;
-    place-items: center;
-    padding: 16px;
-    z-index: 40;
-  }
-  .modal {
-    width: 100%;
-    max-width: 420px;
-    max-height: calc(100vh - 32px);
-    max-height: calc(100dvh - 32px);
-    overflow-y: auto;
-    background: var(--grad-card);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--r-xl);
-    padding: var(--s-5);
-    box-shadow: var(--shadow-modal);
-    animation: pop .2s ease;
-  }
-  @keyframes pop {
-    from { transform: scale(.96); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
-  }
-  .modal h3 { margin: 0 0 var(--s-4); font-size: 18px; }
-  .modal-actions {
-    display: flex;
-    gap: var(--s-3);
-    justify-content: flex-end;
-    margin-top: var(--s-5);
-  }
-
-  .emoji-picker {
-    display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 6px;
-    margin-top: var(--s-2);
-    max-height: min(50vh, 320px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 2px;
-  }
-  .emoji-picker button {
-    aspect-ratio: 1;
-    min-width: 0;
-    min-height: 0;
-    border: 1px solid var(--border);
-    background: var(--field);
-    border-radius: var(--r-sm);
-    font-size: 20px;
-    line-height: 1;
-    cursor: pointer;
-    transition: var(--t-fast);
-    display: grid;
-    place-items: center;
-    padding: 0;
-    overflow: hidden;
-  }
-  .emoji-picker button:hover { border-color: var(--accent-border); background: var(--accent-bg); }
-  .emoji-picker button.active { border-color: var(--accent); background: var(--accent-bg); }
-
-  @media (max-width: 560px) {
-    body { padding: 24px 10px 64px; }
-    .card { padding: var(--s-4); }
-
-    .page-head { margin-bottom: var(--s-5); }
-    .who-link { max-width: 140px; font-size: 12px; }
-
-    .profile-header {
-      flex-direction: column;
-      align-items: flex-start;
-      text-align: left;
-      gap: var(--s-3);
-      padding-right: 0;
-    }
-    .profile-info { width: 100%; }
-    .profile-avatar { width: 64px; height: 64px; font-size: 28px; }
-    .profile-name { font-size: 18px; }
-
-    .profile-card .profile-top-actions { top: var(--s-3); right: var(--s-3); }
-
-    .add-row { flex-direction: column; align-items: stretch; }
-    .add-row .btn { width: 100%; }
-    .add-row .grow { width: 100%; }
-    .add-row .bin { width: 100%; }
-
-    .toolbar { gap: var(--s-2); }
-    .filters { flex-wrap: wrap; }
-    .filters button { padding: 6px 10px; font-size: 12px; }
-    .check-line { font-size: 12px; padding: 5px 10px; }
-
-    .badge {
-      gap: var(--s-3);
-      padding: var(--s-3) var(--s-3) var(--s-3) var(--s-4);
-      border-radius: var(--r-md);
-    }
-    .badge-ico { flex-basis: 40px; width: 40px; height: 40px; font-size: 20px; }
-    .badge-text { font-size: 15px; }
-
-    .icon-btn { width: 32px; height: 32px; }
-
-    .modal-backdrop { padding: 10px; }
-    .modal { padding: var(--s-4); border-radius: var(--r-lg); }
-    .modal h3 { font-size: 17px; margin-bottom: var(--s-3); }
-    .emoji-picker {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 5px;
-      max-height: none;
-    }
-    .emoji-picker button { font-size: 17px; border-radius: 7px; }
-  }
-
-  @media (max-width: 380px) {
-    .emoji-picker { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-    .emoji-picker button { font-size: 16px; }
-  }
-    </style>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/profile.css">
   </head>
-  <body>
+  <body x-data="profilePage">
 
     <div class="wrap">
 
@@ -908,16 +19,19 @@ input.invalid {
         </div>
 
         <div class="me">
-          <a class="who-link" id="who-link" href="#">
-            <span id="who-link-text">@…</span>
+          <a class="who-link"
+             :href="me ? '/@' + encodeURIComponent(me.username) : '#'"
+             :title="me ? me.full_name + ' (@' + me.username + ')' : ''">
+            <span x-text="me ? '@' + me.username : '@…'"></span>
           </a>
         </div>
       </header>
 
-      <section class="card profile-card" id="profile-card" style="display:none;">
+      <section class="card profile-card" x-show="profile" x-cloak>
         <div class="profile-top-actions">
-          <button type="button" class="icon-btn" id="btn-share-profile"
-                  title="Поделиться профилем" aria-label="Поделиться профилем">
+          <button type="button" class="icon-btn"
+                  title="Поделиться профилем" aria-label="Поделиться профилем"
+                  @click="shareProfile()">
             <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="18" cy="5" r="3"></circle>
@@ -928,8 +42,9 @@ input.invalid {
             </svg>
           </button>
 
-          <button type="button" class="icon-btn" id="btn-signout"
-                  title="Выйти" aria-label="Выйти">
+          <button type="button" class="icon-btn" x-show="isOwnProfile"
+                  title="Выйти" aria-label="Выйти"
+                  @click="signout()">
             <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"></path>
@@ -940,947 +55,242 @@ input.invalid {
         </div>
 
         <div class="profile-header">
-          <div class="profile-avatar" id="profile-avatar"></div>
+          <div class="profile-avatar" x-text="profile ? initial(profile.full_name) : ''"></div>
           <div class="profile-info">
-            <h2 class="profile-name" id="profile-name"></h2>
-            <a class="profile-username" id="profile-username" href="#"></a>
-            <p class="profile-bio" id="profile-bio"></p>
-            <p class="profile-joined" id="profile-joined"></p>
+            <h2 class="profile-name" x-text="profile ? profile.full_name : ''"></h2>
+            <a class="profile-username"
+               :href="profile ? '/@' + encodeURIComponent(profile.username) : '#'"
+               x-text="profile ? '@' + profile.username : ''"></a>
+            <p class="profile-bio"
+               x-show="profile && profile.bio && profile.bio.trim()"
+               x-text="profile ? profile.bio : ''"></p>
+            <p class="profile-joined" x-text="joinedText"></p>
           </div>
         </div>
 
-        <div class="balance" id="balance" hidden>
+        <div class="balance" x-show="balance" x-cloak
+             :data-zone="balance ? balance.zone : null"
+             :title="balance ? balance.tooltip : ''"
+             x-effect="balancePct = balance ? balance.pct : '0%'">
           <div class="balance-top">
-            <span class="balance-verdict" id="balance-verdict"></span>
-            <span class="balance-counts" id="balance-counts"></span>
+            <span class="balance-verdict">
+              <span class="bal-icon" x-text="balance ? balance.icon : ''"></span>
+              <span class="bal-text" x-text="balance ? balance.text : ''"></span>
+            </span>
+            <span class="balance-counts"
+                  x-text="balance ? '🏆 ' + balance.positives + ' · 💀 ' + balance.negatives : ''"></span>
           </div>
           <div class="balance-track" aria-hidden="true">
-            <div class="balance-marker" id="balance-marker"></div>
+            <div class="balance-marker" :style="{ left: balancePct }"></div>
           </div>
         </div>
       </section>
 
-      <section class="card add-card" id="add-card">
+      <section class="card add-card" x-show="isOwnProfile" x-cloak>
         <h2>Новый значок</h2>
-        <form id="form-add" novalidate>
+        <form @submit.prevent="addBadge" novalidate>
           <div class="add-row">
             <div class="grow">
-              <input type="text" id="add-title" name="title" maxlength="50"
-                                                             placeholder="выучил новый язык"
-                                                             autocomplete="off" spellcheck="false">
+              <input type="text" name="title" maxlength="50"
+                     x-ref="titleInput"
+                     x-model="newTitle"
+                     @input="onTitleInput"
+                     :class="{ invalid: titleInvalid }"
+                     :disabled="adding"
+                     :placeholder="catalogPlaceholder"
+                     autocomplete="off" spellcheck="false">
             </div>
-            <button type="submit" class="btn primary" id="btn-add">Добавить</button>
+            <button type="submit" class="btn primary"
+                    :disabled="adding"
+                    :aria-busy="adding ? 'true' : 'false'"
+                    x-text="adding ? 'Добавляем…' : 'Добавить'"></button>
           </div>
 
-          <div class="detect" id="detect" aria-live="polite">
-            <span class="faint">Введи название — определим, достижение это или нет</span>
+          <div class="detect" :class="detectClass" aria-live="polite">
+            <span class="faint" x-show="detect.state === 'idle'">Введи название — определим, достижение это или нет</span>
+            <template x-if="detect.state === 'loading'">
+              <span class="spinner"></span>
+            </template>
+            <span x-show="detect.state === 'loading'">Определяем…</span>
+            <span x-show="detect.state === 'done'"
+                  x-text="detect.polarity === 'positive' ? '🏆' : '💀'"></span>
+            <span x-show="detect.state === 'done'" class="tag"
+                  x-text="detect.polarity === 'positive' ? 'Достижение' : 'Анти-достижение'"></span>
+            <span x-show="detect.state === 'done' && detect.inCatalog" class="faint">· уже есть в каталоге</span>
           </div>
         </form>
       </section>
 
       <section class="card">
         <div class="toolbar">
-          <div class="filters" id="filters">
-            <button type="button" data-filter="all" class="active">Все</button>
-            <button type="button" data-filter="positive">🏆 Достижения</button>
-            <button type="button" data-filter="negative">💀 Анти</button>
+          <div class="filters">
+            <button type="button" :class="{ active: filter === 'all' }"
+                    @click="filter = 'all'">Все</button>
+            <button type="button" :class="{ active: filter === 'positive' }"
+                    @click="filter = 'positive'">🏆 Достижения</button>
+            <button type="button" :class="{ active: filter === 'negative' }"
+                    @click="filter = 'negative'">💀 Анти</button>
           </div>
-          <label class="check-line" id="receivedToggle" title="Показывать только полученные значки">
-            <input type="checkbox" id="showReceived">
+          <label class="check-line" :class="{ active: showReceivedOnly }"
+                 title="Показывать только полученные значки">
+            <input type="checkbox" x-model="showReceivedOnly">
             <span>Полученные</span>
           </label>
-          <button type="button" class="btn ghost sm" id="btn-refresh">Обновить</button>
+          <button type="button" class="btn ghost sm" @click="loadBadges()">Обновить</button>
         </div>
-        <div id="list"></div>
+
+        <div>
+          <div class="badge-list" x-show="filteredBadges.length">
+            <template x-for="b in filteredBadges" :key="b.id">
+              <article class="badge" :class="badgeClass(b)" :data-id="b.id"
+                       @pointerdown="startPress($event, b)"
+                       @contextmenu.prevent>
+
+                <template x-if="isOwnProfile && b.is_creator">
+                  <button type="button" class="badge-ico editable"
+                          title="Нажми, чтобы сменить иконку" aria-label="Сменить иконку"
+                          @click.stop="openEmojiModal(b)"
+                          x-text="b.emoji || '🏅'"></button>
+                </template>
+                <template x-if="!(isOwnProfile && b.is_creator)">
+                  <div class="badge-ico" x-text="b.emoji || '🏅'"></div>
+                </template>
+
+                <div class="badge-body">
+                  <p class="badge-text" x-text="b.title"></p>
+                  <p class="badge-meta">
+                    <span class="kind" x-text="kindLabel(b)"></span>
+
+                    <template x-if="showCreator(b)">
+                      <span>
+                        <span class="sep">·</span>
+                        <a class="badge-by" :href="creatorHref(b)"
+                           :title="'Открыть профиль @' + b.creator_username">
+                          by <span class="at" x-text="'@' + b.creator_username"></span>
+                        </a>
+                      </span>
+                    </template>
+
+                    <template x-if="b.received && b.received_at && receivedDate(b.received_at)">
+                      <span class="badge-date"
+                            :title="'Получен: ' + receivedDateFull(b.received_at)"
+                            x-text="'📆 ' + receivedDate(b.received_at)"></span>
+                    </template>
+                  </p>
+                </div>
+
+                <div class="badge-tail">
+                  <span class="badge-status ok"
+                        x-show="!isOwnProfile && isReceivedFor(b)"
+                        title="У вас получен">✅</span>
+                  <span class="badge-status added"
+                        x-show="!isOwnProfile && myBadge(b) && !myBadge(b).received"
+                        title="У вас на странице">📎</span>
+
+                  <div class="badge-actions">
+                    <!-- Свой профиль: отменить получение -->
+                    <button type="button" class="icon-btn cancel"
+                            x-show="isOwnProfile && b.received"
+                            title="Отменить получение" aria-label="Отменить получение"
+                            @click.stop="unreceive(b.id)">
+                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 6l12 12M18 6L6 18"/>
+                      </svg>
+                    </button>
+
+                    <!-- Свой профиль: удалить -->
+                    <button type="button" class="icon-btn danger"
+                            x-show="isOwnProfile && !b.received"
+                            title="Удалить со страницы" aria-label="Удалить со страницы"
+                            @click.stop="remove(b.id)">
+                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/><path d="M8 6V4h8v2"/>
+                        <path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
+                      </svg>
+                    </button>
+
+                    <!-- Чужой профиль: мой значок получен → отменить -->
+                    <button type="button" class="icon-btn cancel"
+                            x-show="!isOwnProfile && isReceivedFor(b)"
+                            title="Отменить получение у себя" aria-label="Отменить получение у себя"
+                            @click.stop="unreceive(myBadge(b).id)">
+                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 6l12 12M18 6L6 18"/>
+                      </svg>
+                    </button>
+
+                    <!-- Чужой профиль: значок у меня есть, но не получен → убрать -->
+                    <button type="button" class="icon-btn danger"
+                            x-show="!isOwnProfile && myBadge(b) && !myBadge(b).received"
+                            title="Убрать со своей страницы" aria-label="Убрать со своей страницы"
+                            @click.stop="remove(myBadge(b).id)">
+                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/><path d="M8 6V4h8v2"/>
+                        <path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
+                      </svg>
+                    </button>
+
+                    <!-- Чужой профиль: значка у меня нет → добавить -->
+                    <button type="button" class="icon-btn add"
+                            x-show="!isOwnProfile && !myBadge(b)"
+                            title="Добавить к себе" aria-label="Добавить к себе"
+                            @click.stop="add(b)">
+                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12h14"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+              </article>
+            </template>
+          </div>
+
+          <div class="empty" x-show="!filteredBadges.length" x-cloak>
+            <div class="big" x-text="emptyState.icon"></div>
+            <div x-text="emptyState.text"></div>
+          </div>
+        </div>
       </section>
 
     </div>
 
-    <div id="toast" role="status" aria-live="polite"></div>
-
-    <script>
-      (function () {
-        'use strict';
-
-        var LOOKUP_URL      = '/api/badge/lookup';
-        var BADGES_URL      = '/api/badges';
-        var CATALOG_URL     = '/api/badges/catalog';
-        var USER_BADGES_URL = '/api/user-badges';
-        var ME_URL          = '/api/me';
-        var SIGNOUT_URL     = '/api/signout';
-
-        function getUsernameFromPath() {
-          var match = window.location.pathname.match(/^\/@([^/]+)/);
-          return match ? decodeURIComponent(match[1]) : null;
-        }
-
-        var VIEWED_USERNAME = getUsernameFromPath();
-        var IS_OWN_PROFILE  = false;
-
-        var DEFAULT_PLACEHOLDER = 'выучил новый язык';
-        var LONGPRESS_MS = 1200;
-
-        var EMOJI_CHOICES = [
-          '🏆', '💰', '🎖️', '⭐', '🔥', '💪', '🚀', '🧠',
-          '🎯', '📚', '💡', '❤️', '😎', '🤝', '😈', '⚡',
-          '💀', '🤡', '🎓', '🥴', '💤', '😢', '🧳', '🍔'
-        ];
-
-        var ICON_TRASH =
-          '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" ' +
-          'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M3 6h18"/><path d="M8 6V4h8v2"/>' +
-          '<path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/></svg>';
-
-        var ICON_CROSS =
-          '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" ' +
-          'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M6 6l12 12M18 6L6 18"/></svg>';
-
-        var ICON_PLUS =
-          '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" ' +
-          'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M12 5v14M5 12h14"/></svg>';
-
-        var toastEl = document.getElementById('toast');
-        var toastTimer = null;
-
-        function toast(msg) {
-          toastEl.textContent = msg;
-          toastEl.classList.add('show');
-          clearTimeout(toastTimer);
-          toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2400);
-        }
-
-        function extractErrorMessage(data, status) {
-          if (data && typeof data.detail === 'string') return data.detail;
-          if (data && Array.isArray(data.detail) && data.detail.length) {
-            return data.detail.map(function (item) {
-              return item.msg || 'неверное значение';
-            }).join('; ');
-          }
-          return 'Что-то пошло не так (' + status + ')';
-        }
-
-        async function apiFetch(url, options) {
-          options = options || {};
-          options.headers = Object.assign(
-            { 'Accept': 'application/json' },
-            options.headers || {}
-          );
-          if (options.body && !options.headers['Content-Type']) {
-            options.headers['Content-Type'] = 'application/json';
-          }
-
-          var res = await fetch(url, options);
-          var data = null;
-          if (res.status !== 204) {
-            try { data = await res.json(); } catch (e) { data = null; }
-          }
-          return { ok: res.ok, status: res.status, data: data };
-        }
-
-        var state = {
-          me: null,
-          profile: null,
-          badges: [],
-          catalog: [],
-          /* badge_id -> мой user-badge (если он у меня есть) */
-          myBadgesByBadgeId: {}
-        };
-
-        var filter = 'all';
-        var showReceivedOnly = false;
-
-        function findBadgeById(id) {
-          for (var i = 0; i < state.badges.length; i++) {
-            if (String(state.badges[i].id) === String(id)) return state.badges[i];
-          }
-          return null;
-        }
-
-        function renderWho() {
-          if (!state.me) return;
-          var link = document.getElementById('who-link');
-          var text = document.getElementById('who-link-text');
-          if (!link || !text) return;
-          link.href = '/@' + encodeURIComponent(state.me.username);
-          link.title = state.me.full_name + ' (@' + state.me.username + ')';
-          text.textContent = '@' + state.me.username;
-        }
-
-        function renderProfileCard(user) {
-          if (!user) return;
-
-          var profileCard = document.getElementById('profile-card');
-          var avatar      = document.getElementById('profile-avatar');
-          var nameEl      = document.getElementById('profile-name');
-          var usernameEl  = document.getElementById('profile-username');
-          var bioEl       = document.getElementById('profile-bio');
-          var joinedEl    = document.getElementById('profile-joined');
-
-          var initial = (user.full_name || '?').trim().charAt(0).toUpperCase();
-          avatar.textContent = initial;
-
-          nameEl.textContent = user.full_name;
-
-          document.title = 'Peerpeak: @' + user.username;
-
-          usernameEl.textContent = '@' + user.username;
-          usernameEl.href = '/@' + encodeURIComponent(user.username);
-
-          if (user.bio && user.bio.trim()) {
-            bioEl.textContent = user.bio;
-            bioEl.style.display = '';
-          } else {
-            bioEl.textContent = '';
-            bioEl.style.display = 'none';
-          }
-
-          if (user.created_at) {
-            var d = new Date(user.created_at);
-            if (!isNaN(d.getTime())) {
-              var months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-                'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-              joinedEl.textContent = 'В Peerpeak с ' + d.getDate() + ' ' +
-                months[d.getMonth()] + ' ' + d.getFullYear() + ' г.';
-            }
-          }
-
-          profileCard.style.display = 'block';
-
-          var shareBtn = document.getElementById('btn-share-profile');
-          if (shareBtn) {
-            shareBtn.onclick = function () { shareProfile(user.username); };
-          }
-        }
-
-        /* ==========================================================
-   БАЛАНС ПРОФИЛЯ
-   ========================================================== */
-var BALANCE_VERDICTS = {
-  pos: { icon: '🎭', text: 'витрина',      hint: 'Одни достижения. Такое вообще бывает?' },
-  bal: { icon: '⚖️', text: 'баланс',       hint: 'Здоровое соотношение: и победы, и провалы.' },
-  neg: { icon: '🌧️', text: 'траур',        hint: 'Слишком много провалов. Может, стоит вспомнить и победы?' }
-};
-
-/* Границы зон по доле достижений p/(p+n):
-   < 0.55            → «мрачновато»
-   0.55 .. 0.85      → «баланс»   (идеал ≈ 3:1 = 0.75)
-   > 0.85            → «витрина»  */
-var BALANCE_MIN_TOTAL = 5;
-var BALANCE_LOW       = 0.55;
-var BALANCE_HIGH      = 0.85;
-
-function computeBalance(badges) {
-  var p = 0, n = 0;
-  (badges || []).forEach(function (b) {
-    if (!b.received) return;            /* учитываем только полученные */
-    if (b.polarity === 'positive') p++;
-    else n++;
-  });
-  var total = p + n;
-  if (total < BALANCE_MIN_TOTAL) return null;
-
-  var score = p / total;
-  var zone;
-  if (score > BALANCE_HIGH)     zone = 'pos';
-  else if (score < BALANCE_LOW) zone = 'neg';
-  else                          zone = 'bal';
-
-  return { positives: p, negatives: n, total: total, score: score, zone: zone };
-}
-
-      function renderBalance() {
-        var el = document.getElementById('balance');
-        if (!el) return;
-
-        var b = computeBalance(state.badges);
-        if (!b) {
-          el.hidden = true;
-          el.removeAttribute('data-zone');
-          delete el.dataset.rendered;
-          return;
-        }
-
-        el.hidden = false;
-        el.dataset.zone = b.zone;
-
-        var v = BALANCE_VERDICTS[b.zone];
-        var verdictEl = document.getElementById('balance-verdict');
-        var countsEl  = document.getElementById('balance-counts');
-        var marker    = document.getElementById('balance-marker');
-
-        verdictEl.innerHTML =
-          '<span class="bal-icon">' + v.icon + '</span>' +
-          '<span class="bal-text">' + v.text + '</span>';
-
-        countsEl.textContent = '🏆 ' + b.positives + ' · 💀 ' + b.negatives;
-
-        el.title = v.hint +
-          '\nПолученных достижений: ' + b.positives +
-          '\nПолученных антидостижений: ' + b.negatives +
-          '\nИдеал — около 3:1 (75%)';
-
-        /* Анимация: первый раз стартуем из 0, дальше — просто едем к новой точке */
-        if (!el.dataset.rendered) {
-          marker.style.left = '0%';
-          void marker.offsetWidth; /* reflow */
-          el.dataset.rendered = '1';
-        }
-        marker.style.left = (b.score * 100).toFixed(1) + '%';
-      }
-
-      function shareProfile(username) {
-          var url = window.location.origin + '/@' + username;
-
-          if (navigator.share) {
-            navigator.share({
-              title: 'Профиль @' + username + ' на Peerpeak',
-              text: 'Посмотри мой профиль на Peerpeak!',
-              url: url
-            }).catch(function (err) {
-              if (err && err.name !== 'AbortError') fallbackCopy(url);
-            });
-          } else {
-            fallbackCopy(url);
-          }
-        }
-
-        function fallbackCopy(text) {
-          var textarea = document.createElement('textarea');
-          textarea.value = text;
-          textarea.style.position = 'fixed';
-          textarea.style.opacity = '0';
-          document.body.appendChild(textarea);
-          textarea.select();
-          try {
-            document.execCommand('copy');
-            toast('Ссылка скопирована: ' + text);
-          } catch (e) {
-            toast('Не удалось скопировать. Ссылка: ' + text);
-          }
-          document.body.removeChild(textarea);
-        }
-
-        function escapeHtml(s) {
-          return String(s).replace(/[&<>"']/g, function (c) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-          });
-      }
-
-        function polarityLabel(p) {
-          return p === 'negative' ? 'Анти-достижение' : 'Достижение';
-        }
-
-        function formatReceivedAt(iso) {
-          if (!iso) return '';
-          var d = new Date(iso);
-          if (isNaN(d.getTime())) return '';
-          var y = d.getFullYear();
-          var m = String(d.getMonth() + 1).padStart(2, '0');
-          var day = String(d.getDate()).padStart(2, '0');
-          return y + '-' + m + '-' + day;
-        }
-
-        function formatReceivedAtFull(iso) {
-          if (!iso) return '';
-          var d = new Date(iso);
-          if (isNaN(d.getTime())) return '';
-          try { return d.toLocaleString('ru-RU'); } catch (e) { return ''; }
-        }
-
-        function badgeItemHTML(b) {
-          var pos = b.polarity === 'positive';
-          var cls = (pos ? 'pos' : 'neg') + (b.received ? '' : ' unreceived');
-
-          /* Состояние «моего» значка (только на чужом профиле) */
-          var myBadge = null;
-          if (!IS_OWN_PROFILE) {
-            myBadge = state.myBadgesByBadgeId[b.badge_id] || null;
-          }
-
-          /* Можно ли зажать → получить (значок ещё не получен мной) */
-          var canPress = IS_OWN_PROFILE ? !b.received : !(myBadge && myBadge.received);
-          if (canPress) cls += ' can-press';
-
-          var ico;
-          if (IS_OWN_PROFILE && b.is_creator) {
-            ico =
-              '<button type="button" class="badge-ico editable"' +
-              ' data-action="edit" data-id="' + b.id + '"' +
-              ' title="Нажми, чтобы сменить иконку" aria-label="Сменить иконку">' +
-              escapeHtml(b.emoji || '🏅') +
-              '</button>';
-          } else {
-            ico = '<div class="badge-ico">' + escapeHtml(b.emoji || '🏅') + '</div>';
-          }
-
-          var meta = '<span class="kind">' + polarityLabel(b.polarity) + '</span>';
-
-          if (b.creator_username && (!state.me || b.creator_username !== state.me.username)) {
-            meta += '<span class="sep">·</span>';
-            meta += '<a class="badge-by" href="/@' + encodeURIComponent(b.creator_username) +
-              '" title="Открыть профиль @' + escapeHtml(b.creator_username) + '">' +
-              'by <span class="at">@' + escapeHtml(b.creator_username) + '</span></a>';
-          }
-
-          if (b.received && b.received_at) {
-            var humanDate = formatReceivedAt(b.received_at);
-            if (humanDate) {
-              meta += '<span class="badge-date" title="Получен: ' +
-                escapeHtml(formatReceivedAtFull(b.received_at)) + '">' +
-                '📆 ' + escapeHtml(humanDate) +
-                '</span>';
-            }
-          }
-
-          /* Кнопка действия + эмодзи-статус */
-          var actionBtn = '';
-          var statusHtml = '';
-
-          if (IS_OWN_PROFILE) {
-            actionBtn = b.received
-              ? '<button type="button" class="icon-btn cancel" data-action="unreceive" data-id="' +
-              b.id + '" title="Отменить получение" aria-label="Отменить получение">' +
-              ICON_CROSS + '</button>'
-              : '<button type="button" class="icon-btn danger" data-action="delete" data-id="' +
-              b.id + '" title="Удалить со страницы" aria-label="Удалить со страницы">' +
-              ICON_TRASH + '</button>';
-          } else if (myBadge && myBadge.received) {
-            /* Мой значок уже получен → крестик + ✅ */
-            actionBtn =
-              '<button type="button" class="icon-btn cancel" data-action="unreceive" data-id="' +
-              myBadge.id + '" title="Отменить получение у себя" aria-label="Отменить получение у себя">' +
-              ICON_CROSS + '</button>';
-            statusHtml = '<span class="badge-status ok" title="У вас получен">✅</span>';
-          } else if (myBadge) {
-            /* Значок у меня на странице, но не получен → урна + 📎 */
-            actionBtn =
-              '<button type="button" class="icon-btn danger" data-action="delete" data-id="' +
-              myBadge.id + '" title="Убрать со своей страницы" aria-label="Убрать со своей страницы">' +
-              ICON_TRASH + '</button>';
-            statusHtml = '<span class="badge-status added" title="У вас на странице">📎</span>';
-          } else {
-            /* Значка у меня нет → плюс, добавить к себе */
-            actionBtn =
-              '<button type="button" class="icon-btn add" data-action="add" data-id="' +
-              b.id + '" title="Добавить к себе" aria-label="Добавить к себе">' +
-              ICON_PLUS + '</button>';
-          }
-
-          var tail = '';
-          if (actionBtn || statusHtml) {
-            tail =
-              '<div class="badge-tail">' +
-              statusHtml +
-              '<div class="badge-actions">' + actionBtn + '</div>' +
-              '</div>';
-          }
-
-          return '' +
-            '<article class="badge ' + cls + '" data-id="' + b.id + '">' +
-            ico +
-            '<div class="badge-body">' +
-            '<p class="badge-text">' + escapeHtml(b.title) + '</p>' +
-            '<p class="badge-meta">' + meta + '</p>' +
-            '</div>' +
-            tail +
-            '</article>';
-        }
-
-        function renderList() {
-          var list = document.getElementById('list');
-
-          var items = filter === 'all'
-            ? state.badges
-            : state.badges.filter(function (b) { return b.polarity === filter; });
-
-          if (showReceivedOnly) {
-            items = items.filter(function (b) {
-              if (IS_OWN_PROFILE) return b.received;
-              var mine = state.myBadgesByBadgeId[b.badge_id];
-              return !!(mine && mine.received);
-            });
-          }
-
-          if (!items.length) {
-            var html;
-            if (!state.badges.length) {
-              html = IS_OWN_PROFILE
-                ? '<div class="big">🏅</div><div>Пока нет ни одного значка.<br>Добавь первый выше!</div>'
-                : '<div class="big">🏅</div><div>У пользователя пока нет значков.</div>';
-            } else if (showReceivedOnly) {
-              html = '<div class="big">⏳</div><div>Полученных значков в этой категории пока нет.</div>';
-            } else {
-              html = '<div class="big">🔍</div><div>В этой категории пока ничего нет.</div>';
-            }
-            list.innerHTML = '<div class="empty">' + html + '</div>';
-            return;
-          }
-
-          list.innerHTML = '<div class="badge-list">' +
-            items.map(badgeItemHTML).join('') +
-            '</div>';
-        }
-
-        function renderAll() {
-          renderWho();
-          renderList();
-          renderBalance();
-        }
-
-        function setPlaceholderFromCatalog() {
-          var input = document.getElementById('add-title');
-          if (!input) return;
-
-          var titles = (state.catalog || []).filter(function (t) { return t && t.length; });
-          if (!titles.length) {
-            input.placeholder = DEFAULT_PLACEHOLDER;
-            return;
-          }
-          var pick = titles[Math.floor(Math.random() * titles.length)];
-          input.placeholder = pick;
-        }
-
-        async function loadCatalog() {
-          try {
-            var r = await apiFetch(CATALOG_URL);
-            if (!r.ok || !Array.isArray(r.data)) return;
-            state.catalog = r.data.map(function (item) {
-              if (typeof item === 'string') return item;
-              return item && item.title ? item.title : '';
-            }).filter(Boolean);
-          } catch (e) { /* тихо игнорируем */ }
-        }
-
-        async function loadMe() {
-          var r = await apiFetch(ME_URL);
-          if (r.status === 401) { window.location.assign('/auth'); return false; }
-          if (!r.ok) { toast('Не удалось загрузить профиль'); return false; }
-          state.me = r.data;
-          return true;
-        }
-
-        async function loadViewedUser() {
-          if (!VIEWED_USERNAME) return null;
-          var r = await apiFetch('/api/users/@' + encodeURIComponent(VIEWED_USERNAME));
-          if (!r.ok) return null;
-          return r.data;
-        }
-
-        async function loadBadges() {
-          var url = IS_OWN_PROFILE
-            ? BADGES_URL
-            : '/api/badges/@' + encodeURIComponent(VIEWED_USERNAME);
-
-          var r, myR = null;
-          if (IS_OWN_PROFILE) {
-            r = await apiFetch(url);
-          } else {
-            /* Параллельно тянем список владельца и свой — чтобы понять, что у меня уже есть */
-            var results = await Promise.all([apiFetch(url), apiFetch(BADGES_URL)]);
-            r = results[0];
-            myR = results[1];
-          }
-
-          if (r.status === 401) { window.location.assign('/auth'); return; }
-          if (!r.ok) { toast('Не удалось загрузить значки'); return; }
-          state.badges = r.data || [];
-
-          state.myBadgesByBadgeId = {};
-          if (!IS_OWN_PROFILE && myR && myR.ok && Array.isArray(myR.data)) {
-            myR.data.forEach(function (mb) {
-              if (!mb || mb.badge_id == null) return;
-              var key = String(mb.badge_id);
-              var existing = state.myBadgesByBadgeId[key];
-              /* Если найдётся и полученный, и не полученный вариант — оставляем полученный */
-              if (!existing || (mb.received && !existing.received)) {
-                state.myBadgesByBadgeId[key] = mb;
-              }
-            });
-          }
-
-          renderAll();
-        }
-
-        var detectEl    = document.getElementById('detect');
-        var addTitleEl  = document.getElementById('add-title');
-        var detectTimer = null;
-        var detectSeq   = 0;
-
-        function setDetect(html, cls) {
-          detectEl.className = 'detect' + (cls ? ' ' + cls : '');
-          detectEl.innerHTML = html;
-        }
-
-      function resetDetect() {
-        setDetect('<span class="faint">Начни вводить текст — определим, достижение это или нет</span>', '');
-      }
-
-      async function runDetect(text) {
-        var seq = ++detectSeq;
-        setDetect('<span class="spinner"></span><span>Определяем…</span>', '');
-
-        var r = await apiFetch(LOOKUP_URL + '?text=' + encodeURIComponent(text));
-        if (seq !== detectSeq) return;
-        if (!r.ok) { resetDetect(); return; }
-
-        var data = r.data;
-        var pos  = data.polarity === 'positive';
-        var cls  = pos ? 'pos' : 'neg';
-        var label = pos ? 'Достижение' : 'Анти-достижение';
-        var icon  = pos ? '🏆' : '💀';
-
-        var extra = data.badge
-          ? ' <span class="faint">· уже есть в каталоге</span>'
-          : '';
-
-        setDetect('<span>' + icon + '</span><span class="tag">' + label + '</span>' + extra, cls);
-      }
-
-      function scheduleDetect() {
-        clearTimeout(detectTimer);
-        var text = addTitleEl.value.trim();
-        if (!text) { detectSeq++; resetDetect(); return; }
-        detectTimer = setTimeout(function () { runDetect(text); }, 350);
-      }
-
-      addTitleEl.addEventListener('input', scheduleDetect);
-
-      var formAdd = document.getElementById('form-add');
-      var btnAdd  = document.getElementById('btn-add');
-
-      formAdd.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (!IS_OWN_PROFILE) return;
-
-        var title = addTitleEl.value.trim();
-        if (!title) {
-          addTitleEl.classList.add('invalid');
-          addTitleEl.focus();
-          toast('Введи название значка');
-          return;
-        }
-        addTitleEl.classList.remove('invalid');
-
-        btnAdd.disabled = true;
-        btnAdd.setAttribute('aria-busy', 'true');
-
-        try {
-          var r = await apiFetch(BADGES_URL, {
-            method: 'POST',
-            body: JSON.stringify({ title: title })
-          });
-
-          if (r.status === 401) { window.location.assign('/auth'); return; }
-          if (!r.ok) { toast(extractErrorMessage(r.data, r.status)); return; }
-
-          addTitleEl.value = '';
-          resetDetect();
-          toast('Значок добавлен');
-          await loadBadges();
-        } catch (err) {
-          toast('Нет связи с сервером');
-        } finally {
-          btnAdd.disabled = false;
-          btnAdd.removeAttribute('aria-busy');
-        }
-      });
-
-      var filterButtons = document.querySelectorAll('#filters button');
-      filterButtons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          filter = btn.dataset.filter;
-          filterButtons.forEach(function (b) { b.classList.toggle('active', b === btn); });
-          renderList();
-        });
-      });
-
-      document.getElementById('showReceived').addEventListener('change', function (e) {
-        showReceivedOnly = e.target.checked;
-        document.getElementById('receivedToggle').classList.toggle('active', showReceivedOnly);
-        renderList();
-      });
-
-      var listEl = document.getElementById('list');
-
-      async function handleReceive(id) {
-        var r = await apiFetch(USER_BADGES_URL + '/' + id + '/receive', { method: 'POST' });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { toast(extractErrorMessage(r.data, r.status)); return; }
-        toast('Значок получен! 🎉');
-        await loadBadges();
-      }
-
-      async function handleUnreceive(id) {
-        var r = await apiFetch(USER_BADGES_URL + '/' + id + '/unreceive', { method: 'POST' });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { toast(extractErrorMessage(r.data, r.status)); return; }
-        toast('Получение отменено');
-        await loadBadges();
-      }
-
-      async function handleDelete(id) {
-        var r = await apiFetch(USER_BADGES_URL + '/' + id, { method: 'DELETE' });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok && r.status !== 204) {
-          toast(extractErrorMessage(r.data, r.status));
-          return;
-        }
-        toast('Значок убран со страницы');
-        await loadBadges();
-      }
-      /* Добавить чужой значок к себе.
-        Используем тот же эндпоинт, что и на своей странице: POST /api/badges { title }.
-        Бэкенд сам сматчит с каталогом и создаст user-badge у текущего пользователя. */
-        async function handleAdd(viewed) {
-          var r = await apiFetch(BADGES_URL, {
-            method: 'POST',
-            body: JSON.stringify({ title: viewed.title })
-          });
-          if (r.status === 401) { window.location.assign('/auth'); return; }
-          if (!r.ok) { toast(extractErrorMessage(r.data, r.status)); return; }
-          toast('Значок добавлен на вашу страницу');
-          await loadBadges();
-        }
-
-      /* Long-press на чужом значке: добавить (если нужно) и сразу засчитать полученным. */
-        async function handleAddAndReceive(viewed) {
-          var r = await apiFetch(BADGES_URL, {
-            method: 'POST',
-            body: JSON.stringify({ title: viewed.title })
-          });
-          if (r.status === 401) { window.location.assign('/auth'); return; }
-          if (!r.ok) { toast(extractErrorMessage(r.data, r.status)); return; }
-
-          /* Ответ POST /api/badges — это созданный user-badge (как в списке на своей странице),
-            поэтому его id можно сразу скармливать в /api/user-badges/{id}/receive. */
-            var newId = (r.data && r.data.id != null) ? r.data.id : null;
-          if (!newId) {
-            toast('Значок добавлен на вашу страницу');
-            await loadBadges();
-            return;
-          }
-
-          var r2 = await apiFetch(USER_BADGES_URL + '/' + newId + '/receive', { method: 'POST' });
-            if (r2.ok) toast('Значок добавлен и получен! 🎉');
-            else toast('Значок добавлен на вашу страницу');
-
-            await loadBadges();
-          }
-
-      listEl.addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-action]');
-        if (!btn) return;
-
-        var action = btn.dataset.action;
-        var id = btn.dataset.id;
-
-        if (action === 'unreceive') handleUnreceive(id);
-        if (action === 'delete')    handleDelete(id);
-        if (action === 'add') {
-          var viewed = findBadgeById(id);
-          if (viewed) handleAdd(viewed);
-        }
-        if (action === 'edit') {
-          if (!IS_OWN_PROFILE) return;
-          openEmojiModal(id);
-        }
-      });
-
-      listEl.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        var btn = e.target.closest('[data-action="edit"]');
-        if (!btn || !IS_OWN_PROFILE) return;
-        e.preventDefault();
-        openEmojiModal(btn.dataset.id);
-      });
-
-      /* ==========================================================
-     LONG-PRESS → ПОЛУЧИТЬ ЗНАЧОК
-     ========================================================== */
-      var pressTimer  = null;
-      var pressTarget = null;
-
-      function cancelPress() {
-        if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-        if (pressTarget) { pressTarget.classList.remove('pressing'); pressTarget = null; }
-      }
-
-      function completePress() {
-        var badgeEl = pressTarget;
-        pressTimer = null;
-        pressTarget = null;
-        if (!badgeEl) return;
-        badgeEl.classList.remove('pressing');
-
-        var id = badgeEl.dataset.id;
-        var viewed = findBadgeById(id);
-        if (!viewed) return;
-
-        if (IS_OWN_PROFILE) {
-          if (!viewed.received) handleReceive(viewed.id);
-          return;
-        }
-
-        var myBadge = state.myBadgesByBadgeId[viewed.badge_id];
-        if (myBadge && !myBadge.received) {
-          handleReceive(myBadge.id);
-        } else if (!myBadge) {
-          handleAddAndReceive(viewed);
-        }
-      }
-
-      listEl.addEventListener('pointerdown', function (e) {
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
-
-        var badgeEl = e.target.closest('.badge');
-        if (!badgeEl) return;
-        if (e.target.closest('button')) return;
-        if (e.target.closest('a')) return;
-
-        var id = badgeEl.dataset.id;
-        var viewed = findBadgeById(id);
-        if (!viewed) return;
-
-        var alreadyReceived = IS_OWN_PROFILE
-          ? viewed.received
-          : !!(state.myBadgesByBadgeId[viewed.badge_id] &&
-            state.myBadgesByBadgeId[viewed.badge_id].received);
-
-        if (alreadyReceived) return; /* уже получен — нечего засчитывать */
-
-          cancelPress();
-        pressTarget = badgeEl;
-        badgeEl.classList.add('pressing');
-        pressTimer = setTimeout(completePress, LONGPRESS_MS);
-      });
-
-      document.addEventListener('pointerup', cancelPress);
-      document.addEventListener('pointercancel', cancelPress);
-      window.addEventListener('blur', cancelPress);
-      document.addEventListener('scroll', cancelPress, true);
-
-      listEl.addEventListener('contextmenu', function (e) {
-        if (e.target.closest('.badge')) e.preventDefault();
-      });
-
-      /* ==========================================================
-        МОДАЛКА СМЕНЫ ИКОНКИ
-        ========================================================== */
-        var modalBackdrop = null;
-
-      function closeEmojiModal() {
-        if (modalBackdrop) { modalBackdrop.remove(); modalBackdrop = null; }
-        document.removeEventListener('keydown', onModalKey);
-      }
-
-      function openEmojiModal(userBadgeId) {
-        if (!IS_OWN_PROFILE) return;
-        var badge = state.badges.filter(function (b) { return b.id === userBadgeId; })[0];
-        if (!badge || !badge.is_creator) return;
-
-        closeEmojiModal();
-
-        var grid = EMOJI_CHOICES.map(function (em) {
-          var active = em === badge.emoji ? ' active' : '';
-          return '<button type="button" class="' + active.trim() + '" data-emoji="' +
-                                em + '">' + em + '</button>';
-        }).join('');
-
-        modalBackdrop = document.createElement('div');
-        modalBackdrop.className = 'modal-backdrop';
-        modalBackdrop.innerHTML = '' +
-          '<div class="modal" role="dialog" aria-modal="true" aria-label="Смена иконки">' +
-          '<h3>Иконка значка</h3>' +
-          '<div class="emoji-picker">' + grid + '</div>' +
-          '<div class="modal-actions">' +
-          '<button type="button" class="btn ghost" data-close>Отмена</button>' +
-          '</div>' +
-          '</div>';
-
-        document.body.appendChild(modalBackdrop);
-
-        modalBackdrop.addEventListener('click', function (e) {
-          if (e.target === modalBackdrop || e.target.closest('[data-close]')) {
-            closeEmojiModal();
-            return;
-          }
-          var pick = e.target.closest('[data-emoji]');
-          if (pick) saveEmoji(badge.badge_id, pick.dataset.emoji);
-        });
-
-        document.addEventListener('keydown', onModalKey);
-      }
-
-      function onModalKey(e) {
-        if (e.key === 'Escape') closeEmojiModal();
-      }
-
-      async function saveEmoji(badgeId, emoji) {
-        var r = await apiFetch(BADGES_URL + '/' + badgeId, {
-          method: 'PATCH',
-          body: JSON.stringify({ emoji: emoji })
-        });
-
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { toast(extractErrorMessage(r.data, r.status)); return; }
-
-        closeEmojiModal();
-        toast('Иконка обновлена');
-        await loadBadges();
-      }
-
-      document.getElementById('btn-refresh').addEventListener('click', function () {
-        loadBadges();
-      });
-
-      document.getElementById('btn-signout').addEventListener('click', async function () {
-        try {
-          await apiFetch(SIGNOUT_URL, { method: 'POST' });
-        } catch (e) { /* игнорируем */ }
-        window.location.assign('/auth');
-      });
-
-      function applyProfileMode() {
-        var addCard = document.getElementById('add-card');
-        if (addCard) addCard.hidden = !IS_OWN_PROFILE;
-
-        var signoutBtn = document.getElementById('btn-signout');
-        if (signoutBtn) signoutBtn.hidden = !IS_OWN_PROFILE;
-      }
-
-      (async function init() {
-        var ok = await loadMe();
-        if (!ok) return;
-        renderWho();
-
-        if (VIEWED_USERNAME && VIEWED_USERNAME !== state.me.username) {
-          var viewed = await loadViewedUser();
-          if (viewed) {
-            state.profile = viewed;
-            IS_OWN_PROFILE = false;
-          } else {
-            state.profile = state.me;
-            IS_OWN_PROFILE = true;
-          }
-        } else {
-          state.profile = state.me;
-          IS_OWN_PROFILE = true;
-        }
-
-        renderProfileCard(state.profile);
-        applyProfileMode();
-
-        await loadCatalog();
-        setPlaceholderFromCatalog();
-
-        await loadBadges();
-      })();
-
-})();
-    </script>
+    <!-- ================= МОДАЛКА ИКОНКИ ================= -->
+    <template x-if="emojiModal.open">
+      <div class="modal-backdrop"
+           @click.self="closeEmojiModal()"
+           @keydown.escape.window="closeEmojiModal()">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Смена иконки">
+          <h3>Иконка значка</h3>
+          <div class="emoji-picker">
+            <template x-for="emoji in emojiChoices" :key="emoji">
+              <button type="button"
+                      :class="{ active: isActiveEmoji(emoji) }"
+                      @click="pickEmoji(emoji)"
+                      x-text="emoji"></button>
+            </template>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" @click="closeEmojiModal()">Отмена</button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <div id="toast" role="status" aria-live="polite"
+         :class="{ show: $store.toast.visible }"
+         x-text="$store.toast.message"></div>
+
+    <!-- Компоненты регистрируются до запуска Alpine (он стартует сразу
+         после загрузки), поэтому скрипты идут перед alpine.min.js. -->
+    <script src="/static/js/shared.js"></script>
+    <script src="/static/js/profile.js"></script>
+    <script src="/static/vendor/alpine.min.js"></script>
 
   </body>
 </html>

@@ -1,0 +1,157 @@
+/* ============================================================
+   AUTH-СТРАНИЦА
+   ============================================================ */
+body {
+  padding: 48px 16px 72px;
+}
+
+h1 {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: clamp(26px, 5vw, 38px);
+  letter-spacing: -.5px;
+}
+
+.lead { text-align: center; }
+
+.auth-wrap {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.auth-head { margin-bottom: 26px; }
+
+/* Заголовок в одну строку: уменьшаем кегль и запрещаем перенос */
+.auth-head h1 {
+  font-size: clamp(18px, 5.8vw, 28px);
+  white-space: nowrap;
+  letter-spacing: -.3px;
+}
+
+.auth-card { padding: 24px; }
+
+/* Табы «Вход / Регистрация» */
+.auth-tabs {
+  display: flex;
+  gap: 5px;
+  background: #12161f;
+  border: 1px solid var(--border);
+  padding: 5px;
+  border-radius: var(--r-md);
+  margin-bottom: 22px;
+}
+.auth-tabs button {
+  flex: 1;
+  border: 0;
+  background: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.auth-tabs button:hover { color: var(--text); }
+.auth-tabs button.active {
+  background: var(--grad-accent);
+  color: #fff;
+  box-shadow: var(--shadow-accent);
+}
+
+/* Форма */
+.auth-form { display: flex; flex-direction: column; }
+.auth-form .field-group:last-of-type { margin-bottom: var(--s-5); }
+.auth-form .btn { width: 100%; }
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+.field-group > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.field-group .help {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* Поле пароля с глазком */
+.pass-wrap { position: relative; }
+.pass-wrap input { padding-right: 48px; }
+
+.pass-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.pass-toggle:hover { background: #252c3d; color: var(--text); }
+.pass-toggle[aria-pressed="true"] { color: var(--accent-soft); }
+.pass-toggle svg { display: block; }
+.pass-toggle .ico-eye-off { display: none; }
+.pass-toggle[aria-pressed="true"] .ico-eye { display: none; }
+.pass-toggle[aria-pressed="true"] .ico-eye-off { display: block; }
+
+/* Блок ошибки */
+.form-error {
+  display: none;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 var(--s-4);
+  padding: 10px 13px;
+  font-size: 13px;
+  line-height: 1.45;
+  border-radius: var(--r-md);
+  background: var(--neg-bg);
+  border: 1px solid var(--neg-border);
+  color: var(--neg-soft);
+  word-break: break-word;
+  animation: shake .28s ease;
+}
+.form-error.show { display: flex; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+
+/* Подвал карточки */
+.auth-foot {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 18px 0 0;
+}
+.link-btn {
+  border: 0;
+  background: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-soft);
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.link-btn:hover { color: #fff; text-decoration: underline; }
+
+@media (max-width: 520px) {
+  body { padding-top: 32px; }
+  .auth-card { padding: 18px; }
+  .auth-tabs button { font-size: 13px; padding: 9px 8px; }
+}

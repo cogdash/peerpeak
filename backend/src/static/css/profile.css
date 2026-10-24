@@ -365,7 +365,6 @@ button.badge-ico.editable { cursor: pointer; transition: var(--t-fast); }
 button.badge-ico.editable:hover {
   border-color: var(--accent-border);
   background: var(--accent-bg);
-  transform: scale(1.06);
 }
 button.badge-ico.editable:focus-visible {
   outline: none;

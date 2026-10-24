@@ -7,6 +7,12 @@ document.addEventListener('alpine:init', function () {
   var USER_BADGES_URL = '/api/user-badges';
   var LONGPRESS_MS = 1200;
 
+  var EMOJI_CHOICES = [
+    '🏆', '💰', '🎖️', '⭐', '🔥', '💪', '🚀', '🧠',
+    '🎯', '📚', '💡', '❤️', '😎', '🤝', '😈', '⚡',
+    '💀', '🤡', '🎓', '🥴', '💤', '😢', '🧳', '🍔'
+  ];
+
   function getBadgeIdFromPath() {
     var match = window.location.pathname.match(/^\/badge\/([^/]+)/);
     return match ? decodeURIComponent(match[1]) : null;
@@ -37,6 +43,10 @@ document.addEventListener('alpine:init', function () {
       me: null,
       /* Мой user-badge для этого значка, если он уже есть на моей странице. */
       myBadge: null,
+
+      /* --- Модалка иконки --- */
+      emojiChoices: EMOJI_CHOICES,
+      emojiModal: { open: false },
 
       /* --- Long-press → получение --- */
       pressing: false,
@@ -81,6 +91,11 @@ document.addEventListener('alpine:init', function () {
       get kindLabel() {
         if (!this.badge) return '';
         return this.badge.polarity === 'negative' ? 'Анти-достижение' : 'Достижение';
+      },
+
+      get isCreator() {
+        if (!this.me || !this.badge) return false;
+        return String(this.badge.creator_id) === String(this.me.id);
       },
 
       receivedDate(iso) {
@@ -258,6 +273,45 @@ document.addEventListener('alpine:init', function () {
           });
           await this.loadMyBadge();
         }
+      },
+
+      /* ======================================================
+         СМЕНА ИКОНКИ
+         ====================================================== */
+      openEmojiModal() {
+        if (!this.isCreator) return;
+        this.emojiModal = { open: true };
+      },
+
+      closeEmojiModal() {
+        this.emojiModal = { open: false };
+      },
+
+      isActiveEmoji(emoji) {
+        return !!(this.badge && this.badge.emoji === emoji);
+      },
+
+      async pickEmoji(emoji) {
+        this.closeEmojiModal();
+        await this.saveEmoji(emoji);
+      },
+
+      async saveEmoji(emoji) {
+        if (!this.badge) return;
+
+        var r = await apiFetch(BADGES_URL + '/' + this.badge.id, {
+          method: 'PATCH',
+          body: JSON.stringify({ emoji: emoji })
+        });
+
+        if (r.status === 401) { window.location.assign('/auth'); return; }
+        if (!r.ok) {
+          this.$store.toast.show(extractErrorMessage(r.data, r.status));
+          return;
+        }
+
+        this.badge.emoji = r.data.emoji;
+        this.$store.toast.show('Иконка обновлена');
       },
 
       /* ======================================================

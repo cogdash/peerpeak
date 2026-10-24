@@ -33,7 +33,15 @@
         <!-- Одна карточка — ровно такая же, как в профиле. -->
         <div class="badge-list" x-show="badge" x-cloak>
           <article class="badge" :class="badgeClass" @pointerdown="startPress($event)">
-            <div class="badge-ico" x-text="badge ? (badge.emoji || '🏅') : ''"></div>
+            <template x-if="isCreator">
+              <button type="button" class="badge-ico editable"
+                      title="Нажми, чтобы сменить иконку" aria-label="Сменить иконку"
+                      @click="openEmojiModal()"
+                      x-text="badge ? (badge.emoji || '🏅') : ''"></button>
+            </template>
+            <template x-if="!isCreator">
+              <div class="badge-ico" x-text="badge ? (badge.emoji || '🏅') : ''"></div>
+            </template>
 
             <div class="badge-body">
               <p class="badge-text" x-text="badge ? badge.title : ''"></p>
@@ -110,6 +118,29 @@
       </main>
 
     </div>
+{% endblock %}
+
+{% block overlays %}
+    <template x-if="emojiModal.open">
+      <div class="modal-backdrop"
+           @click.self="closeEmojiModal()"
+           @keydown.escape.window="closeEmojiModal()">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Смена иконки">
+          <h3>Иконка значка</h3>
+          <div class="emoji-picker">
+            <template x-for="emoji in emojiChoices" :key="emoji">
+              <button type="button"
+                      :class="{ active: isActiveEmoji(emoji) }"
+                      @click="pickEmoji(emoji)"
+                      x-text="emoji"></button>
+            </template>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" @click="closeEmojiModal()">Отмена</button>
+          </div>
+        </div>
+      </div>
+    </template>
 {% endblock %}
 
 {% block scripts %}

@@ -60,6 +60,7 @@ document.addEventListener('alpine:init', function () {
       /* --- Фильтры --- */
       filter: 'all',
       showReceivedOnly: false,
+      showSharedOnly: false,
 
       /* --- Добавление значка --- */
       newTitle: '',
@@ -160,6 +161,10 @@ document.addEventListener('alpine:init', function () {
           ? this.badges
           : this.badges.filter(function (b) { return b.polarity === this.filter; }, this);
 
+        if (this.showSharedOnly) {
+          /* «Общие» — значки, которые есть и у этого пользователя, и у меня. */
+          items = items.filter(function (b) { return !!this.myBadge(b); }, this);
+        }
         if (this.showReceivedOnly) {
           items = items.filter(function (b) { return this.isReceivedFor(b); }, this);
         }
@@ -171,6 +176,9 @@ document.addEventListener('alpine:init', function () {
           return this.isOwnProfile
             ? { icon: '🏅', text: 'Пока нет ни одного значка. Добавь первый выше!' }
             : { icon: '🏅', text: 'У пользователя пока нет значков.' };
+        }
+        if (this.showSharedOnly) {
+          return { icon: '🤝', text: 'У вас нет общих значков с этим пользователем.' };
         }
         if (this.showReceivedOnly) {
           return { icon: '⏳', text: 'Полученных значков в этой категории пока нет.' };

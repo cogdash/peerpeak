@@ -243,6 +243,7 @@ body {
   background: var(--accent-bg);
   border-color: var(--accent-border);
   color: var(--accent-soft);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 .check-line input[type="checkbox"] {
   appearance: none;

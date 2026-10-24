@@ -121,6 +121,12 @@
             <button type="button" :class="{ active: filter === 'negative' }"
                     @click="filter = 'negative'">💀 Анти</button>
           </div>
+          <label class="check-line" x-show="!isOwnProfile" x-cloak
+                 :class="{ active: showSharedOnly }"
+                 title="Показывать только общие значки">
+            <input type="checkbox" x-model="showSharedOnly">
+            <span>Общие</span>
+          </label>
           <label class="check-line" :class="{ active: showReceivedOnly }"
                  title="Показывать только полученные значки">
             <input type="checkbox" x-model="showReceivedOnly">

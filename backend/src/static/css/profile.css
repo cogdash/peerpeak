@@ -5,49 +5,6 @@ body {
   padding: 40px 16px 72px;
 }
 
-.page-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--s-4);
-  margin-bottom: var(--s-6);
-  flex-wrap: wrap;
-}
-
-.page-head .me {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.who-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-soft);
-  background: var(--card-2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: var(--t-fast);
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.who-link:hover {
-  color: #fff;
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
-}
-.who-link:focus-visible {
-  outline: none;
-  border-color: var(--accent-focus);
-  box-shadow: 0 0 0 3px var(--accent-ring);
-}
-
 .profile-card {
   margin-bottom: var(--s-5);
   position: relative;
@@ -378,6 +335,9 @@ body {
 /* Значок доступен для «зажать → получить» */
 .badge.can-press { cursor: pointer; }
 
+/* Короткий клик по карточке открывает её страницу. */
+.badge[data-id] { cursor: pointer; }
+
 .badge-ico {
   flex: 0 0 48px;
   width: 48px;
@@ -674,9 +634,6 @@ button.badge-ico.editable:focus-visible {
 @media (max-width: 560px) {
   body { padding: 24px 10px 64px; }
   .card { padding: var(--s-4); }
-
-  .page-head { margin-bottom: var(--s-5); }
-  .who-link { max-width: 140px; font-size: 12px; }
 
   .profile-header {
     flex-direction: column;

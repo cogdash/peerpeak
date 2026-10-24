@@ -1,0 +1,50 @@
+/* ============================================================
+   СТРАНИЦА ОТДЕЛЬНОГО ЗНАЧКА
+   ============================================================ */
+
+.badge-page {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 var(--s-4);
+  padding: 0;
+  border: 0;
+  background: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.back-link:hover { color: var(--text); }
+.back-link:focus-visible {
+  outline: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+/* Одна карточка по центру страницы. */
+.badge-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: calc(100vh - 250px);
+  min-height: calc(100dvh - 250px);
+}
+
+.badge-stage > * { width: 100%; }
+.badge-stage .badge-list { width: 100%; }
+
+@media (max-width: 560px) {
+  .badge-stage {
+    min-height: calc(100vh - 220px);
+    min-height: calc(100dvh - 220px);
+  }
+}

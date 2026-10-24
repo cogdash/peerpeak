@@ -1,0 +1,18 @@
+<header class="page-head site-header">
+  <div class="site-heading">
+    <a class="brand-link" href="/"><h1>Peerpeak</h1></a>
+    <p class="lead">Ваши значки за достижения (и не очень)</p>
+  </div>
+
+  <div class="me">
+    {% if user %}
+    <a class="who-link"
+       href="/@{{ user.username|urlencode }}"
+       title="{{ user.full_name }} (@{{ user.username }})">
+      <span>@{{ user.username }}</span>
+    </a>
+    {% else %}
+    <a class="who-link" href="/auth">Войти</a>
+    {% endif %}
+  </div>
+</header>

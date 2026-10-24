@@ -385,6 +385,25 @@ async def list_user_badges(
     ]
 
 
+@router.get("/badges/{badge_id}")
+async def get_badge(
+    badge_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> BadgeResponse:
+    """Return a single badge from the catalog.
+
+    This endpoint is public: a badge page can be opened without signing in.
+    """
+    badge = await _get_badge_by_id(session, badge_id)
+    if badge is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Значок не найден",
+        )
+
+    return _badge_response(badge)
+
+
 @router.get("/users/@{username}")
 async def get_user_profile(
     username: str,

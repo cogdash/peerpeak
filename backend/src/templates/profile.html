@@ -1,32 +1,12 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Peerpeak</title>
+{% extends "base.html" %}
 
-    <link rel="stylesheet" href="/static/css/base.css">
+{% block styles %}
     <link rel="stylesheet" href="/static/css/profile.css">
-  </head>
-  <body x-data="profilePage">
+{% endblock %}
 
-    <div class="wrap">
+{% block body_attrs %}x-data="profilePage"{% endblock %}
 
-      <header class="page-head">
-        <div>
-          <h1>Peerpeak</h1>
-          <p class="lead">Ваши значки за достижения (и не очень)</p>
-        </div>
-
-        <div class="me">
-          <a class="who-link"
-             :href="me ? '/@' + encodeURIComponent(me.username) : '#'"
-             :title="me ? me.full_name + ' (@' + me.username + ')' : ''">
-            <span x-text="me ? '@' + me.username : '@…'"></span>
-          </a>
-        </div>
-      </header>
-
+{% block content %}
       <section class="card profile-card" x-show="profile" x-cloak>
         <div class="profile-top-actions">
           <button type="button" class="icon-btn" x-show="isOwnProfile"
@@ -154,6 +134,7 @@
             <template x-for="b in filteredBadges" :key="b.id">
               <article class="badge" :class="badgeClass(b)" :data-id="b.id"
                        @pointerdown="startPress($event, b)"
+                       @click="openBadgeFromCard($event, b)"
                        @contextmenu.prevent>
 
                 <template x-if="isOwnProfile && b.is_creator">
@@ -267,9 +248,9 @@
           </div>
         </div>
       </section>
+{% endblock %}
 
-    </div>
-
+{% block overlays %}
     <!-- ================= МОДАЛКА РЕДАКТИРОВАНИЯ ПРОФИЛЯ ================= -->
     <template x-if="editModal.open">
       <div class="modal-backdrop"
@@ -337,16 +318,8 @@
         </div>
       </div>
     </template>
+{% endblock %}
 
-    <div id="toast" role="status" aria-live="polite"
-         :class="{ show: $store.toast.visible }"
-         x-text="$store.toast.message"></div>
-
-    <!-- Компоненты регистрируются до запуска Alpine (он стартует сразу
-         после загрузки), поэтому скрипты идут перед alpine.min.js. -->
-    <script src="/static/js/shared.js"></script>
+{% block scripts %}
     <script src="/static/js/profile.js"></script>
-    <script src="/static/vendor/alpine.min.js"></script>
-
-  </body>
-</html>
+{% endblock %}

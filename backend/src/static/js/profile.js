@@ -11,6 +11,8 @@ document.addEventListener('alpine:init', function () {
 
   var DEFAULT_PLACEHOLDER = 'выучил новый язык';
   var LONGPRESS_MS = 1200;
+  /* Дольше короткого тапа — значит пользователь начал зажатие. */
+  var HOLD_MS = 300;
 
   var EMOJI_CHOICES = [
     '🏆', '💰', '🎖️', '⭐', '🔥', '💪', '🚀', '🧠',
@@ -80,6 +82,9 @@ document.addEventListener('alpine:init', function () {
       /* --- Long-press --- */
       pressingId: null,
       pressTimer: null,
+      pressStartedAt: null,
+      /* Зажатие не должно открывать страницу значка. */
+      holdCanceledClick: false,
 
       /* --- Анимация маркера баланса --- */
       balancePct: '0%',
@@ -488,15 +493,28 @@ document.addEventListener('alpine:init', function () {
         await this.loadBadges();
       },
 
+      /* Короткий клик по карточке открывает страницу значка. */
+      openBadgeFromCard(e, b) {
+        if (this.holdCanceledClick) return;
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        if (!b || b.badge_id == null) return;
+        window.location.assign('/badge/' + encodeURIComponent(b.badge_id));
+      },
+
       /* ======================================================
          LONG-PRESS → ПОЛУЧИТЬ ЗНАЧОК
          ====================================================== */
       startPress(e, b) {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         if (e.target.closest('button') || e.target.closest('a')) return;
-        if (this.isReceivedFor(b)) return;
 
         this.cancelPress();
+        this.holdCanceledClick = false;
+        this.pressStartedAt = Date.now();
+
+        /* Даже если значок уже получен, зажатие не должно открывать страницу. */
+        if (this.isReceivedFor(b)) return;
+
         this.pressingId = b.id;
         this.pressTimer = setTimeout(function () {
           this.completePress(b);
@@ -509,11 +527,20 @@ document.addEventListener('alpine:init', function () {
           this.pressTimer = null;
         }
         this.pressingId = null;
+
+        if (this.pressStartedAt !== null) {
+          var held = Date.now() - this.pressStartedAt;
+          this.pressStartedAt = null;
+          if (held >= HOLD_MS) this.holdCanceledClick = true;
+        }
       },
 
       completePress(b) {
         this.pressTimer = null;
         this.pressingId = null;
+        this.pressStartedAt = null;
+        /* Браузер пришлёт click после pointerup — не открываем страницу. */
+        this.holdCanceledClick = true;
 
         if (this.isOwnProfile) {
           if (!b.received) this.receive(b.id);

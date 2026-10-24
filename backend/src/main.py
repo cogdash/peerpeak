@@ -1,15 +1,17 @@
 import os
+import uuid
 
-from fastapi import Depends, FastAPI, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import get_current_user
-from db.models import User
+from db.models import Badge, User
 from db.session import get_session
 from routers.auth import router as auth_router
 from routers.profile import router as profile_router
@@ -19,7 +21,10 @@ app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
 
 STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 app.include_router(auth_router)
 app.include_router(profile_router)
@@ -80,7 +85,22 @@ async def read_user_profile(
 
     # Unauthenticated visitors can view the profile
     user = await _optional_user(request, session)
-    return FileResponse(STATIC_DIR / "profile.html")
+    return templates.TemplateResponse(request, "profile.html", {"user": user})
+
+
+@app.get("/badge/{badge_id}")
+async def read_badge_page(
+    badge_id: uuid.UUID,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    # Badge pages are public, but an unknown badge id should not serve the page.
+    badge = await session.get(Badge, badge_id)
+    if badge is None:
+        raise HTTPException(status_code=404, detail="Badge not found")
+
+    user = await _optional_user(request, session)
+    return templates.TemplateResponse(request, "badge.html", {"user": user})
 
 
 @app.get("/auth")
@@ -92,7 +112,7 @@ async def read_auth(
     user = await _optional_user(request, session)
     if user is not None:
         return RedirectResponse(url="/", status_code=302)
-    return FileResponse(STATIC_DIR / "auth.html")
+    return templates.TemplateResponse(request, "auth.html", {"user": None})
 
 
 @app.get("/api/health/db")

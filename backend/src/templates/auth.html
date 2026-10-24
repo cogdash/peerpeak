@@ -1,16 +1,17 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Peerpeak: вход</title>
+{% extends "base.html" %}
 
-<link rel="stylesheet" href="/static/css/base.css">
+{% block title %}Peerpeak: вход{% endblock %}
+
+{% block styles %}
 <link rel="stylesheet" href="/static/css/auth.css">
-</head>
-<body x-data="authPage">
+{% endblock %}
 
-<div class="wrap auth-wrap">
+{% block body_attrs %}x-data="authPage"{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block content %}
+  <div class="auth-wrap">
 
   <header class="auth-head">
     <h1>Добро пожаловать в Peerpeak</h1>
@@ -140,17 +141,9 @@
 
   </section>
 
-</div>
+  </div>
+{% endblock %}
 
-<div id="toast" role="status" aria-live="polite"
-     :class="{ show: $store.toast.visible }"
-     x-text="$store.toast.message"></div>
-
-<!-- Компоненты регистрируются до запуска Alpine (он стартует сразу
-     после загрузки), поэтому скрипты идут перед alpine.min.js. -->
-<script src="/static/js/shared.js"></script>
+{% block scripts %}
 <script src="/static/js/auth.js"></script>
-<script src="/static/vendor/alpine.min.js"></script>
-
-</body>
-</html>
+{% endblock %}

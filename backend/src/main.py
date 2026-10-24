@@ -7,11 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from sqlalchemy import text, select
+from sqlalchemy import text, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import get_current_user
-from db.models import Badge, User
+from db.models import Badge, User, UserBadge
 from db.session import get_session
 from routers.auth import router as auth_router
 from routers.profile import router as profile_router
@@ -83,9 +83,34 @@ async def read_user_profile(
     if target_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Count received achievements by polarity for the link preview.
+    counts_result = await session.execute(
+        select(Badge.polarity, func.count())
+        .join(UserBadge, UserBadge.badge_id == Badge.id)
+        .where(
+            UserBadge.user_id == target_user.id,
+            UserBadge.received.is_(True),
+        )
+        .group_by(Badge.polarity)
+    )
+    counts = dict(counts_result.all())
+
+    bio = (target_user.bio or "").strip()
+    bio_excerpt = bio[:140] + ("…" if len(bio) > 140 else "")
+    stats = f"🏆 {counts.get('positive', 0)} · 💀 {counts.get('negative', 0)}"
+    og_description = f"{bio_excerpt} · {stats}" if bio_excerpt else stats
+
     # Unauthenticated visitors can view the profile
     user = await _optional_user(request, session)
-    return templates.TemplateResponse(request, "profile.html", {"user": user})
+    return templates.TemplateResponse(
+        request,
+        "profile.html",
+        {
+            "user": user,
+            "profile_user": target_user,
+            "og_description": og_description,
+        },
+    )
 
 
 @app.get("/badge/{badge_id}")
@@ -100,7 +125,20 @@ async def read_badge_page(
         raise HTTPException(status_code=404, detail="Badge not found")
 
     user = await _optional_user(request, session)
-    return templates.TemplateResponse(request, "badge.html", {"user": user})
+    return templates.TemplateResponse(
+        request,
+        "badge.html",
+        {
+            "user": user,
+            "badge": badge,
+            "og_title": f"{badge.emoji or '🏅'} {badge.title}",
+            "og_description": (
+                "Анти-достижение в Peerpeak"
+                if badge.polarity == "negative"
+                else "Достижение в Peerpeak"
+            ),
+        },
+    )
 
 
 @app.get("/auth")

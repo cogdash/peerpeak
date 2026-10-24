@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block title %}{{ profile_user.full_name }} — Peerpeak{% endblock %}
+
+{% block meta %}
+    <meta property="og:type" content="profile">
+    <meta property="og:site_name" content="Peerpeak">
+    <meta property="og:title" content="{{ profile_user.full_name }}">
+    <meta property="og:description" content="{{ og_description }}">
+    <meta property="og:url" content="{{ request.url }}">
+{% endblock %}
+
 {% block styles %}
     <link rel="stylesheet" href="/static/css/profile.css">
 {% endblock %}

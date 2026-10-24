@@ -261,6 +261,45 @@ document.addEventListener('alpine:init', function () {
       },
 
       /* ======================================================
+         ПОДЕЛИТЬСЯ
+         ====================================================== */
+      shareBadge() {
+        if (!this.badge) return;
+
+        var url = window.location.origin + '/badge/' + encodeURIComponent(this.badge.id);
+        var title = 'Значок «' + this.badge.title + '» на Peerpeak';
+        var self = this;
+
+        if (navigator.share) {
+          navigator.share({
+            title: title,
+            text: 'Посмотри этот значок на Peerpeak!',
+            url: url
+          }).catch(function (err) {
+            if (err && err.name !== 'AbortError') self.copyToClipboard(url);
+          });
+        } else {
+          this.copyToClipboard(url);
+        }
+      },
+
+      copyToClipboard(text) {
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          this.$store.toast.show('Ссылка скопирована');
+        } catch (e) {
+          this.$store.toast.show('Не удалось скопировать ссылку');
+        }
+        document.body.removeChild(textarea);
+      },
+
+      /* ======================================================
          НАВИГАЦИЯ
          ====================================================== */
       goBack() {

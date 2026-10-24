@@ -42,6 +42,12 @@
 .badge-stage > * { width: 100%; }
 .badge-stage .badge-list { width: 100%; }
 
+/* Кнопка «Поделиться» справа под карточкой. */
+.badge-share {
+  display: flex;
+  justify-content: flex-end;
+}
+
 @media (max-width: 560px) {
   .badge-stage {
     min-height: calc(100vh - 220px);

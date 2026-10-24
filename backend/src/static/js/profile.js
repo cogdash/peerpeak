@@ -696,7 +696,7 @@ document.addEventListener('alpine:init', function () {
         textarea.select();
         try {
           document.execCommand('copy');
-          this.$store.toast.show('Ссылка скопирована: ' + text);
+          this.$store.toast.show('Ссылка скопирована');
         } catch (e) {
           this.$store.toast.show('Не удалось скопировать. Ссылка: ' + text);
         }

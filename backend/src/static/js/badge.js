@@ -327,7 +327,7 @@ document.addEventListener('alpine:init', function () {
         if (navigator.share) {
           navigator.share({
             title: title,
-            text: 'Посмотри этот значок на Peerpeak!',
+            text: 'Посмотри этот значок в Peerpeak!',
             url: url
           }).catch(function (err) {
             if (err && err.name !== 'AbortError') self.copyToClipboard(url);

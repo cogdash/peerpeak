@@ -684,8 +684,8 @@ document.addEventListener('alpine:init', function () {
 
         if (navigator.share) {
           navigator.share({
-            title: 'Профиль @' + username + ' на Peerpeak',
-            text: 'Посмотри мой профиль на Peerpeak!',
+            title: 'Профиль @' + username + ' в Peerpeak',
+            text: 'Посмотри мой профиль в Peerpeak!',
             url: url
           }).catch(function (err) {
             if (err && err.name !== 'AbortError') self.copyToClipboard(url);

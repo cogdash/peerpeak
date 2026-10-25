@@ -5,15 +5,11 @@ document.addEventListener('alpine:init', function () {
   var LOOKUP_URL      = '/api/badge/lookup';
   var BADGES_URL      = '/api/badges';
   var CATALOG_URL     = '/api/badges/catalog';
-  var USER_BADGES_URL = '/api/user-badges';
   var USERS_URL       = '/api/users';
   var ME_URL          = '/api/me';
   var SIGNOUT_URL     = '/api/signout';
 
   var DEFAULT_PLACEHOLDER = 'выучил новый язык';
-  var LONGPRESS_MS = 1200;
-  /* Дольше короткого тапа — значит пользователь начал зажатие. */
-  var HOLD_MS = 300;
 
   var EMOJI_CHOICES = [
     '🏆', '💰', '🎖️', '⭐', '🔥', '💪', '🚀', '🧠',
@@ -47,7 +43,7 @@ document.addEventListener('alpine:init', function () {
   }
 
   Alpine.data('profilePage', function () {
-    return {
+    var component = {
       /* --- Состояние загрузки --- */
       me: null,
       profile: null,
@@ -86,34 +82,17 @@ document.addEventListener('alpine:init', function () {
       followModalSeq: 0,
       followModal: { open: false, mode: 'followers', loading: false, users: [], error: '' },
 
-      /* --- Long-press --- */
-      pressingId: null,
-      pressTimer: null,
-      pressStartedAt: null,
-      /* Зажатие не должно открывать страницу значка. */
-      holdCanceledClick: false,
-
       /* --- Анимация маркера баланса --- */
       balancePct: '0%',
 
       init() {
         this.viewedUsername = getUsernameFromPath();
-
-        this._onPointerUp = this.cancelPress.bind(this);
-        document.addEventListener('pointerup', this._onPointerUp);
-        document.addEventListener('pointercancel', this._onPointerUp);
-        window.addEventListener('blur', this._onPointerUp);
-        document.addEventListener('scroll', this._onPointerUp, true);
-
+        this.bindCardPress();
         this.load();
       },
 
       destroy() {
-        document.removeEventListener('pointerup', this._onPointerUp);
-        document.removeEventListener('pointercancel', this._onPointerUp);
-        window.removeEventListener('blur', this._onPointerUp);
-        document.removeEventListener('scroll', this._onPointerUp, true);
-        clearTimeout(this.pressTimer);
+        this.unbindCardPress();
         clearTimeout(this.detectTimer);
       },
 
@@ -189,7 +168,7 @@ document.addEventListener('alpine:init', function () {
         };
       },
 
-      get filteredBadges() {
+      get filteredCards() {
         var items = this.filter === 'all'
           ? this.badges
           : this.badges.filter(function (b) { return b.polarity === this.filter; }, this);
@@ -201,7 +180,8 @@ document.addEventListener('alpine:init', function () {
         if (this.showReceivedOnly) {
           items = items.filter(function (b) { return this.isReceivedFor(b); }, this);
         }
-        return items;
+
+        return items.map(this.toCard, this);
       },
 
       get emptyState() {
@@ -241,46 +221,28 @@ document.addEventListener('alpine:init', function () {
         return !!(mine && mine.received);
       },
 
-      canPress(b) {
-        return this.isOwnProfile ? !b.received : !this.isReceivedFor(b);
-      },
+      /* Приводит значок профиля к общему виду карточки. */
+      toCard(b) {
+        var mine = this.myBadge(b);
+        var own = this.isOwnProfile;
 
-      badgeClass(b) {
-        return [
-          b.polarity === 'positive' ? 'pos' : 'neg',
-          b.received ? '' : 'unreceived',
-          this.canPress(b) ? 'can-press' : '',
-          this.pressingId === b.id ? 'pressing' : ''
-        ].filter(Boolean).join(' ');
-      },
-
-      kindLabel(b) {
-        return b.polarity === 'negative' ? 'Анти-достижение' : 'Достижение';
-      },
-
-      showCreator(b) {
-        return !!b.creator_username && (!this.me || b.creator_username !== this.me.username);
-      },
-
-      creatorHref(b) {
-        return '/@' + encodeURIComponent(b.creator_username);
-      },
-
-      receivedDate(iso) {
-        if (!iso) return '';
-        var d = new Date(iso);
-        if (isNaN(d.getTime())) return '';
-        var y = d.getFullYear();
-        var m = String(d.getMonth() + 1).padStart(2, '0');
-        var day = String(d.getDate()).padStart(2, '0');
-        return y + '-' + m + '-' + day;
-      },
-
-      receivedDateFull(iso) {
-        if (!iso) return '';
-        var d = new Date(iso);
-        if (isNaN(d.getTime())) return '';
-        try { return d.toLocaleString('ru-RU'); } catch (e) { return ''; }
+        return {
+          key: String(b.id),
+          badge_id: b.badge_id,
+          user_badge_id: own ? b.id : (mine ? mine.id : null),
+          title: b.title,
+          emoji: b.emoji,
+          polarity: b.polarity,
+          added: own ? true : !!mine,
+          received: own ? !!b.received : !!(mine && mine.received),
+          editable: own && !!b.is_creator,
+          creator_username: b.creator_username,
+          received_at: b.received ? b.received_at : null,
+          href: '/badge/' + encodeURIComponent(b.badge_id),
+          show_status: !own,
+          extra_text: '',
+          extra_title: ''
+        };
       },
 
       /* ======================================================
@@ -464,173 +426,6 @@ document.addEventListener('alpine:init', function () {
         } finally {
           this.adding = false;
         }
-      },
-
-      /* ======================================================
-         ДЕЙСТВИЯ СО ЗНАЧКАМИ
-         ====================================================== */
-      async receive(id) {
-        var r = await apiFetch(USER_BADGES_URL + '/' + id + '/receive', { method: 'POST' });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { this.$store.toast.show(extractErrorMessage(r.data, r.status)); return; }
-        this.$store.toast.show('Значок получен! 🎉');
-        await this.loadBadges();
-      },
-
-      async unreceive(id) {
-        var r = await apiFetch(USER_BADGES_URL + '/' + id + '/unreceive', { method: 'POST' });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { this.$store.toast.show(extractErrorMessage(r.data, r.status)); return; }
-        this.$store.toast.show('Получение отменено');
-        await this.loadBadges();
-      },
-
-      async remove(id) {
-        var r = await apiFetch(USER_BADGES_URL + '/' + id, { method: 'DELETE' });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok && r.status !== 204) {
-          this.$store.toast.show(extractErrorMessage(r.data, r.status));
-          return;
-        }
-        this.$store.toast.show('Значок убран со страницы');
-        await this.loadBadges();
-      },
-
-      /* Добавить чужой значок к себе.
-         Используем тот же эндпоинт, что и на своей странице: POST /api/badges { title }.
-         Бэкенд сам сматчит с каталогом и создаст user-badge у текущего пользователя. */
-      async add(b) {
-        var r = await apiFetch(BADGES_URL, {
-          method: 'POST',
-          body: JSON.stringify({ title: b.title })
-        });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { this.$store.toast.show(extractErrorMessage(r.data, r.status)); return; }
-        this.$store.toast.show('Значок добавлен на вашу страницу');
-        await this.loadBadges();
-      },
-
-      /* Long-press на чужом значке: добавить (если нужно) и сразу засчитать полученным. */
-      async addAndReceive(b) {
-        var r = await apiFetch(BADGES_URL, {
-          method: 'POST',
-          body: JSON.stringify({ title: b.title })
-        });
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { this.$store.toast.show(extractErrorMessage(r.data, r.status)); return; }
-
-        /* Ответ POST /api/badges — это созданный user-badge (как в списке на своей странице),
-           поэтому его id можно сразу скармливать в /api/user-badges/{id}/receive. */
-        var newId = (r.data && r.data.id != null) ? r.data.id : null;
-        if (!newId) {
-          this.$store.toast.show('Значок добавлен на вашу страницу');
-          await this.loadBadges();
-          return;
-        }
-
-        var r2 = await apiFetch(USER_BADGES_URL + '/' + newId + '/receive', { method: 'POST' });
-        this.$store.toast.show(r2.ok
-          ? 'Значок добавлен и получен! 🎉'
-          : 'Значок добавлен на вашу страницу');
-
-        await this.loadBadges();
-      },
-
-      /* Короткий клик по карточке открывает страницу значка. */
-      openBadgeFromCard(e, b) {
-        if (this.holdCanceledClick) return;
-        if (e.target.closest('button') || e.target.closest('a')) return;
-        if (!b || b.badge_id == null) return;
-        window.location.assign('/badge/' + encodeURIComponent(b.badge_id));
-      },
-
-      /* ======================================================
-         LONG-PRESS → ПОЛУЧИТЬ ЗНАЧОК
-         ====================================================== */
-      startPress(e, b) {
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
-        if (e.target.closest('button') || e.target.closest('a')) return;
-
-        this.cancelPress();
-        this.holdCanceledClick = false;
-        this.pressStartedAt = Date.now();
-
-        /* Даже если значок уже получен, зажатие не должно открывать страницу. */
-        if (this.isReceivedFor(b)) return;
-
-        this.pressingId = b.id;
-        this.pressTimer = setTimeout(function () {
-          this.completePress(b);
-        }.bind(this), LONGPRESS_MS);
-      },
-
-      cancelPress() {
-        if (this.pressTimer) {
-          clearTimeout(this.pressTimer);
-          this.pressTimer = null;
-        }
-        this.pressingId = null;
-
-        if (this.pressStartedAt !== null) {
-          var held = Date.now() - this.pressStartedAt;
-          this.pressStartedAt = null;
-          if (held >= HOLD_MS) this.holdCanceledClick = true;
-        }
-      },
-
-      completePress(b) {
-        this.pressTimer = null;
-        this.pressingId = null;
-        this.pressStartedAt = null;
-        /* Браузер пришлёт click после pointerup — не открываем страницу. */
-        this.holdCanceledClick = true;
-
-        if (this.isOwnProfile) {
-          if (!b.received) this.receive(b.id);
-          return;
-        }
-
-        var mine = this.myBadge(b);
-        if (mine && !mine.received) {
-          this.receive(mine.id);
-        } else if (!mine) {
-          this.addAndReceive(b);
-        }
-      },
-
-      /* ======================================================
-         МОДАЛКА СМЕНЫ ИКОНКИ
-         ====================================================== */
-      openEmojiModal(b) {
-        if (!this.isOwnProfile || !b.is_creator) return;
-        this.emojiModal = { open: true, badge: b };
-      },
-
-      closeEmojiModal() {
-        this.emojiModal = { open: false, badge: null };
-      },
-
-      isActiveEmoji(emoji) {
-        return !!(this.emojiModal.badge && this.emojiModal.badge.emoji === emoji);
-      },
-
-      async pickEmoji(emoji) {
-        var badge = this.emojiModal.badge;
-        this.closeEmojiModal();
-        if (badge) await this.saveEmoji(badge.badge_id, emoji);
-      },
-
-      async saveEmoji(badgeId, emoji) {
-        var r = await apiFetch(BADGES_URL + '/' + badgeId, {
-          method: 'PATCH',
-          body: JSON.stringify({ emoji: emoji })
-        });
-
-        if (r.status === 401) { window.location.assign('/auth'); return; }
-        if (!r.ok) { this.$store.toast.show(extractErrorMessage(r.data, r.status)); return; }
-
-        this.$store.toast.show('Иконка обновлена');
-        await this.loadBadges();
       },
 
       /* ======================================================
@@ -878,7 +673,16 @@ document.addEventListener('alpine:init', function () {
           await apiFetch(SIGNOUT_URL, { method: 'POST' });
         } catch (e) { /* игнорируем */ }
         window.location.assign('/auth');
+      },
+
+      /* Общая карточка значка перезагружает данные профиля. */
+      async reloadCards() {
+        await this.loadBadges();
       }
     };
+
+    /* Методы карточки (клик, long-press, добавление/удаление, иконка)
+       общие для профиля, страницы значка и ленты. */
+    return Object.assign(component, window.badgeCardMixin);
   });
 });

@@ -38,6 +38,7 @@ class BadgeResponse(BaseModel):
     emoji: str
     polarity: str
     creator_id: str
+    creator_username: str
     created_at: datetime
 
 
@@ -70,6 +71,16 @@ class AddBadgeRequest(BaseModel):
     received: bool = False
 
 
+class FeedBadgeResponse(BaseModel):
+    id: str
+    title: str
+    emoji: str
+    polarity: str
+    creator_username: str
+    # How many users have added the badge to their page.
+    users_count: int
+
+
 class FollowUserResponse(BaseModel):
     id: str
     username: str
@@ -94,6 +105,7 @@ def _badge_response(badge: Badge) -> BadgeResponse:
         emoji=badge.emoji,
         polarity=badge.polarity,
         creator_id=str(badge.creator_id),
+        creator_username=badge.creator.username if badge.creator else "",
         created_at=badge.created_at,
     )
 
@@ -246,6 +258,55 @@ async def list_catalog(
     return list(result.scalars().all())
 
 
+@router.get("/feed/badges", response_model=list[FeedBadgeResponse])
+async def feed_badges(
+    limit: int = Query(default=10, ge=1, le=50),
+    exclude_username: str | None = Query(default=None, min_length=1, max_length=32),
+    session: AsyncSession = Depends(get_session),
+) -> list[FeedBadgeResponse]:
+    """Return a random selection of catalog badges for the discovery feed.
+
+    This endpoint is public: the feed can be browsed without signing in.
+    When ``exclude_username`` is passed, the database skips every badge that
+    user already has on their page, so the feed only suggests something new.
+    """
+    users_count = (
+        select(func.count(UserBadge.id))
+        .where(UserBadge.badge_id == Badge.id)
+        .correlate(Badge)
+        .scalar_subquery()
+    )
+
+    statement = (
+        select(Badge, users_count.label("users_count"))
+        .options(selectinload(Badge.creator))
+    )
+
+    if exclude_username:
+        owned = (
+            select(UserBadge.badge_id)
+            .join(User, User.id == UserBadge.user_id)
+            .where(User.username == exclude_username)
+        )
+        statement = statement.where(Badge.id.notin_(owned))
+
+    result = await session.execute(
+        statement.order_by(func.random()).limit(limit)
+    )
+
+    return [
+        FeedBadgeResponse(
+            id=str(badge.id),
+            title=badge.title,
+            emoji=badge.emoji,
+            polarity=badge.polarity,
+            creator_username=badge.creator.username if badge.creator else "",
+            users_count=int(count or 0),
+        )
+        for badge, count in result.all()
+    ]
+
+
 @router.post("/badges", status_code=status.HTTP_201_CREATED)
 async def add_badge(
     payload: AddBadgeRequest,
@@ -318,7 +379,7 @@ async def update_badge_emoji(
     session: AsyncSession = Depends(get_session),
 ) -> BadgeResponse:
     """Update a badge icon. Only the badge creator may do this."""
-    badge = await session.get(Badge, badge_id)
+    badge = await _get_badge_by_id(session, badge_id)
     if badge is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -1,0 +1,104 @@
+{# ============================================================
+   ОБЩАЯ КАРТОЧКА ЗНАЧКА
+   Используется на профиле, странице значка и в ленте.
+
+   Ожидает нормализованный объект из JS-методов card*:
+     key, badge_id, user_badge_id, title, emoji, polarity,
+     added, received, editable, creator_username, received_at,
+     href, show_status, extra_text, extra_title
+
+   always_actions=True — кнопки действий видны всегда
+   (лента), иначе они появляются по hover/focus, как раньше.
+   ============================================================ #}
+{% macro badge_card(expr, always_actions=false) %}
+<article class="badge" :class="cardClass({{ expr }})"
+         @pointerdown="startPress($event, {{ expr }})"
+         @click="openBadgeFromCard($event, {{ expr }})"
+         @contextmenu.prevent>
+
+  <template x-if="canEditIcon({{ expr }})">
+    <button type="button" class="badge-ico editable"
+            title="Нажми, чтобы сменить иконку" aria-label="Сменить иконку"
+            @click.stop="openEmojiModal({{ expr }})"
+            x-text="{{ expr }}.emoji || '🏅'"></button>
+  </template>
+  <template x-if="!canEditIcon({{ expr }})">
+    <div class="badge-ico" x-text="{{ expr }}.emoji || '🏅'"></div>
+  </template>
+
+  <div class="badge-body">
+    <a class="badge-text" :href="{{ expr }}.href"
+       x-text="{{ expr }}.title" @click.stop></a>
+
+    <p class="badge-meta">
+      <span class="kind" x-text="kindLabel({{ expr }})"></span>
+
+      <template x-if="showCreator({{ expr }})">
+        <span>
+          <span class="sep">·</span>
+          <a class="badge-by" :href="creatorHref({{ expr }})"
+             :title="'Открыть профиль @' + {{ expr }}.creator_username">
+            by <span class="at" x-text="'@' + {{ expr }}.creator_username"></span>
+          </a>
+        </span>
+      </template>
+
+      <template x-if="{{ expr }}.received_at && cardDate({{ expr }}.received_at)">
+        <span class="badge-date"
+              :title="'Получен: ' + cardDateFull({{ expr }}.received_at)"
+              x-text="'📆 ' + cardDate({{ expr }}.received_at)"></span>
+      </template>
+
+      <span class="badge-date" x-show="{{ expr }}.extra_text"
+            :title="{{ expr }}.extra_title || ''"
+            x-text="{{ expr }}.extra_text || ''"></span>
+    </p>
+  </div>
+
+  <div class="badge-tail"{% if always_actions %} :class="{ always: true }"{% endif %}>
+    <span class="badge-status"
+          x-show="{{ expr }}.added && {{ expr }}.show_status"
+          :title="cardStatusTitle({{ expr }})"
+          x-text="cardStatus({{ expr }})"></span>
+
+    <div class="badge-actions">
+      <!-- Ещё нет на моей странице → добавить. -->
+      <button type="button" class="icon-btn add"
+              x-show="me && !{{ expr }}.added"
+              title="Добавить к себе" aria-label="Добавить к себе"
+              :disabled="cardBusyKey === {{ expr }}.key"
+              @click.stop="addCard({{ expr }})">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </button>
+
+      <!-- Есть у меня, но не получен → убрать со страницы. -->
+      <button type="button" class="icon-btn danger"
+              x-show="{{ expr }}.added && !{{ expr }}.received"
+              title="Убрать со своей страницы" aria-label="Убрать со своей страницы"
+              :disabled="cardBusyKey === {{ expr }}.key"
+              @click.stop="removeCard({{ expr }})">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"/><path d="M8 6V4h8v2"/>
+          <path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
+        </svg>
+      </button>
+
+      <!-- Получен → отменить получение. -->
+      <button type="button" class="icon-btn cancel"
+              x-show="{{ expr }}.received"
+              title="Отменить получение" aria-label="Отменить получение"
+              :disabled="cardBusyKey === {{ expr }}.key"
+              @click.stop="unreceiveCard({{ expr }})">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</article>
+{% endmacro %}

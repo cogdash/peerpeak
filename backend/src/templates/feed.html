@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_badge_card.html" import badge_card %}
+
+{% block title %}Лента значков — Peerpeak{% endblock %}
+
+{% block meta %}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Peerpeak">
+    <meta property="og:title" content="Лента значков — Peerpeak">
+    <meta property="og:description" content="Случайные значки из каталога Peerpeak">
+    <meta property="og:url" content="{{ request.url }}">
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="/static/css/profile.css">
+    <link rel="stylesheet" href="/static/css/feed.css">
+{% endblock %}
+
+{% block header %}{% include "_header.html" %}{% endblock %}
+
+{% block body_attrs %}x-data="feedPage"{% endblock %}
+
+{% block content %}
+      <section class="card feed-card">
+        <div class="feed-toolbar">
+          <div class="feed-heading">
+            <h2>Лента значков</h2>
+          </div>
+
+          <button type="button" class="btn ghost"
+                  :disabled="loading"
+                  :aria-busy="loading ? 'true' : 'false'"
+                  @click="load()"
+                  x-text="loading ? 'Обновляем…' : 'Обновить'"></button>
+        </div>
+
+        <div class="empty" x-show="loading && !badges.length" x-cloak>
+          <div class="big">⏳</div>
+          <div>Загружаем значки…</div>
+        </div>
+
+        <div class="empty" x-show="!loading && error && !badges.length" x-cloak>
+          <div class="big">🏅</div>
+          <div x-text="error"></div>
+        </div>
+
+        <div class="badge-list" x-show="cards.length" x-cloak>
+          <template x-for="c in cards" :key="c.key">
+            {{ badge_card('c', always_actions=true) }}
+          </template>
+        </div>
+
+        <div class="empty" x-show="!loading && !error && !badges.length" x-cloak>
+          <div class="big">🗂️</div>
+          <div>Пока нет новых значков для показа.</div>
+        </div>
+      </section>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/static/js/feed.js"></script>
+{% endblock %}

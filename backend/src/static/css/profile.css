@@ -413,6 +413,17 @@ button.badge-ico.editable:focus-visible {
   word-break: break-word;
   overflow-wrap: anywhere;
 }
+a.badge-text {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+a.badge-text:hover { color: var(--accent-soft); }
+
+.badge.clickable { cursor: pointer; }
+@media (hover: hover) and (pointer: fine) {
+  .badge.clickable:hover { border-color: var(--border-strong); }
+}
 
 .badge-meta {
   margin: 0;

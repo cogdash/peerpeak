@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_badge_card.html" import badge_card %}
 
 {% block title %}{{ profile_user.full_name }} — Peerpeak{% endblock %}
 
@@ -171,119 +172,13 @@
         </div>
 
         <div>
-          <div class="badge-list" x-show="filteredBadges.length">
-            <template x-for="b in filteredBadges" :key="b.id">
-              <article class="badge" :class="badgeClass(b)" :data-id="b.id"
-                       @pointerdown="startPress($event, b)"
-                       @click="openBadgeFromCard($event, b)"
-                       @contextmenu.prevent>
-
-                <template x-if="isOwnProfile && b.is_creator">
-                  <button type="button" class="badge-ico editable"
-                          title="Нажми, чтобы сменить иконку" aria-label="Сменить иконку"
-                          @click.stop="openEmojiModal(b)"
-                          x-text="b.emoji || '🏅'"></button>
-                </template>
-                <template x-if="!(isOwnProfile && b.is_creator)">
-                  <div class="badge-ico" x-text="b.emoji || '🏅'"></div>
-                </template>
-
-                <div class="badge-body">
-                  <p class="badge-text" x-text="b.title"></p>
-                  <p class="badge-meta">
-                    <span class="kind" x-text="kindLabel(b)"></span>
-
-                    <template x-if="showCreator(b)">
-                      <span>
-                        <span class="sep">·</span>
-                        <a class="badge-by" :href="creatorHref(b)"
-                           :title="'Открыть профиль @' + b.creator_username">
-                          by <span class="at" x-text="'@' + b.creator_username"></span>
-                        </a>
-                      </span>
-                    </template>
-
-                    <template x-if="b.received && b.received_at && receivedDate(b.received_at)">
-                      <span class="badge-date"
-                            :title="'Получен: ' + receivedDateFull(b.received_at)"
-                            x-text="'📆 ' + receivedDate(b.received_at)"></span>
-                    </template>
-                  </p>
-                </div>
-
-                <div class="badge-tail">
-                  <span class="badge-status ok"
-                        x-show="!isOwnProfile && isReceivedFor(b)"
-                        title="У вас получен">✅</span>
-                  <span class="badge-status added"
-                        x-show="!isOwnProfile && myBadge(b) && !myBadge(b).received"
-                        title="У вас на странице">📎</span>
-
-                  <div class="badge-actions">
-                    <!-- Свой профиль: отменить получение -->
-                    <button type="button" class="icon-btn cancel"
-                            x-show="isOwnProfile && b.received"
-                            title="Отменить получение" aria-label="Отменить получение"
-                            @click.stop="unreceive(b.id)">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 6l12 12M18 6L6 18"/>
-                      </svg>
-                    </button>
-
-                    <!-- Свой профиль: удалить -->
-                    <button type="button" class="icon-btn danger"
-                            x-show="isOwnProfile && !b.received"
-                            title="Удалить со страницы" aria-label="Удалить со страницы"
-                            @click.stop="remove(b.id)">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18"/><path d="M8 6V4h8v2"/>
-                        <path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
-                      </svg>
-                    </button>
-
-                    <!-- Чужой профиль: мой значок получен → отменить -->
-                    <button type="button" class="icon-btn cancel"
-                            x-show="!isOwnProfile && isReceivedFor(b)"
-                            title="Отменить получение у себя" aria-label="Отменить получение у себя"
-                            @click.stop="unreceive(myBadge(b).id)">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 6l12 12M18 6L6 18"/>
-                      </svg>
-                    </button>
-
-                    <!-- Чужой профиль: значок у меня есть, но не получен → убрать -->
-                    <button type="button" class="icon-btn danger"
-                            x-show="!isOwnProfile && myBadge(b) && !myBadge(b).received"
-                            title="Убрать со своей страницы" aria-label="Убрать со своей страницы"
-                            @click.stop="remove(myBadge(b).id)">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18"/><path d="M8 6V4h8v2"/>
-                        <path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
-                      </svg>
-                    </button>
-
-                    <!-- Чужой профиль: значка у меня нет → добавить -->
-                    <button type="button" class="icon-btn add"
-                            x-show="!isOwnProfile && !myBadge(b)"
-                            title="Добавить к себе" aria-label="Добавить к себе"
-                            @click.stop="add(b)">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 5v14M5 12h14"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-              </article>
+          <div class="badge-list" x-show="filteredCards.length">
+            <template x-for="c in filteredCards" :key="c.key">
+              {{ badge_card('c') }}
             </template>
           </div>
 
-          <div class="empty" x-show="!filteredBadges.length" x-cloak>
+          <div class="empty" x-show="!filteredCards.length" x-cloak>
             <div class="big" x-text="emptyState.icon"></div>
             <div x-text="emptyState.text"></div>
           </div>

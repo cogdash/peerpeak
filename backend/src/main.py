@@ -46,16 +46,19 @@ async def _optional_user(request: Request, session: AsyncSession) -> User | None
 
 
 @app.get("/")
-async def read_index(
+async def read_index():
+    # The feed is the entry point for both guests and signed-in users.
+    return RedirectResponse(url="/feed", status_code=302)
+
+
+@app.get("/feed")
+async def read_feed(
     request: Request,
     session: AsyncSession = Depends(get_session),
 ):
-    # Unauthenticated visitors are sent straight to the auth page.
+    # Badge discovery is public: only the header depends on the viewer.
     user = await _optional_user(request, session)
-    if user is None:
-        return RedirectResponse(url="/auth", status_code=302)
-    # Redirect logged-in users to their own profile page
-    return RedirectResponse(url=f"/@{user.username}", status_code=302)
+    return templates.TemplateResponse(request, "feed.html", {"user": user})
 
 
 @app.get("/profile")

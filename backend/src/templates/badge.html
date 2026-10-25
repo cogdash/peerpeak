@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_badge_card.html" import badge_card %}
 
 {% block title %}{{ og_title }} — Peerpeak{% endblock %}
 
@@ -40,76 +41,11 @@
           <div x-text="error"></div>
         </div>
 
-        <!-- Одна карточка — ровно такая же, как в профиле. -->
+        <!-- Та же карточка, что в профиле и ленте. -->
         <div class="badge-list" x-show="badge" x-cloak>
-          <article class="badge" :class="badgeClass" @pointerdown="startPress($event)">
-            <template x-if="isCreator">
-              <button type="button" class="badge-ico editable"
-                      title="Нажми, чтобы сменить иконку" aria-label="Сменить иконку"
-                      @click="openEmojiModal()"
-                      x-text="badge ? (badge.emoji || '🏅') : ''"></button>
-            </template>
-            <template x-if="!isCreator">
-              <div class="badge-ico" x-text="badge ? (badge.emoji || '🏅') : ''"></div>
-            </template>
-
-            <div class="badge-body">
-              <p class="badge-text" x-text="badge ? badge.title : ''"></p>
-              <p class="badge-meta">
-                <span class="kind" x-text="kindLabel"></span>
-
-                <span class="badge-date"
-                      x-show="myBadge && myBadge.received && myBadge.received_at"
-                      :title="myBadge && myBadge.received_at ? 'Получен: ' + receivedDateFull(myBadge.received_at) : ''"
-                      x-text="myBadge && myBadge.received_at ? '📆 ' + receivedDate(myBadge.received_at) : ''"></span>
-              </p>
-            </div>
-
-            <div class="badge-tail">
-              <span class="badge-status ok"
-                    x-show="myBadge && myBadge.received"
-                    title="У вас получен">✅</span>
-              <span class="badge-status added"
-                    x-show="myBadge && !myBadge.received"
-                    title="У вас на странице">📎</span>
-
-              <div class="badge-actions">
-                <!-- Получен у меня → отменить получение, как в профиле. -->
-                <button type="button" class="icon-btn cancel"
-                        x-show="myBadge && myBadge.received"
-                        title="Отменить получение у себя" aria-label="Отменить получение у себя"
-                        @click="unreceiveBadge()">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 6l12 12M18 6L6 18"/>
-                  </svg>
-                </button>
-
-                <!-- Есть у меня, но не получен → убрать со страницы. -->
-                <button type="button" class="icon-btn danger"
-                        x-show="myBadge && !myBadge.received"
-                        title="Убрать со своей страницы" aria-label="Убрать со своей страницы"
-                        @click="removeBadge()">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18"/><path d="M8 6V4h8v2"/>
-                    <path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
-                  </svg>
-                </button>
-
-                <!-- Ещё нет на моей странице → добавить. -->
-                <button type="button" class="icon-btn add"
-                        x-show="me && !myBadge"
-                        title="Добавить к себе" aria-label="Добавить к себе"
-                        @click="addBadge()">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                       stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 5v14M5 12h14"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </article>
+          <template x-if="card">
+            {{ badge_card('card') }}
+          </template>
 
           <div class="badge-share">
             <button type="button" class="btn ghost sm" @click="shareBadge()">

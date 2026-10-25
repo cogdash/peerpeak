@@ -49,9 +49,11 @@
               x-text="'📆 ' + cardDate({{ expr }}.received_at)"></span>
       </template>
 
-      <span class="badge-date badge-users"
-            :title="cardUsersTitle({{ expr }})"
-            x-text="cardUsersText({{ expr }})"></span>
+      <button type="button" class="badge-date badge-users"
+              :title="cardUsersTitle({{ expr }}) + '. Показать пользователей'"
+              :aria-label="'Показать пользователей: ' + cardUsersText({{ expr }})"
+              @click.stop="openBadgeUsers({{ expr }})"
+              x-text="cardUsersText({{ expr }})"></button>
     </p>
   </div>
 

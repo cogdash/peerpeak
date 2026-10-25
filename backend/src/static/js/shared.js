@@ -53,6 +53,7 @@
      ============================================================ */
   var BADGES_URL = '/api/badges';
   var USER_BADGES_URL = '/api/user-badges';
+  var USERS_URL = '/api/users';
   var LONGPRESS_MS = 1200;
   /* Дольше короткого тапа — значит пользователь начал зажатие. */
   var HOLD_MS = 300;
@@ -91,6 +92,17 @@
     pressStartedAt: null,
     holdCanceledClick: false,
     cardBusyKey: null,
+
+    /* --- Модалка «кто добавил значок» --- */
+    badgeUsersModal: {
+      open: false,
+      badgeId: null,
+      state: 'all',
+      loading: false,
+      users: [],
+      error: ''
+    },
+    badgeUsersSeq: 0,
 
     bindCardPress() {
       this._onPointerUp = this.cancelPress.bind(this);
@@ -381,6 +393,123 @@
 
       this.$store.toast.show('Иконка обновлена');
       await this.reloadCards();
+    },
+
+    /* ======================================================
+       КТО ДОБАВИЛ ЗНАЧОК
+       ====================================================== */
+    openBadgeUsers(card, state) {
+      if (!card || !card.badge_id) return;
+
+      this.badgeUsersModal = {
+        open: true,
+        badgeId: card.badge_id,
+        state: state || 'all',
+        loading: true,
+        users: [],
+        error: ''
+      };
+      this.loadBadgeUsers();
+    },
+
+    closeBadgeUsers() {
+      this.badgeUsersSeq++;
+      this.badgeUsersModal = {
+        open: false,
+        badgeId: null,
+        state: 'all',
+        loading: false,
+        users: [],
+        error: ''
+      };
+    },
+
+    setBadgeUsersFilter(state) {
+      if (this.badgeUsersModal.state === state) return;
+      this.badgeUsersModal.state = state;
+      this.loadBadgeUsers();
+    },
+
+    async loadBadgeUsers() {
+      if (!this.badgeUsersModal.open || !this.badgeUsersModal.badgeId) return;
+
+      var seq = ++this.badgeUsersSeq;
+      var badgeId = this.badgeUsersModal.badgeId;
+      var state = this.badgeUsersModal.state;
+
+      this.badgeUsersModal.loading = true;
+      this.badgeUsersModal.error = '';
+
+      try {
+        var r = await apiFetch(
+          BADGES_URL + '/' + encodeURIComponent(badgeId) + '/users?state=' +
+          encodeURIComponent(state)
+        );
+        if (seq !== this.badgeUsersSeq) return;
+
+        if (!r.ok) {
+          this.badgeUsersModal.error = 'Не удалось загрузить список';
+          return;
+        }
+
+        this.badgeUsersModal.users = (Array.isArray(r.data) ? r.data : [])
+          .map(function (item) {
+            return Object.assign({}, item, { busy: false });
+          });
+      } catch (e) {
+        if (seq === this.badgeUsersSeq) {
+          this.badgeUsersModal.error = 'Нет связи с сервером';
+        }
+      } finally {
+        if (seq === this.badgeUsersSeq) {
+          this.badgeUsersModal.loading = false;
+        }
+      }
+    },
+
+    badgeUsersEmptyText() {
+      if (this.badgeUsersModal.error) return this.badgeUsersModal.error;
+      if (this.badgeUsersModal.state === 'received') {
+        return 'Пока никто не получил этот значок.';
+      }
+      if (this.badgeUsersModal.state === 'unreceived') {
+        return 'Нет пользователей, которые добавили значок, но ещё не получили его.';
+      }
+      return 'Пока никто не добавил этот значок.';
+    },
+
+    badgeUserInitial(name) {
+      return (name || '?').trim().charAt(0).toUpperCase();
+    },
+
+    isBadgeUserMe(user) {
+      return !!(this.me && user && user.username === this.me.username);
+    },
+
+    async toggleBadgeUserFollow(user) {
+      if (!user || user.busy || this.isBadgeUserMe(user)) return;
+
+      var wasFollowing = !!user.is_following;
+      user.busy = true;
+
+      try {
+        var r = await apiFetch(
+          USERS_URL + '/' + encodeURIComponent(user.username) + '/follow',
+          { method: wasFollowing ? 'DELETE' : 'POST' }
+        );
+
+        if (r.status === 401) { window.location.assign('/auth'); return; }
+        if (!r.ok) {
+          this.$store.toast.show(extractErrorMessage(r.data, r.status));
+          return;
+        }
+
+        user.is_following = r.data.following;
+      } catch (e) {
+        this.$store.toast.show('Нет связи с сервером');
+      } finally {
+        user.busy = false;
+      }
     }
   };
 

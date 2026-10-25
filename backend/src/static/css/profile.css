@@ -463,6 +463,71 @@ a.badge-text:hover { color: var(--accent-soft); }
   white-space: nowrap;
 }
 
+/* Счётчик A/B — кнопка, открывает список пользователей. */
+.badge-meta .badge-users {
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: var(--t-fast);
+}
+
+.badge-meta .badge-users:hover { color: var(--accent-soft); }
+.badge-meta .badge-users:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.badge-users-modal { max-width: 420px; }
+
+.badge-users-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--s-3);
+}
+
+.badge-users-filters button {
+  flex: 1 1 auto;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+
+.badge-users-filters button:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.badge-users-filters button.active {
+  color: var(--accent-soft);
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.badge-user-status {
+  flex: 0 0 auto;
+  margin-left: 6px;
+  margin-right: 10px;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 2px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Хвост: [эмодзи-статус] → [кнопка действия].
    На hover статус уезжает левее, кнопка встаёт на его место. */
 .badge-tail {

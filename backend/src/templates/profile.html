@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_badge_card.html" import badge_card %}
+{% from "_badge_users_modal.html" import badge_users_modal %}
 
 {% block title %}{{ profile_user.full_name }} — Peerpeak{% endblock %}
 
@@ -307,6 +308,8 @@
         </div>
       </div>
     </template>
+
+    {{ badge_users_modal() }}
 {% endblock %}
 
 {% block scripts %}

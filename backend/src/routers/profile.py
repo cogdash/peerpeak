@@ -97,6 +97,16 @@ class FollowUserResponse(BaseModel):
     is_following: bool
 
 
+class BadgeUserResponse(BaseModel):
+    id: str
+    username: str
+    full_name: str
+    # Whether this user marked the badge as received.
+    received: bool
+    # Whether the authenticated viewer follows this user.
+    is_following: bool
+
+
 class FollowStateResponse(BaseModel):
     following: bool
     followers_count: int
@@ -606,6 +616,82 @@ async def get_badge(
 
     counts = await _badge_counts(session, [badge.id])
     return _badge_response(badge, *counts.get(badge.id, (0, 0)))
+
+
+@router.get("/badges/{badge_id}/users", response_model=list[BadgeUserResponse])
+async def list_badge_users(
+    badge_id: uuid.UUID,
+    state: str = Query(
+        default="all",
+        pattern="^(all|received|unreceived)$",
+    ),
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    session: AsyncSession = Depends(get_session),
+    viewer: User | None = Depends(get_optional_user),
+) -> list[BadgeUserResponse]:
+    """List users who have this badge on their page.
+
+    ``state``:
+    - ``all`` — everyone, users who received the badge first;
+    - ``received`` — only users who marked it as received;
+    - ``unreceived`` — only users who added it but haven't received it.
+
+    This endpoint is public. When the viewer is signed in, ``is_following``
+    tells whether they follow each listed user.
+    """
+    badge = await session.get(Badge, badge_id)
+    if badge is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Значок не найден",
+        )
+
+    statement = (
+        select(User, UserBadge)
+        .join(UserBadge, UserBadge.user_id == User.id)
+        .where(UserBadge.badge_id == badge_id)
+    )
+
+    if state == "received":
+        statement = statement.where(UserBadge.received.is_(True)).order_by(
+            UserBadge.received_at.desc().nulls_last(),
+            UserBadge.created_at.desc(),
+        )
+    elif state == "unreceived":
+        statement = statement.where(UserBadge.received.is_(False)).order_by(
+            UserBadge.created_at.desc(),
+        )
+    else:
+        statement = statement.order_by(
+            UserBadge.received.desc(),
+            UserBadge.received_at.desc().nulls_last(),
+            UserBadge.created_at.desc(),
+        )
+
+    result = await session.execute(
+        statement.limit(limit).offset(offset)
+    )
+    rows = result.all()
+
+    followed: set[uuid.UUID] = set()
+    if viewer is not None:
+        followed = await _followed_ids(
+            session,
+            viewer.id,
+            [item_user.id for item_user, _ in rows],
+        )
+
+    return [
+        BadgeUserResponse(
+            id=str(item_user.id),
+            username=item_user.username,
+            full_name=item_user.full_name,
+            received=user_badge.received,
+            is_following=item_user.id in followed,
+        )
+        for item_user, user_badge in rows
+    ]
 
 
 @router.get("/users/@{username}")

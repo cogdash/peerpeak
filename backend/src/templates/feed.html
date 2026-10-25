@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_badge_card.html" import badge_card %}
+{% from "_badge_users_modal.html" import badge_users_modal %}
 
 {% block title %}Лента значков — Peerpeak{% endblock %}
 
@@ -55,6 +56,10 @@
           <div>Пока нет новых значков для показа.</div>
         </div>
       </section>
+{% endblock %}
+
+{% block overlays %}
+    {{ badge_users_modal() }}
 {% endblock %}
 
 {% block scripts %}

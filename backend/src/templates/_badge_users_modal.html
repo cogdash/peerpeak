@@ -1,0 +1,81 @@
+{# ============================================================
+   МОДАЛКА «КТО ДОБАВИЛ ЗНАЧОК»
+   Открывается по нажатию на A/B 👥 в общей карточке.
+   Список устроен как подписчики/подписки: аватар, имя,
+   @username, сердечко подписки. Справа — ✅ или 📎.
+   ============================================================ #}
+{% macro badge_users_modal() %}
+<template x-if="badgeUsersModal.open">
+  <div class="modal-backdrop"
+       @click.self="closeBadgeUsers()"
+       @keydown.escape.window="closeBadgeUsers()">
+    <div class="modal follow-modal badge-users-modal" role="dialog" aria-modal="true"
+         aria-label="Пользователи со значком">
+      <h3>Пользователи со значком</h3>
+
+      <div class="badge-users-filters" role="group" aria-label="Фильтр пользователей">
+        <button type="button"
+                :class="{ active: badgeUsersModal.state === 'all' }"
+                :aria-pressed="badgeUsersModal.state === 'all' ? 'true' : 'false'"
+                @click="setBadgeUsersFilter('all')">Все</button>
+        <button type="button"
+                :class="{ active: badgeUsersModal.state === 'received' }"
+                :aria-pressed="badgeUsersModal.state === 'received' ? 'true' : 'false'"
+                @click="setBadgeUsersFilter('received')">Получили</button>
+        <button type="button"
+                :class="{ active: badgeUsersModal.state === 'unreceived' }"
+                :aria-pressed="badgeUsersModal.state === 'unreceived' ? 'true' : 'false'"
+                @click="setBadgeUsersFilter('unreceived')">Добавили, но не получили</button>
+      </div>
+
+      <div class="follow-list"
+           x-show="!badgeUsersModal.loading && badgeUsersModal.users.length" x-cloak>
+        <template x-for="u in badgeUsersModal.users" :key="u.id">
+          <div class="follow-row">
+            <a class="follow-link" :href="'/@' + encodeURIComponent(u.username)">
+              <span class="follow-avatar" x-text="badgeUserInitial(u.full_name)"></span>
+              <span class="follow-who">
+                <span class="follow-name" x-text="u.full_name"></span>
+                <span class="follow-username" x-text="'@' + u.username"></span>
+              </span>
+            </a>
+
+            <span class="badge-user-status"
+                  :title="u.received ? 'Получен' : 'Добавлен, но не получен'"
+                  :aria-label="u.received ? 'Получен' : 'Добавлен, но не получен'"
+                  x-text="u.received ? '✅' : '📎'"></span>
+
+            <button type="button" class="icon-btn follow"
+                    x-show="me && !isBadgeUserMe(u)" x-cloak
+                    :class="{ active: u.is_following }"
+                    :title="u.is_following ? 'Отписаться' : 'Подписаться'"
+                    :aria-label="u.is_following ? 'Отписаться' : 'Подписаться'"
+                    :aria-pressed="u.is_following ? 'true' : 'false'"
+                    :disabled="u.busy"
+                    @click="toggleBadgeUserFollow(u)">
+              <svg viewBox="0 0 24 24" width="15" height="15"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          </div>
+        </template>
+      </div>
+
+      <div class="follow-state"
+           x-show="!badgeUsersModal.loading && !badgeUsersModal.users.length"
+           x-text="badgeUsersEmptyText()"></div>
+
+      <div class="follow-state" x-show="badgeUsersModal.loading">
+        <span class="spinner"></span>
+        <span>Загружаем…</span>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" @click="closeBadgeUsers()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</template>
+{% endmacro %}

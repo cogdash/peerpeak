@@ -63,7 +63,7 @@
                x-text="profile ? '@' + profile.username : ''"></a>
             <p class="profile-bio"
                x-show="profile && profile.bio && profile.bio.trim()"
-               x-text="profile ? profile.bio : ''"></p>
+               x-html="bioHtml"></p>
             <p class="profile-joined" x-text="joinedText"></p>
           </div>
         </div>
@@ -336,5 +336,7 @@
 {% endblock %}
 
 {% block scripts %}
+    <script src="/static/vendor/linkify.min.js"></script>
+    <script src="/static/vendor/linkify-string.min.js"></script>
     <script src="/static/js/profile.js"></script>
 {% endblock %}

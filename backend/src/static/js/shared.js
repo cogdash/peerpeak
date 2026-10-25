@@ -13,6 +13,33 @@
     title:     'название'
   };
 
+  /* Экранирует HTML-спецсимволы. */
+  window.escapeHtml = function (text) {
+    return String(text == null ? '' : text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
+  /* Превращает обычный текст в безопасный HTML со ссылками.
+     Ссылки ищет linkify (подключён только на странице профиля),
+     он же экранирует HTML. Если библиотеки нет — отдаём простой текст. */
+  window.renderBioHtml = function (text) {
+    if (!text) return '';
+
+    if (typeof linkifyStr === 'function') {
+      return linkifyStr(text, {
+        defaultProtocol: 'https',
+        target: '_blank',
+        rel: 'noopener noreferrer nofollow'
+      });
+    }
+
+    return window.escapeHtml(text);
+  };
+
   /* Превращает ответ FastAPI в понятный текст.
      - HTTPException: { detail: "строка" }
      - Ошибка валидации (422): { detail: [ { loc, msg, ... } ] } */

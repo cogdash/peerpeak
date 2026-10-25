@@ -73,6 +73,13 @@ body {
   word-break: break-word;
 }
 .profile-bio:empty { display: none; }
+.profile-bio a {
+  color: var(--accent-soft);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.profile-bio a:hover { color: var(--accent); }
 
 .profile-joined {
   margin: 0;

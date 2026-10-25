@@ -114,6 +114,12 @@ document.addEventListener('alpine:init', function () {
       /* ======================================================
          ВЫЧИСЛЯЕМЫЕ ЗНАЧЕНИЯ
          ====================================================== */
+      get bioHtml() {
+        return this.profile && this.profile.bio
+          ? renderBioHtml(this.profile.bio)
+          : '';
+      },
+
       get joinedText() {
         if (!this.profile || !this.profile.created_at) return '';
         var d = new Date(this.profile.created_at);

@@ -320,6 +320,7 @@ async def feed_badges(
     """Return a random selection of catalog badges for the discovery feed.
 
     This endpoint is public: the feed can be browsed without signing in.
+    Only badges that at least one user has added to their page are returned.
     When ``exclude_username`` is passed, the database skips every badge that
     user already has on their page, so the feed only suggests something new.
     """
@@ -346,6 +347,8 @@ async def feed_badges(
             received_count.label("received_count"),
         )
         .options(selectinload(Badge.creator))
+        # Badges nobody has added to their page are not interesting yet.
+        .where(users_count > 0)
     )
 
     if exclude_username:

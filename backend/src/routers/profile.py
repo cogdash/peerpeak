@@ -40,6 +40,9 @@ class BadgeResponse(BaseModel):
     creator_id: str
     creator_username: str
     created_at: datetime
+    # Users who marked the badge as received / added it to their page.
+    received_count: int = 0
+    users_count: int = 0
 
 
 class UserBadgeResponse(BaseModel):
@@ -54,6 +57,9 @@ class UserBadgeResponse(BaseModel):
     # Username of the badge creator, shown as "by @user" on the card.
     creator_username: str
     created_at: datetime
+    # Users who marked the badge as received / added it to their page.
+    received_count: int = 0
+    users_count: int = 0
 
 
 class LookupResponse(BaseModel):
@@ -77,6 +83,8 @@ class FeedBadgeResponse(BaseModel):
     emoji: str
     polarity: str
     creator_username: str
+    # How many users marked the badge as received.
+    received_count: int
     # How many users have added the badge to their page.
     users_count: int
 
@@ -98,7 +106,11 @@ class UpdateEmojiRequest(BaseModel):
     emoji: str = Field(default="", max_length=16)
 
 
-def _badge_response(badge: Badge) -> BadgeResponse:
+def _badge_response(
+    badge: Badge,
+    users_count: int = 0,
+    received_count: int = 0,
+) -> BadgeResponse:
     return BadgeResponse(
         id=str(badge.id),
         title=badge.title,
@@ -107,10 +119,18 @@ def _badge_response(badge: Badge) -> BadgeResponse:
         creator_id=str(badge.creator_id),
         creator_username=badge.creator.username if badge.creator else "",
         created_at=badge.created_at,
+        received_count=received_count,
+        users_count=users_count,
     )
 
 
-def _user_badge_response(user_badge: UserBadge, badge: Badge, user: User) -> UserBadgeResponse:
+def _user_badge_response(
+    user_badge: UserBadge,
+    badge: Badge,
+    user: User,
+    users_count: int = 0,
+    received_count: int = 0,
+) -> UserBadgeResponse:
     return UserBadgeResponse(
         id=str(user_badge.id),
         badge_id=str(badge.id),
@@ -122,6 +142,8 @@ def _user_badge_response(user_badge: UserBadge, badge: Badge, user: User) -> Use
         is_creator=badge.creator_id == user.id,
         creator_username=badge.creator.username if badge.creator else "",
         created_at=user_badge.created_at,
+        received_count=received_count,
+        users_count=users_count,
     )
 
 
@@ -169,6 +191,29 @@ async def _followed_ids(
     return set(result.scalars().all())
 
 
+async def _badge_counts(
+    session: AsyncSession,
+    badge_ids: list[uuid.UUID],
+) -> dict[uuid.UUID, tuple[int, int]]:
+    """Return ``{badge_id: (users_count, received_count)}``."""
+    if not badge_ids:
+        return {}
+
+    result = await session.execute(
+        select(
+            UserBadge.badge_id,
+            func.count(UserBadge.id),
+            func.count(UserBadge.id).filter(UserBadge.received.is_(True)),
+        )
+        .where(UserBadge.badge_id.in_(badge_ids))
+        .group_by(UserBadge.badge_id)
+    )
+    return {
+        badge_id: (int(total or 0), int(received or 0))
+        for badge_id, total, received in result.all()
+    }
+
+
 async def _follow_counts(session: AsyncSession, user_id: uuid.UUID) -> tuple[int, int]:
     """Return ``(followers, following)`` counts for a user."""
     followers = await session.scalar(
@@ -204,10 +249,11 @@ async def lookup_badge(
 
     badge = await _get_badge_by_title(session, title)
     if badge is not None:
+        counts = await _badge_counts(session, [badge.id])
         return LookupResponse(
             title=title,
             polarity=badge.polarity,
-            badge=_badge_response(badge),
+            badge=_badge_response(badge, *counts.get(badge.id, (0, 0))),
             score=1.0,
             scores={},
         )
@@ -237,10 +283,17 @@ async def list_badges(
         .where(UserBadge.user_id == user.id)
         .order_by(UserBadge.created_at.desc())
     )
+    rows = result.all()
+    counts = await _badge_counts(session, [badge.id for _, badge in rows])
 
     return [
-        _user_badge_response(user_badge, badge, user)
-        for user_badge, badge in result.all()
+        _user_badge_response(
+            user_badge,
+            badge,
+            user,
+            *counts.get(badge.id, (0, 0)),
+        )
+        for user_badge, badge in rows
     ]
 
 
@@ -276,9 +329,22 @@ async def feed_badges(
         .correlate(Badge)
         .scalar_subquery()
     )
+    received_count = (
+        select(func.count(UserBadge.id))
+        .where(
+            UserBadge.badge_id == Badge.id,
+            UserBadge.received.is_(True),
+        )
+        .correlate(Badge)
+        .scalar_subquery()
+    )
 
     statement = (
-        select(Badge, users_count.label("users_count"))
+        select(
+            Badge,
+            users_count.label("users_count"),
+            received_count.label("received_count"),
+        )
         .options(selectinload(Badge.creator))
     )
 
@@ -301,9 +367,10 @@ async def feed_badges(
             emoji=badge.emoji,
             polarity=badge.polarity,
             creator_username=badge.creator.username if badge.creator else "",
-            users_count=int(count or 0),
+            received_count=int(received or 0),
+            users_count=int(total or 0),
         )
-        for badge, count in result.all()
+        for badge, total, received in result.all()
     ]
 
 
@@ -368,7 +435,8 @@ async def add_badge(
     await session.commit()
     await session.refresh(user_badge)
 
-    return _user_badge_response(user_badge, badge, user)
+    counts = await _badge_counts(session, [badge.id])
+    return _user_badge_response(user_badge, badge, user, *counts.get(badge.id, (0, 0)))
 
 
 @router.patch("/badges/{badge_id}")
@@ -396,7 +464,8 @@ async def update_badge_emoji(
     await session.commit()
     await session.refresh(badge)
 
-    return _badge_response(badge)
+    counts = await _badge_counts(session, [badge.id])
+    return _badge_response(badge, *counts.get(badge.id, (0, 0)))
 
 
 @router.post("/user-badges/{user_badge_id}/receive")
@@ -420,7 +489,13 @@ async def receive_badge(
         await session.refresh(user_badge)
 
     badge = await _get_badge_by_id(session, user_badge.badge_id)
-    return _user_badge_response(user_badge, badge, user)
+    counts = await _badge_counts(session, [badge.id])
+    return _user_badge_response(
+        user_badge,
+        badge,
+        user,
+        *counts.get(badge.id, (0, 0)),
+    )
 
 
 @router.post("/user-badges/{user_badge_id}/unreceive")
@@ -444,7 +519,13 @@ async def unreceive_badge(
         await session.refresh(user_badge)
 
     badge = await _get_badge_by_id(session, user_badge.badge_id)
-    return _user_badge_response(user_badge, badge, user)
+    counts = await _badge_counts(session, [badge.id])
+    return _user_badge_response(
+        user_badge,
+        badge,
+        user,
+        *counts.get(badge.id, (0, 0)),
+    )
 
 
 @router.delete("/user-badges/{user_badge_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -490,10 +571,17 @@ async def list_user_badges(
         .where(UserBadge.user_id == target_user.id)
         .order_by(UserBadge.created_at.desc())
     )
+    rows = result.all()
+    counts = await _badge_counts(session, [badge.id for _, badge in rows])
 
     return [
-        _user_badge_response(user_badge, badge, target_user)
-        for user_badge, badge in result.all()
+        _user_badge_response(
+            user_badge,
+            badge,
+            target_user,
+            *counts.get(badge.id, (0, 0)),
+        )
+        for user_badge, badge in rows
     ]
 
 
@@ -513,7 +601,8 @@ async def get_badge(
             detail="Значок не найден",
         )
 
-    return _badge_response(badge)
+    counts = await _badge_counts(session, [badge.id])
+    return _badge_response(badge, *counts.get(badge.id, (0, 0)))
 
 
 @router.get("/users/@{username}")

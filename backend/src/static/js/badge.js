@@ -65,8 +65,8 @@ document.addEventListener('alpine:init', function () {
           received_at: mine ? mine.received_at : null,
           href: null,
           show_status: true,
-          extra_text: '',
-          extra_title: ''
+          received_count: this.badge.received_count || 0,
+          users_count: this.badge.users_count || 0
         };
       },
 

@@ -106,7 +106,6 @@ document.addEventListener('alpine:init', function () {
 
         return this.badges.map(function (b) {
           var mine = self.myBadge(b);
-          var count = b.users_count || 0;
 
           return {
             key: String(b.id),
@@ -122,47 +121,50 @@ document.addEventListener('alpine:init', function () {
             received_at: mine ? mine.received_at : null,
             href: '/badge/' + encodeURIComponent(b.id),
             show_status: true,
-            extra_text: '👥 ' + count,
-            extra_title: self.usersTitle(count)
+            received_count: b.received_count || 0,
+            users_count: b.users_count || 0
           };
         });
       },
 
-      /* После добавления/удаления обновляем счётчик без перезагрузки ленты. */
+      /* После действий обновляем счётчики без перезагрузки ленты. */
       onCardAdded(card) {
-        this.bumpUsersCount(card.badge_id, 1);
+        this.bumpCardCounts(card.badge_id, { users: 1 });
+      },
+
+      onCardReceived(card) {
+        this.bumpCardCounts(card.badge_id, { received: 1 });
+      },
+
+      onCardUnreceived(card) {
+        this.bumpCardCounts(card.badge_id, { received: -1 });
       },
 
       onCardRemoved(card) {
-        this.bumpUsersCount(card.badge_id, -1);
+        this.bumpCardCounts(card.badge_id, {
+          users: -1,
+          received: card.received ? -1 : 0
+        });
       },
 
-      bumpUsersCount(badgeId, delta) {
+      bumpCardCounts(badgeId, deltas) {
         var item = this.badges.find(function (b) {
           return String(b.id) === String(badgeId);
         });
-        if (item) item.users_count = Math.max(0, (item.users_count || 0) + delta);
+        if (!item) return;
+
+        item.users_count = Math.max(
+          0,
+          (item.users_count || 0) + (deltas.users || 0)
+        );
+        item.received_count = Math.max(
+          0,
+          (item.received_count || 0) + (deltas.received || 0)
+        );
       },
 
       async reloadCards() {
         await this.refreshMine();
-      },
-
-      /* ======================================================
-         ТЕКСТЫ
-         ====================================================== */
-      usersTitle(n) {
-        return 'Значок есть у ' + n + ' ' +
-          this.plural(n, 'пользователя', 'пользователей', 'пользователей');
-      },
-
-      plural(n, one, few, many) {
-        var abs = Math.abs(n) % 100;
-        var last = abs % 10;
-        if (abs > 10 && abs < 20) return many;
-        if (last > 1 && last < 5) return few;
-        if (last === 1) return one;
-        return many;
       }
     };
 

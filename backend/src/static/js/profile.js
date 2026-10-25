@@ -240,8 +240,8 @@ document.addEventListener('alpine:init', function () {
           received_at: b.received ? b.received_at : null,
           href: '/badge/' + encodeURIComponent(b.badge_id),
           show_status: !own,
-          extra_text: '',
-          extra_title: ''
+          received_count: b.received_count || 0,
+          users_count: b.users_count || 0
         };
       },
 

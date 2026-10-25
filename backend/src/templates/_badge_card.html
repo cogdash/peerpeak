@@ -5,7 +5,7 @@
    Ожидает нормализованный объект из JS-методов card*:
      key, badge_id, user_badge_id, title, emoji, polarity,
      added, received, editable, creator_username, received_at,
-     href, show_status, extra_text, extra_title
+     href, show_status, received_count, users_count
 
    always_actions=True — кнопки действий видны всегда
    (лента), иначе они появляются по hover/focus, как раньше.
@@ -49,9 +49,9 @@
               x-text="'📆 ' + cardDate({{ expr }}.received_at)"></span>
       </template>
 
-      <span class="badge-date" x-show="{{ expr }}.extra_text"
-            :title="{{ expr }}.extra_title || ''"
-            x-text="{{ expr }}.extra_text || ''"></span>
+      <span class="badge-date badge-users"
+            :title="cardUsersTitle({{ expr }})"
+            x-text="cardUsersText({{ expr }})"></span>
     </p>
   </div>
 

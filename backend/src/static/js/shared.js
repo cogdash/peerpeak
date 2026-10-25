@@ -46,7 +46,7 @@
      Карточка получает нормализованный объект:
        { key, badge_id, user_badge_id, title, emoji, polarity,
          added, received, editable, creator_username, received_at,
-         href, show_status, extra_text, extra_title }
+         href, show_status, received_count, users_count }
      added/received описывают состояние ТЕКУЩЕГО пользователя,
      поэтому карточка одинаково работает и на своём, и на чужом
      профиле, и в ленте.
@@ -72,6 +72,16 @@
     var d = new Date(iso);
     if (isNaN(d.getTime())) return '';
     try { return d.toLocaleString('ru-RU'); } catch (e) { return ''; }
+  }
+
+  /* Русское склонение: 1 пользователь, 2 пользователя, 5 пользователей. */
+  function pluralRu(n, one, few, many) {
+    var abs = Math.abs(n) % 100;
+    var last = abs % 10;
+    if (abs > 10 && abs < 20) return many;
+    if (last > 1 && last < 5) return few;
+    if (last === 1) return one;
+    return many;
   }
 
   window.badgeCardMixin = {
@@ -138,6 +148,18 @@
 
     cardStatusTitle(card) {
       return card.received ? 'У вас получен' : 'У вас на странице';
+    },
+
+    /* Счётчик на карточке: получили / добавили. */
+    cardUsersText(card) {
+      return (card.received_count || 0) + '/' + (card.users_count || 0) + ' 👥';
+    },
+
+    cardUsersTitle(card) {
+      var received = card.received_count || 0;
+      var total = card.users_count || 0;
+      return 'Получен у ' + received + ' из ' + total + ' ' +
+        pluralRu(total, 'пользователя', 'пользователей', 'пользователей');
     },
 
     canEditIcon(card) {
@@ -240,6 +262,7 @@
         var r2 = await apiFetch(USER_BADGES_URL + '/' + newId + '/receive', {
           method: 'POST'
         });
+        if (r2.ok && this.onCardReceived) this.onCardReceived(card);
         this.$store.toast.show(r2.ok
           ? 'Значок добавлен и получен! 🎉'
           : 'Значок добавлен на вашу страницу');
@@ -267,6 +290,7 @@
           return;
         }
         this.$store.toast.show('Значок получен! 🎉');
+        if (this.onCardReceived) this.onCardReceived(card);
         await this.reloadCards();
       } catch (e) {
         this.$store.toast.show('Нет связи с сервером');
@@ -290,6 +314,7 @@
           return;
         }
         this.$store.toast.show('Получение отменено');
+        if (this.onCardUnreceived) this.onCardUnreceived(card);
         await this.reloadCards();
       } catch (e) {
         this.$store.toast.show('Нет связи с сервером');

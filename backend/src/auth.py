@@ -134,3 +134,22 @@ async def get_current_user(
 
     return user
 
+
+async def get_optional_user(
+    auth_token: str | None = Cookie(default=None, alias=AUTH_COOKIE_NAME),
+    session: AsyncSession = Depends(get_session),
+) -> User | None:
+    """Resolve the current user, or return ``None`` for guests.
+
+    Useful for public endpoints that render a different response to the
+    authenticated owner of the session (for example, whether the viewer
+    already follows the requested profile).
+    """
+    if not auth_token:
+        return None
+
+    try:
+        return await get_current_user(auth_token=auth_token, session=session)
+    except HTTPException:
+        return None
+

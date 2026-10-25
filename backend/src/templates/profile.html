@@ -29,6 +29,21 @@
             </svg>
           </button>
 
+          <button type="button" class="icon-btn follow"
+                  x-show="!isOwnProfile" x-cloak
+                  :class="{ active: profile && profile.is_following }"
+                  :title="profile && profile.is_following ? 'Отписаться' : 'Подписаться'"
+                  :aria-label="profile && profile.is_following ? 'Отписаться' : 'Подписаться'"
+                  :aria-pressed="profile && profile.is_following ? 'true' : 'false'"
+                  :disabled="followLoading"
+                  @click="toggleFollow()">
+            <svg viewBox="0 0 24 24" width="17" height="17"
+                 fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
+
           <button type="button" class="icon-btn"
                   title="Поделиться профилем" aria-label="Поделиться профилем"
                   @click="shareProfile()">
@@ -61,6 +76,17 @@
             <a class="profile-username"
                :href="profile ? '/@' + encodeURIComponent(profile.username) : '#'"
                x-text="profile ? '@' + profile.username : ''"></a>
+            <p class="profile-follow-stats" x-show="profile" x-cloak>
+              <button type="button" class="profile-follow-stat"
+                      title="Показать подписчиков"
+                      @click="openFollowModal('followers')"
+                      x-text="followersText"></button>
+              <span class="profile-follow-sep" aria-hidden="true">·</span>
+              <button type="button" class="profile-follow-stat"
+                      title="Показать подписки"
+                      @click="openFollowModal('following')"
+                      x-text="followingText"></button>
+            </p>
             <p class="profile-bio"
                x-show="profile && profile.bio && profile.bio.trim()"
                x-html="bioHtml"></p>
@@ -329,6 +355,59 @@
           </div>
           <div class="modal-actions">
             <button type="button" class="btn ghost" @click="closeEmojiModal()">Отмена</button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ================= МОДАЛКА ПОДПИСОК ================= -->
+    <template x-if="followModal.open">
+      <div class="modal-backdrop"
+           @click.self="closeFollowModal()"
+           @keydown.escape.window="closeFollowModal()">
+        <div class="modal follow-modal" role="dialog" aria-modal="true"
+             :aria-label="followModalTitle">
+          <h3 x-text="followModalTitle"></h3>
+
+          <div class="follow-list" x-show="!followModal.loading && followModal.users.length">
+            <template x-for="u in followModal.users" :key="u.id">
+              <div class="follow-row">
+                <a class="follow-link" :href="'/@' + encodeURIComponent(u.username)">
+                  <span class="follow-avatar" x-text="initial(u.full_name)"></span>
+                  <span class="follow-who">
+                    <span class="follow-name" x-text="u.full_name"></span>
+                    <span class="follow-username" x-text="'@' + u.username"></span>
+                  </span>
+                </a>
+
+                <button type="button" class="icon-btn follow"
+                        x-show="!isMe(u)" x-cloak
+                        :class="{ active: u.is_following }"
+                        :title="u.is_following ? 'Отписаться' : 'Подписаться'"
+                        :aria-label="u.is_following ? 'Отписаться' : 'Подписаться'"
+                        :aria-pressed="u.is_following ? 'true' : 'false'"
+                        :disabled="u.busy"
+                        @click="toggleFollowUser(u)">
+                  <svg viewBox="0 0 24 24" width="15" height="15"
+                       fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+              </div>
+            </template>
+          </div>
+
+          <div class="follow-state" x-show="!followModal.loading && !followModal.users.length"
+               x-text="followEmptyText"></div>
+
+          <div class="follow-state" x-show="followModal.loading">
+            <span class="spinner"></span>
+            <span>Загружаем…</span>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" @click="closeFollowModal()">Закрыть</button>
           </div>
         </div>
       </div>

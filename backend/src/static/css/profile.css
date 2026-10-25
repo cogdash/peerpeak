@@ -64,6 +64,29 @@ body {
 }
 .profile-username:hover { text-decoration: underline; }
 
+.profile-follow-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.profile-follow-stat {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.profile-follow-stat:hover {
+  color: var(--accent-soft);
+  text-decoration: underline;
+}
+.profile-follow-sep { color: var(--faint); }
+
 .profile-bio {
   margin: 0 0 8px;
   font-size: 14px;
@@ -544,6 +567,18 @@ button.badge-ico.editable:focus-visible {
 .icon-btn.add:hover    { color: #fff; background: var(--grad-accent); border-color: transparent; }
 .icon-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+.icon-btn.follow:hover {
+  color: var(--neg-soft);
+  border-color: var(--neg-border);
+  background: var(--neg-bg);
+}
+.icon-btn.follow.active {
+  color: var(--neg-soft);
+  border-color: var(--neg-border);
+  background: var(--neg-bg);
+}
+.icon-btn.follow.active svg { fill: currentColor; }
+
 /* ============================================================
    ПУСТОЕ СОСТОЯНИЕ
    ============================================================ */
@@ -604,6 +639,89 @@ button.badge-ico.editable:focus-visible {
   gap: var(--s-3);
   justify-content: flex-end;
   margin-top: var(--s-5);
+}
+
+/* ============================================================
+   СПИСОК ПОДПИСОК
+   ============================================================ */
+.follow-modal { max-width: 380px; }
+.follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: min(55vh, 380px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+.follow-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--r-sm);
+  transition: var(--t-fast);
+}
+.follow-row:hover { background: var(--field); }
+.follow-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  color: var(--text);
+  text-decoration: none;
+}
+.follow-row .icon-btn {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+.follow-avatar {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--grad-accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+.follow-who { display: flex; flex-direction: column; min-width: 0; }
+.follow-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.follow-username {
+  font-size: 12px;
+  color: var(--accent-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.follow-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--s-6) var(--s-3);
+  color: var(--muted);
+  text-align: center;
+}
+.follow-state .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
 }
 
 .emoji-picker {

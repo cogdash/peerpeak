@@ -6,6 +6,7 @@ document.addEventListener('alpine:init', function () {
   var BADGES_URL      = '/api/badges';
   var CATALOG_URL     = '/api/badges/catalog';
   var USER_BADGES_URL = '/api/user-badges';
+  var USERS_URL       = '/api/users';
   var ME_URL          = '/api/me';
   var SIGNOUT_URL     = '/api/signout';
 
@@ -80,6 +81,11 @@ document.addEventListener('alpine:init', function () {
       /* --- Модалка редактирования профиля --- */
       editModal: { open: false, full_name: '', username: '', bio: '', saving: false },
 
+      /* --- Подписки --- */
+      followLoading: false,
+      followModalSeq: 0,
+      followModal: { open: false, mode: 'followers', loading: false, users: [], error: '' },
+
       /* --- Long-press --- */
       pressingId: null,
       pressTimer: null,
@@ -118,6 +124,27 @@ document.addEventListener('alpine:init', function () {
         return this.profile && this.profile.bio
           ? renderBioHtml(this.profile.bio)
           : '';
+      },
+
+      get followersText() {
+        var n = this.profile ? (this.profile.followers_count || 0) : 0;
+        return n + ' ' + this.plural(n, 'подписчик', 'подписчика', 'подписчиков');
+      },
+
+      get followingText() {
+        var n = this.profile ? (this.profile.following_count || 0) : 0;
+        return n + ' ' + this.plural(n, 'подписка', 'подписки', 'подписок');
+      },
+
+      get followModalTitle() {
+        return this.followModal.mode === 'followers' ? 'Подписчики' : 'Подписки';
+      },
+
+      get followEmptyText() {
+        if (this.followModal.error) return this.followModal.error;
+        return this.followModal.mode === 'followers'
+          ? 'Пока нет подписчиков.'
+          : 'Пока нет подписок.';
       },
 
       get joinedText() {
@@ -288,7 +315,9 @@ document.addEventListener('alpine:init', function () {
             this.isOwnProfile = true;
           }
         } else {
-          this.profile = this.me;
+          /* Свой профиль: тоже тянем публичные данные, чтобы получить счётчики. */
+          var own = await this.loadViewedUser();
+          this.profile = own || this.me;
           this.isOwnProfile = true;
         }
 
@@ -659,7 +688,10 @@ document.addEventListener('alpine:init', function () {
 
           var newUsername = r.data.username;
           this.me = r.data;
-          if (this.isOwnProfile) this.profile = this.me;
+          if (this.isOwnProfile) {
+            /* Сохраняем счётчики подписок, которых нет в ответе /api/me. */
+            this.profile = Object.assign({}, this.profile, r.data);
+          }
 
           this.editModal.saving = false;
           this.editModal.open = false;
@@ -676,6 +708,127 @@ document.addEventListener('alpine:init', function () {
         } finally {
           this.editModal.saving = false;
         }
+      },
+
+      /* ======================================================
+         ПОДПИСКИ
+         ====================================================== */
+      plural(n, one, few, many) {
+        var abs = Math.abs(n) % 100;
+        var last = abs % 10;
+        if (abs > 10 && abs < 20) return many;
+        if (last > 1 && last < 5) return few;
+        if (last === 1) return one;
+        return many;
+      },
+
+      async toggleFollow() {
+        if (!this.profile || this.isOwnProfile || this.followLoading) return;
+
+        var following = !!this.profile.is_following;
+        this.followLoading = true;
+
+        try {
+          var r = await apiFetch(
+            USERS_URL + '/' + encodeURIComponent(this.profile.username) + '/follow',
+            { method: following ? 'DELETE' : 'POST' }
+          );
+
+          if (r.status === 401) { window.location.assign('/auth'); return; }
+          if (!r.ok) {
+            this.$store.toast.show(extractErrorMessage(r.data, r.status));
+            return;
+          }
+
+          this.profile.is_following = r.data.following;
+          this.profile.followers_count = r.data.followers_count;
+          this.$store.toast.show(
+            r.data.following
+              ? 'Подписались на @' + this.profile.username
+              : 'Отписались от @' + this.profile.username
+          );
+        } catch (e) {
+          this.$store.toast.show('Нет связи с сервером');
+        } finally {
+          this.followLoading = false;
+        }
+      },
+
+      isMe(u) {
+        return !!(this.me && u && u.username === this.me.username);
+      },
+
+      async toggleFollowUser(u) {
+        if (!u || u.busy || this.isMe(u)) return;
+
+        var wasFollowing = !!u.is_following;
+        u.busy = true;
+
+        try {
+          var r = await apiFetch(
+            USERS_URL + '/' + encodeURIComponent(u.username) + '/follow',
+            { method: wasFollowing ? 'DELETE' : 'POST' }
+          );
+
+          if (r.status === 401) { window.location.assign('/auth'); return; }
+          if (!r.ok) {
+            this.$store.toast.show(extractErrorMessage(r.data, r.status));
+            return;
+          }
+
+          u.is_following = r.data.following;
+
+          /* Если открыт профиль этого же пользователя — синхронизируем шапку. */
+          if (this.profile && this.profile.username === u.username) {
+            this.profile.is_following = r.data.following;
+            this.profile.followers_count = r.data.followers_count;
+          }
+
+          /* Мои подписки меняются при любом действии из модалки. */
+          if (this.isOwnProfile) {
+            var delta = (r.data.following ? 1 : 0) - (wasFollowing ? 1 : 0);
+            this.profile.following_count =
+              Math.max(0, (this.profile.following_count || 0) + delta);
+          }
+        } catch (e) {
+          this.$store.toast.show('Нет связи с сервером');
+        } finally {
+          u.busy = false;
+        }
+      },
+
+      async openFollowModal(mode) {
+        if (!this.profile) return;
+
+        this.followModal = { open: true, mode: mode, loading: true, users: [], error: '' };
+
+        var seq = ++this.followModalSeq;
+
+        try {
+          var r = await apiFetch(
+            USERS_URL + '/' + encodeURIComponent(this.profile.username) + '/' + mode
+          );
+          if (seq !== this.followModalSeq) return;
+
+          if (r.status === 401) { window.location.assign('/auth'); return; }
+          if (!r.ok) {
+            this.followModal.error = 'Не удалось загрузить список';
+            return;
+          }
+
+          this.followModal.users = (Array.isArray(r.data) ? r.data : []).map(function (item) {
+            return Object.assign({}, item, { busy: false });
+          });
+        } catch (e) {
+          if (seq === this.followModalSeq) this.followModal.error = 'Нет связи с сервером';
+        } finally {
+          if (seq === this.followModalSeq) this.followModal.loading = false;
+        }
+      },
+
+      closeFollowModal() {
+        this.followModalSeq++;
+        this.followModal = { open: false, mode: 'followers', loading: false, users: [], error: '' };
       },
 
       /* ======================================================

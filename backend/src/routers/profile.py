@@ -10,13 +10,13 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from auth import get_current_user
+from auth import get_current_user, get_optional_user
 from classifier import classify
-from db.models import Badge, User, UserBadge, normalize_title
+from db.models import Badge, Follow, User, UserBadge, normalize_title
 from db.session import get_session
 
 router = APIRouter(prefix="/api", tags=["profile"])
@@ -70,6 +70,19 @@ class AddBadgeRequest(BaseModel):
     received: bool = False
 
 
+class FollowUserResponse(BaseModel):
+    id: str
+    username: str
+    full_name: str
+    # Whether the authenticated viewer follows this user.
+    is_following: bool
+
+
+class FollowStateResponse(BaseModel):
+    following: bool
+    followers_count: int
+
+
 class UpdateEmojiRequest(BaseModel):
     emoji: str = Field(default="", max_length=16)
 
@@ -119,6 +132,44 @@ async def _get_badge_by_id(session: AsyncSession, badge_id: uuid.UUID) -> Badge 
         .where(Badge.id == badge_id)
     )
     return result.scalar_one_or_none()
+
+
+async def _get_user_by_username(session: AsyncSession, username: str) -> User | None:
+    result = await session.execute(select(User).where(User.username == username))
+    return result.scalar_one_or_none()
+
+
+async def _followed_ids(
+    session: AsyncSession,
+    viewer_id: uuid.UUID,
+    user_ids: list[uuid.UUID],
+) -> set[uuid.UUID]:
+    """Return the subset of ``user_ids`` that ``viewer_id`` follows."""
+    if not user_ids:
+        return set()
+
+    result = await session.execute(
+        select(Follow.following_id).where(
+            Follow.follower_id == viewer_id,
+            Follow.following_id.in_(user_ids),
+        )
+    )
+    return set(result.scalars().all())
+
+
+async def _follow_counts(session: AsyncSession, user_id: uuid.UUID) -> tuple[int, int]:
+    """Return ``(followers, following)`` counts for a user."""
+    followers = await session.scalar(
+        select(func.count())
+        .select_from(Follow)
+        .where(Follow.following_id == user_id)
+    )
+    following = await session.scalar(
+        select(func.count())
+        .select_from(Follow)
+        .where(Follow.follower_id == user_id)
+    )
+    return int(followers or 0), int(following or 0)
 
 
 @router.get("/badge/lookup")
@@ -408,18 +459,33 @@ async def get_badge(
 async def get_user_profile(
     username: str,
     session: AsyncSession = Depends(get_session),
+    viewer: User | None = Depends(get_optional_user),
 ):
     """Get a user's public profile information.
 
-    This endpoint is public and doesn't require authentication.
+    This endpoint is public and doesn't require authentication. When the viewer
+    is signed in, ``is_following`` tells whether they already follow the user.
     """
-    result = await session.execute(select(User).where(User.username == username))
-    target_user = result.scalar_one_or_none()
+    target_user = await _get_user_by_username(session, username)
     if target_user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Пользователь не найден",
         )
+
+    followers_count, following_count = await _follow_counts(session, target_user.id)
+
+    is_following = False
+    if viewer is not None and viewer.id != target_user.id:
+        result = await session.scalar(
+            select(func.count())
+            .select_from(Follow)
+            .where(
+                Follow.follower_id == viewer.id,
+                Follow.following_id == target_user.id,
+            )
+        )
+        is_following = bool(result)
 
     return {
         "id": str(target_user.id),
@@ -427,5 +493,134 @@ async def get_user_profile(
         "full_name": target_user.full_name,
         "bio": target_user.bio,
         "created_at": target_user.created_at,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_following": is_following,
     }
+
+
+@router.post("/users/{username}/follow", response_model=FollowStateResponse)
+async def follow_user(
+    username: str,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> FollowStateResponse:
+    """Subscribe to a user. Repeated calls are idempotent."""
+    target_user = await _get_user_by_username(session, username)
+    if target_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+    if target_user.id == user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя подписаться на себя",
+        )
+
+    if await session.get(Follow, (user.id, target_user.id)) is None:
+        session.add(Follow(follower_id=user.id, following_id=target_user.id))
+        await session.commit()
+
+    followers_count, _ = await _follow_counts(session, target_user.id)
+    return FollowStateResponse(following=True, followers_count=followers_count)
+
+
+@router.delete("/users/{username}/follow", response_model=FollowStateResponse)
+async def unfollow_user(
+    username: str,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> FollowStateResponse:
+    """Unsubscribe from a user. Repeated calls are idempotent."""
+    target_user = await _get_user_by_username(session, username)
+    if target_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    follow = await session.get(Follow, (user.id, target_user.id))
+    if follow is not None:
+        await session.delete(follow)
+        await session.commit()
+
+    followers_count, _ = await _follow_counts(session, target_user.id)
+    return FollowStateResponse(following=False, followers_count=followers_count)
+
+
+@router.get("/users/{username}/followers", response_model=list[FollowUserResponse])
+async def list_followers(
+    username: str,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> list[FollowUserResponse]:
+    """List users following ``username``. Requires authentication."""
+    target_user = await _get_user_by_username(session, username)
+    if target_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    result = await session.execute(
+        select(User)
+        .join(Follow, Follow.follower_id == User.id)
+        .where(Follow.following_id == target_user.id)
+        .order_by(Follow.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    items = list(result.scalars().all())
+    followed = await _followed_ids(session, user.id, [item.id for item in items])
+
+    return [
+        FollowUserResponse(
+            id=str(item.id),
+            username=item.username,
+            full_name=item.full_name,
+            is_following=item.id in followed,
+        )
+        for item in items
+    ]
+
+
+@router.get("/users/{username}/following", response_model=list[FollowUserResponse])
+async def list_following(
+    username: str,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> list[FollowUserResponse]:
+    """List users followed by ``username``. Requires authentication."""
+    target_user = await _get_user_by_username(session, username)
+    if target_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    result = await session.execute(
+        select(User)
+        .join(Follow, Follow.following_id == User.id)
+        .where(Follow.follower_id == target_user.id)
+        .order_by(Follow.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    items = list(result.scalars().all())
+    followed = await _followed_ids(session, user.id, [item.id for item in items])
+
+    return [
+        FollowUserResponse(
+            id=str(item.id),
+            username=item.username,
+            full_name=item.full_name,
+            is_following=item.id in followed,
+        )
+        for item in items
+    ]
 
